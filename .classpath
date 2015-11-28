@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/fluent-hc-4.5.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/httpclient-4.5.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/httpclient-cache-4.5.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/httpclient-win-4.5.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/httpcore-4.4.1.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/httpmime-4.5.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/jna-4.1.0.jar" sourcepath="D:/Assist/src/native/jna-master.zip"/>
+	<classpathentry kind="lib" path="D:/Assist/apache/httpClient/jna-platform-4.1.0.jar" sourcepath="D:/Assist/src/native/jna-master.zip"/>
+	<classpathentry kind="lib" path="D:/Assist/json/commons-beanutils.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/json/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/json/commons-lang-2.2.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/json/commons-logging.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/json/ezmorph-1.0.6.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/json/json.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/json/json-lib-2.2.3-jdk15.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/xml/dom4j.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/xml/jaxen.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/xml/tagsoup-1.2.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

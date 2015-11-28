@@ -22,7 +22,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -50,6 +50,7 @@ import com.hx.crawlerTools_crawler.Crawler;
 import com.hx.crawlerTools_crawler.HtmlCrawler;
 import com.hx.crawlerTools_crawler.ScriptParameter;
 import com.hx.crawlerTools_crawler.SingleUrlTask;
+import com.hx.util.Constants;
 import com.hx.util.Log;
 
 // 工具类
@@ -60,12 +61,14 @@ public class Tools {
 	public static String NULL = "null";
 	public static final Character SLASH = '\\';
 	public static final Character INV_SLASH = '/';
-	private static final Character DOT = '.';
-	private static final Character SPACE = ' ';
-	private static final Character TAB = '\t';
-	private static final Character CR = '\r';
-	private static final Character LF = '\n';
-	private static final Character QUESTION = '?';
+	public static final Character DOT = '.';
+	public static final Character COMMON = ',';
+	public static final Character COLON = ':';	
+	public static final Character SPACE = ' ';
+	public static final Character TAB = '\t';
+	public static final Character CR = '\r';
+	public static final Character LF = '\n';
+	public static final Character QUESTION = '?';
 	public static final String CRLF = "\r\n";
 	public static Random ran = new Random();
 	public static String DEFAULT_CHARSET = "utf-8";
@@ -134,6 +137,14 @@ public class Tools {
 	public static String PNG = ".png";
 	public static String JPEG = ".jpeg";
 	public static String JS = ".js";
+	public static String MAP = ".map";
+	
+	// 字节的表示相关
+	public static String BYTE = "byte";
+	public static String KB = "kb";
+	public static String MB = "mb";
+	public static String GB = "gb";
+	public static String TB = "tb";
 	
 	// 文件名后面可能出现的其他符号
 	static Set<Character> mayBeFileNameSeps = new HashSet<>();
@@ -188,116 +199,14 @@ public class Tools {
 			}
 			String[] fileNameSeps = props.getProperty("mayBeFileNameSeps", EMPTY_STR).split(";");
 			for(String sep : fileNameSeps) {
-				mayBeFileNameSeps.add(sep.charAt(0) );
+				if(! Tools.isEmpty(sep)) {
+					mayBeFileNameSeps.add(sep.charAt(0) );
+				}
 			}
 		}
 		
 	}
-	
-	// 获取文件的内容
-	public static String getContent(String path) throws IOException {
-		return getContent(new File(path));
-	}
-	public static String getContent(File file) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), DEFAULT_CHARSET));
-		StringBuilder sb = new StringBuilder();
-		String line = null;
-		
-		while((line = br.readLine()) != null) {
-			sb.append(line);
-		}
-		
-		return sb.toString();
-	}
-	
-	// 获取文件的所有的行, 存储在一个结果的List, 文件过大, 慎用此方法
-	public static List<String> getContentWithList(File file) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)) );
-		List<String> lines = new LinkedList<>();
-		
-		String line = null;
-		while((line = br.readLine()) != null) {
-			lines.add(line);
-		}
-		br.close();
-		
-		return lines;
-	}
-	
-	// 获取inputStream中的字符串
-	public static String getContent(InputStream is) throws IOException {
-		StringBuilder sb = new StringBuilder(is.available() );
-		BufferedReader br = new BufferedReader(new InputStreamReader(is) );
-
-		String line = null;
-		while((line = br.readLine()) != null) {
-			sb.append(line );
-		}
-		
-		return sb.toString();
-	}
-
-	// 匹配siteUrl的regex
-	static Pattern siteUrlPattern = Pattern.compile("^(\\w{3,5}://\\w+(\\.\\w+)+?/)(.*)");
-	
-	// 获取站点的首页url
-	// http://www.baidu.com/tieba/java/page01.jsp  =>  http://www.baidu.com/
-	public static String getSiteUrl(String url) {
-		Matcher matcher = siteUrlPattern.matcher(url);
-		if(matcher.matches()) {
-			return matcher.group(1);
-		}
-		return null;
-	}
-	
-	// 将绝对/ 相对的url转换为绝对的url
-	// 转换 /path & ./path
-	public static String transformUrl(String url, String res) {
-		if(res.startsWith("/") ) {
-			return getSiteUrl(url) + removeIfStartsWith(res, "/");
-		} else if (res.startsWith("./") ) {
-			return url.substring(0, url.lastIndexOf("/")+1 ) + Tools.removeIfStartsWith(res, "./");
-		} else {
-			return res;
-		}
-	}
-
-	// 如果给定的字符串以startsWith, 则移除startsWith
-	public static String removeIfStartsWith(String str, String startsWith) {
-		if(str.startsWith(startsWith) ) {
-			return str.substring(startsWith.length() );
-		}
-		
-		return str;
-	}
-	
-	// 如果给定的字符串以endsWith, 则移除endsWith
-	public static String removeIfEndsWith(String str, String endsWith) {
-		if(str.endsWith(endsWith) ) {
-			return str.substring(0, str.length() - endsWith.length());
-		}
-		
-		return str;
-	}
-	
-	// 判断str01 和str02是否相同[忽略大小写]
-	public static boolean equalsIgnoreCase(String str01, String str02) {
-		return str01.toUpperCase().equals(str02.toUpperCase() );
-	}
-	
-	// 通过cookies获取cookie的字符串表示
-	public static String getCookieStr(Map<String, String> cookies) {
-		StringBuilder sb = new StringBuilder();
-		for(Entry<String, String> entry : cookies.entrySet()) {
-			sb.append(entry.getKey() );		sb.append("=");
-			sb.append(entry.getValue() );		sb.append(";");
-		}
-		if(sb.length() != 0) {
-			return sb.substring(0, sb.length()-1);
-		}
-		
-		return Tools.EMPTY_STR;
-	}
+	// ----------------- 属性结束 -----------------------
 	
 	
 	// ---------------临时文件相关---------------
@@ -329,32 +238,136 @@ public class Tools {
 		return TMP_NAME + (TMP_IDX.getAndIncrement() ) + suffix;
 	}
 	
-	
+	// ----------------- 文件操作相关方法 -----------------------
 	// 将html字符串保存到指定的文件中
 	public static void save(String html, String nextTmpName) throws IOException {
 		save(html, new File(nextTmpName) );
 	}
 	public static void save(String html, File nextTmpFile) throws IOException {
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(nextTmpFile) );
-		bos.write(html.getBytes(DEFAULT_CHARSET) );
-		bos.close();
-		
+		write0(html, nextTmpFile, DEFAULT_CHARSET, false);
 		Log.log("save content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
 	}	
 	public static void append(String html, String nextTmpName) throws IOException {
 		append(html, new File(nextTmpName) );
 	}
 	public static void append(String html, File nextTmpFile) throws IOException {
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(nextTmpFile, true) );
-		bos.write(html.getBytes(DEFAULT_CHARSET) );
-		bos.close();
-		
+		write0(html, nextTmpFile, DEFAULT_CHARSET, true);
 		Log.log("append content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
 	}
+	private static void write0(String html, File nextTmpFile, String charset, boolean isAppend) throws IOException {
+		BufferedOutputStream bos = null;
+		try {
+			bos = new BufferedOutputStream(new FileOutputStream(nextTmpFile, isAppend) );
+			bos.write(html.getBytes(charset) );
+		} finally {
+			if(bos != null) {
+				bos.close();
+			}
+		}
+	}
 	
+	// 刷出缓存的数据
+	public static void flushBuffer(StringBuffer sb, String path) throws IOException {
+	  Tools.append(sb.toString(), path);
+	  Log.log("flush buffer at : " + new Date().toString() + ", size : " + getKBytesByBytes(sb.length() << 1) + " kb" );
+	  sb.setLength(0);
+	}
+	
+	// 移除指定的文件
+	public static void remove(String path) {
+		File file = new File(path);
+		if(file.exists() ) {
+			boolean isSucc = file.delete();
+			if(isSucc) {
+				Log.log("delete \" " + path + " \" success ...");
+			} else {
+				Log.log("delete \" " + path + " \" failed, maybe inuse ...");
+			}
+		} else {
+			Log.log("\" " + path + " \" is not exists ...");
+		}
+	}
+	
+    // 复制指定的文件
+    public static void copy(String src, String dst) throws IOException {
+        File srcFile = new File(src);
+        File dstFile = new File(dst);
+        if(srcFile.isDirectory() ) {
+            Log.log("srcFile \" " + src + " \" can't be folder ...");
+            return ;
+        }
+        if(! srcFile.exists() ) {
+            Log.log("srcFile \" " + src + " \" do not exists ...");
+            return ;
+        }
+        if(dstFile.exists() ) {
+            Log.log("dstFile \" " + dst + " \" does exists, please remove it first [make sure it is not important] ...");
+            return ;
+        }
 
-	// ----------------- 业务方法 -----------------------
+        FileInputStream fis = new FileInputStream(srcFile);
+        FileOutputStream fos = new FileOutputStream(dstFile);
+        copy(fis, fos);
+        Log.log("copy file \" " + src + " \" -> \" " + dst + " \" success ...");
+    }
+
+	// 获取给定的输入流中的字符内容
+	public static String getContent(InputStream is, String charset) throws IOException {
+		StringBuilder sb = new StringBuilder(is.available() );
+		BufferedReader br = null;
+
+		try {
+			String line = null;
+			while((line = br.readLine()) != null) {
+				sb.append(line );
+			}
+		} finally {
+			if(br != null) {
+				br.close();
+			}
+		}
+		
+		return sb.toString();
+	}
+	public static String getContent(InputStream is) throws IOException {
+		return getContent(is, DEFAULT_CHARSET);
+	}
+	public static String getContent(String path, String charset) throws IOException {
+		return getContent(new File(path), charset);
+	}
+	public static String getContent(File file, String charset) throws IOException {
+		return getContent(new FileInputStream(file), charset);
+	}
+	public static String getContent(String path) throws IOException {
+		return getContent(new File(path), DEFAULT_CHARSET);
+	}
+	public static String getContent(File file) throws IOException {
+		return getContent(file, DEFAULT_CHARSET);
+	}
 	
+	// 获取文件的所有的行, 存储在一个结果的List, 文件过大, 慎用此方法
+	public static List<String> getContentWithList(File file, String charset) throws IOException {
+		List<String> lines = new LinkedList<>();
+		BufferedReader br = null;
+		
+		try {
+			String line = null;
+			while((line = br.readLine()) != null) {
+				lines.add(line);
+			}
+		} finally {
+			if(br != null) {
+				br.close();
+			}
+		}
+		
+		return lines;
+	}
+	public static List<String> getContentWithList(File file) throws IOException {
+		return getContentWithList(file, DEFAULT_CHARSET);
+	}
+    
+	// ----------------- 业务方法 -----------------------
 	// 所有的数字的Character
 	static Set<Character> nums = new HashSet<>();
 	static {
@@ -401,6 +414,83 @@ public class Tools {
 		} else {
 			return new Integer(sb.toString());
 		}
+	}
+	
+	// 匹配siteUrl的regex
+	static Pattern siteUrlPattern = Pattern.compile("^(\\w{3,5}://\\w+(\\.\\w+)+?/)(.*)");
+	
+	// 获取站点的首页url
+	// http://www.baidu.com/tieba/java/page01.jsp  =>  http://www.baidu.com/
+	public static String getSiteUrl(String url) {
+		Matcher matcher = siteUrlPattern.matcher(url);
+		if(matcher.matches()) {
+			return matcher.group(1);
+		}
+		return null;
+	}
+	
+	// 将绝对/ 相对的url转换为绝对的url
+	// 转换 /path & ./path
+	public static String transformUrl(String url, String res) {
+		if(res.startsWith("/") ) {
+			return getSiteUrl(url) + removeIfStartsWith(res, "/");
+		} else if (res.startsWith("./") ) {
+			return url.substring(0, url.lastIndexOf("/")+1 ) + Tools.removeIfStartsWith(res, "./");
+		} else {
+			return res;
+		}
+	}
+
+	// 如果给定的字符串以startsWith, 则移除startsWith
+	public static String removeIfStartsWith(String str, String startsWith) {
+		if(str.startsWith(startsWith) ) {
+			return str.substring(startsWith.length() );
+		}
+		
+		return str;
+	}
+	// 如果给定的字符串以endsWith, 则移除endsWith
+	public static String removeIfEndsWith(String str, String endsWith) {
+		if(str.endsWith(endsWith) ) {
+			return str.substring(0, str.length() - endsWith.length());
+		}
+		
+		return str;
+	}
+	
+	// 如果不是给定的字符串以startsWith, 则添加startsWith
+	public static String appendIfNotStartsWith(String str, String startsWith) {
+		if(! str.startsWith(startsWith) ) {
+			return startsWith + str;
+		}
+		
+		return str;
+	}
+	public static String appendIfNotEndsWith(String str, String endsWith) {
+		if(str.endsWith(endsWith) ) {
+			return str + endsWith;
+		}
+		
+		return str;
+	}
+	
+	// 判断str01 和str02是否相同[忽略大小写]
+	public static boolean equalsIgnoreCase(String str01, String str02) {
+		return str01.toUpperCase().equals(str02.toUpperCase() );
+	}
+	
+	// 通过cookies获取cookie的字符串表示
+	public static String getCookieStr(Map<String, String> cookies) {
+		StringBuilder sb = new StringBuilder();
+		for(Entry<String, String> entry : cookies.entrySet()) {
+			sb.append(entry.getKey() );		sb.append("=");
+			sb.append(entry.getValue() );		sb.append(";");
+		}
+		if(sb.length() != 0) {
+			return sb.substring(0, sb.length()-1);
+		}
+		
+		return Tools.EMPTY_STR;
 	}
 	
 	// 判断字符串是否为空[null, "", "null"]
@@ -468,6 +558,7 @@ public class Tools {
 		return Tools.EMPTY_STR;
 	}
 	
+	// ----------------- crawler 处理相关 -----------------------
 	// 获取处理过之后的文档
 	public static void getPreparedDoc(String url, String file) throws Exception {
 		String html = HtmlCrawler.newInstance().getPage(url).getContent();
@@ -480,6 +571,16 @@ public class Tools {
 	// 通过xpath 获取结果
 	public static JSONArray getResultByXPath(String html, String url, String xpath) throws Exception {
 		return com.hx.crawlerTools_xpathParser.Parser.parse(Tools.normalize(html), url, xpath);
+	}
+	public static JSONArray getResultByXPathes(String html, String url, String[] xpathes, ResultJudger judger) throws Exception {
+		for(int i=0; i<xpathes.length; i++) {			
+			JSONArray res = getResultByXPath(html, url, xpathes[i]);
+			if(! judger.isResultNull(i, res)) {
+				return res;
+			}
+		}
+		
+		return null;
 	}
 	
 	// 格式化html [去掉, 添加 不规范的标签]
@@ -893,37 +994,46 @@ public class Tools {
 		InputStream is = url.openStream();
 		OutputStream os = new FileOutputStream(new File(path));
 		copy(is,  os);
-		is.close();
-		os.close();
 		
 		Log.log("download file \"" + path + "\" succcess ...");
 	}
 	
 	// 将输入流中的数据 复制到输出流
-	public static void copy(InputStream is, OutputStream os) throws IOException {
-		BufferedInputStream bis = new BufferedInputStream(is);
-		BufferedOutputStream bos = new BufferedOutputStream(os);
+	public static void copy(InputStream is, OutputStream os, boolean isCloseStream) {
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;
 		
-		int len = 0;
-		byte[] buf = new byte[BUFF_SIZE];
-		while((len = bis.read(buf)) != -1) {
-			bos.write(buf, 0, len);
+		try {
+			bis = new BufferedInputStream(is);
+			bos = new BufferedOutputStream(os);
+			int len = 0;
+			byte[] buf = new byte[BUFF_SIZE];
+			while((len = bis.read(buf)) != -1) {
+				bos.write(buf, 0, len);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if(isCloseStream) {
+				if(bos != null) {
+					try {
+						bos.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				if(bis != null) {
+					try {
+						bis.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 		}
-		bos.close();
-		bis.close();
 	}
-
-	// 站点首页模式
-	static Pattern siteUrlPat = Pattern.compile("(\\w{2,5}://\\w+(\\.\\w+)+/).*");
-	
-	// 获取给定url的站点首页
-	public static String getSiteForUrl(String url) {
-		Matcher matcher = siteUrlPat.matcher(url);
-		
-		if(matcher.matches() ) {
-			return matcher.group(1);
-		}
-		return url;
+	public static void copy(InputStream is, OutputStream os) {
+		copy(is, os, true);
 	}
 	
 	// 获取指定路径的文件的文件, 通过sep分割的文件名     获取文件名
@@ -953,6 +1063,7 @@ public class Tools {
 		return min;
 	}
 	
+	// ------------ 线程池相关 --------------------
 	// awaitTermination 线程池
 //	public static void awaitTermination(long timout, TimeUnit unit) {
 //		try {
@@ -962,19 +1073,44 @@ public class Tools {
 //		}
 //	}
 	
-	// shutdown 线程池
-	public static void awaitShutdown() {
-		while (! threadPool.isShutdown() ) {
-			int acitveTaskCount = threadPool.getActiveCount();
-			
-			if(acitveTaskCount == 0) {
-				threadPool.shutdown();
-			} else {
-				Tools.sleep(CHECK_INTERVAL);
-			}
-		}
+	// 添加一个任务
+	public static void addTask(Runnable run) {
+		threadPool.execute(run);
 	}
 	
+	// shutdown 线程池
+	public static void awaitShutdown(ThreadPoolExecutor threadPool, int checkInterval, boolean isLog) {
+		awaitTasksEnd0(threadPool, checkInterval, true, isLog);
+	}
+	public static void awaitShutdown() {
+		awaitShutdown(threadPool, CHECK_INTERVAL, false);
+	}
+	
+    // 等待 线程池中任务结束 [并不关闭线程池]
+    public static void awaitTasksEnd(ThreadPoolExecutor threadPool, int checkInterval, boolean isLog) {
+    	awaitTasksEnd0(threadPool, checkInterval, false, isLog);
+    }
+    public static void awaitTasksEnd() {
+    	awaitTasksEnd(threadPool, CHECK_INTERVAL, false);
+    }
+    private static void awaitTasksEnd0(ThreadPoolExecutor threadPool, int checkInterval, boolean isShutdown, boolean isLog) {
+        while (! threadPool.isShutdown() ) {
+        	int taskInQueue = threadPool.getQueue().size();
+        	int activeTaskCount = threadPool.getActiveCount();
+            if((taskInQueue == 0) && (activeTaskCount == 0) ) {
+            	if(isShutdown) {
+            		threadPool.shutdown();
+            	}
+                break ;
+            } else {
+            	if(isLog ) {
+            		Log.log("task in queue : " + taskInQueue + ", active task count : " + activeTaskCount + ", at : " + new Date().toString() + " !");
+            	}
+                Tools.sleep(checkInterval);
+            }
+        }
+    }
+    
 	// 让当前线程休息ms
 	public static void sleep(long ms) {
 		try {
@@ -984,6 +1120,7 @@ public class Tools {
 		}
 	}
 	
+	// ------------ 日志相关 --------------------
 	// 打印任务的日志信息
 	public static void logBeforeTask(SingleUrlTask singleUrlTask, boolean debugEnable) {
 		if(debugEnable ) {
@@ -1006,6 +1143,40 @@ public class Tools {
 		Log.err(e.getClass().getName() + " while fetch : " + Tools.getTaskName(singleUrlTask) + ", url : " + singleUrlTask.getUrl() );
 	}
 	
+	// ------------ 进制转换相关 --------------------
+    // 根据长度, 获取长度的字符串表示
+	public static String getLengthString(long length, String dimen) {
+		if(equalsIgnoreCase(Tools.BYTE, dimen)) {
+		  return length + " " + Tools.BYTE;
+		} else if(equalsIgnoreCase(Tools.KB, dimen) ) {
+			return Tools.getKBytesByBytes(length) + " " + Tools.KB;
+		} else if(equalsIgnoreCase(Tools.MB, dimen) ) {
+			return Tools.getMBytesByBytes(length) + " " + Tools.MB;
+		} else if(equalsIgnoreCase(Tools.GB, dimen) ) {
+			return Tools.getGBytesByBytes(length) + " " + Tools.GB;
+		} else if(equalsIgnoreCase(Tools.TB, dimen) ) {
+			return Tools.getTBytesByBytes(length) + " " + Tools.TB;
+		} else {
+			return length + " " + Tools.BYTE;
+		}
+	}
+	
+	// 根据字节数, 获取千字节数, 兆字节数, 吉字节数, 踢字节数
+	public static long getKBytesByBytes(long bytes) {
+		return bytes >> 10;
+	}
+	public static long getMBytesByBytes(long bytes) {
+		return bytes >> 20;
+	}
+	public static long getGBytesByBytes(long bytes) {
+		return bytes >> 30;
+	}
+	public static long getTBytesByBytes(long bytes) {
+		return bytes >> 40;
+	}
 	
 	
+	
+	// ------------ 待续 --------------------
+
 }
