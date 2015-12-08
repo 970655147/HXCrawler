@@ -11,12 +11,12 @@ import net.sf.json.JSONArray;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-// Main æµ‹è¯•
+// Main 
 public class Main {
 
-	// æµ‹è¯•æ•´ä¸ªcrawlerTools
+	// ²âÊÔcrawlerTools
 	// 1. test for indexString
-	// 2. dom4j æµ‹è¯•
+	// 2. dom4j ²âÊÔ
 	// 3. test for Parser.parse
 	public static void main(String []args) throws Exception {
 		

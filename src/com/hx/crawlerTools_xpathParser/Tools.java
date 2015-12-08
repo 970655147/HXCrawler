@@ -50,8 +50,6 @@ import com.hx.crawlerTools_crawler.Crawler;
 import com.hx.crawlerTools_crawler.HtmlCrawler;
 import com.hx.crawlerTools_crawler.ScriptParameter;
 import com.hx.crawlerTools_crawler.SingleUrlTask;
-import com.hx.util.Constants;
-import com.hx.util.Log;
 
 // π§æﬂ¿‡
 public class Tools {
@@ -317,6 +315,7 @@ public class Tools {
 		BufferedReader br = null;
 
 		try {
+			br = new BufferedReader(new InputStreamReader(is, charset) );
 			String line = null;
 			while((line = br.readLine()) != null) {
 				sb.append(line );
