@@ -50,11 +50,11 @@ public class Page {
 	// 响应头中cookie的元素据keys
 	static Set<String> nonCookieKeys = new HashSet<>();
 	static {
-		nonCookieKeys.add("path");
-		nonCookieKeys.add("Max-Age");
-		nonCookieKeys.add("max-age");
-		nonCookieKeys.add("expires");
-		nonCookieKeys.add("domain");
+		nonCookieKeys.add(getStdForString("path") );
+		nonCookieKeys.add(getStdForString("Max-Age") );
+		nonCookieKeys.add(getStdForString("max-age") );
+		nonCookieKeys.add(getStdForString("expires") );
+		nonCookieKeys.add(getStdForString("domain") );
 	}
 	
 	// 解析响应消息 [cookie, charset等等]
@@ -108,10 +108,10 @@ public class Page {
 	private NameValuePair[] getCookie(String value, Set<String>nonCookieKeys) {
 		NameValuePair[] cookie = new BasicNameValuePair[0];
 		int lastIdxSemicolon = 0, idxEqu = value.indexOf("="), idxSemicolon = value.indexOf(";");
-		while(idxSemicolon > 0) {
+		while((idxSemicolon > 0) && (idxEqu > 0) ) {
 			String key = value.substring(lastIdxSemicolon, idxEqu);
 			String val = value.substring(idxEqu+1, idxSemicolon);
-			if(! nonCookieKeys.contains(key.trim()) ) {
+			if(! nonCookieKeys.contains(getStdForString(key.trim())) ) {
 				NameValuePair[] cookieTmp = new BasicNameValuePair[cookie.length + 1];
 				System.arraycopy(cookie, 0, cookieTmp, 0, cookie.length);
 				cookieTmp[cookieTmp.length-1] = new BasicNameValuePair(key, val);
@@ -127,7 +127,7 @@ public class Page {
 		if(idxEqu > 0) {
 			String key = value.substring(lastIdxSemicolon, idxEqu);
 			String val = value.substring(idxEqu+1);
-			if(! nonCookieKeys.contains(key.trim()) ) {
+			if(! nonCookieKeys.contains(getStdForString(key.trim())) ) {
 				NameValuePair[] cookieTmp = new BasicNameValuePair[cookie.length + 1];
 				System.arraycopy(cookie, 0, cookieTmp, 0, cookie.length);
 				cookieTmp[cookieTmp.length-1] = new BasicNameValuePair(key, val);
@@ -138,6 +138,10 @@ public class Page {
 		return cookie;
 	}
 	
+	// 获取统一的大写 或者小写
+	private static String getStdForString(String str) {
+		return str.toUpperCase();
+	}
 	
 	
 }

@@ -213,13 +213,10 @@ public class Tools {
 		TMP_IDX = new AtomicInteger(idx );
 	}
 	public static String getNextTmpPath() {
-		return TMP_DIR + "\\" + getNextTmpName();
+		return TMP_DIR + "\\" + getNextTmpName() + SUFFIX;
 	}
 	public static String getNextTmpPath(String suffix) {
-		return TMP_DIR + "\\" + getNextTmpName(suffix);
-	}
-	public static String getNextTmpPath(String fileName, String suffix) {
-		return TMP_DIR + "\\" + fileName + suffix;
+		return TMP_DIR + "\\" + getNextTmpName() + suffix;
 	}
 	public static String getTmpPath(int idx) {
 		return TMP_DIR + "\\" + TMP_NAME + idx + SUFFIX;
@@ -227,13 +224,25 @@ public class Tools {
 	public static String getTmpPath(int idx, String suffix) {
 		return TMP_DIR + "\\" + TMP_NAME + idx + suffix;
 	}
+	public static String getTmpPath(String name) {
+		return TMP_DIR + "\\" + name + SUFFIX;
+	}
+	public static String getTmpPath(String name, String suffix) {
+		return TMP_DIR + "\\" + name + suffix;
+	}
+	public static String getNextTmpDir() {
+		return TMP_DIR + "\\" + getNextTmpName();
+	}
+	public static String getTmpDir(int idx) {
+		return TMP_DIR + "\\" + TMP_NAME + idx;
+	}
+	public static String getTmpDir(String name) {
+		return TMP_DIR + "\\" + name;
+	}
 	
 	// 获取临时文件的下一个索引[生成文件名称]
 	private static String getNextTmpName() {
 		return TMP_NAME + (TMP_IDX.getAndIncrement() ) + SUFFIX;
-	}
-	private static String getNextTmpName(String suffix) {
-		return TMP_NAME + (TMP_IDX.getAndIncrement() ) + suffix;
 	}
 	
 	// ----------------- 文件操作相关方法 -----------------------
@@ -319,6 +328,7 @@ public class Tools {
 			String line = null;
 			while((line = br.readLine()) != null) {
 				sb.append(line );
+				sb.append(Tools.CRLF);
 			}
 		} finally {
 			if(br != null) {
@@ -350,6 +360,7 @@ public class Tools {
 		BufferedReader br = null;
 		
 		try {
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset) );
 			String line = null;
 			while((line = br.readLine()) != null) {
 				lines.add(line);
@@ -365,7 +376,13 @@ public class Tools {
 	public static List<String> getContentWithList(File file) throws IOException {
 		return getContentWithList(file, DEFAULT_CHARSET);
 	}
-    
+	public static List<String> getContentWithList(String file, String charset) throws IOException {
+		return getContentWithList(new File(file), charset );
+	}
+	public static List<String> getContentWithList(String file) throws IOException {
+		return getContentWithList(new File(file) );
+	}
+	
 	// ----------------- 业务方法 -----------------------
 	// 所有的数字的Character
 	static Set<Character> nums = new HashSet<>();
@@ -456,7 +473,6 @@ public class Tools {
 		
 		return str;
 	}
-	
 	// 如果不是给定的字符串以startsWith, 则添加startsWith
 	public static String appendIfNotStartsWith(String str, String startsWith) {
 		if(! str.startsWith(startsWith) ) {
@@ -466,7 +482,7 @@ public class Tools {
 		return str;
 	}
 	public static String appendIfNotEndsWith(String str, String endsWith) {
-		if(str.endsWith(endsWith) ) {
+		if(! str.endsWith(endsWith) ) {
 			return str + endsWith;
 		}
 		
@@ -499,35 +515,24 @@ public class Tools {
 	
 	// 获取str中以start 和end之间的字符串
 	public static String getStrInRange(String str, String start, String end) {
-		int startIdx = str.indexOf(start);
-		if(startIdx == -1) {
-			return Tools.EMPTY_STR;
-		}
-		
-		int endIdx = str.indexOf(end, startIdx + start.length());
-		if(endIdx == -1) {
-			return Tools.EMPTY_STR;
-		}
-		
-		return str.substring(startIdx + start.length(), endIdx);
-	}
-	public static String getStrInRangeWithStart(String str, String start) {
-		int idx = str.indexOf(start);
-		if(idx != -1) {
-			return str.substring(idx + start.length());
-		}
-		
-		return Tools.EMPTY_STR;
-	}
-	public static String getStrInRangeWithEnd(String str, String end) {
-		int idx = str.indexOf(end);
-		if(idx != -1) {
-			return str.substring(0, idx);
-		}
-		
-		return Tools.EMPTY_STR;
+		return getStrInRange(str, start, end, false, false);
 	}
 	public static String getStrInRangeInclude(String str, String start, String end) {
+		return getStrInRange(str, start, end, true, true);
+	}
+	public static String getStrInRangeWithStart(String str, String start) {
+		return getStrInRangeWithStart(str, start, false);
+	}
+	public static String getStrInRangeWithStartInclude(String str, String start) {
+		return getStrInRangeWithStart(str, start, true);
+	}
+	public static String getStrInRangeWithEnd(String str, String end) {
+		return getStrInRangeWithEnd(str, end, false);
+	}
+	public static String getStrInRangeWithEndInclude(String str, String end) {
+		return getStrInRangeWithEnd(str, end, true);
+	}
+	public static String getStrInRange(String str, String start, String end, boolean includeStart, boolean includeEnd) {
 		int startIdx = str.indexOf(start);
 		if(startIdx == -1) {
 			return Tools.EMPTY_STR;
@@ -538,24 +543,52 @@ public class Tools {
 			return Tools.EMPTY_STR;
 		}
 		
-		return str.substring(startIdx, endIdx + end.length() );
+		if(! includeStart) {
+			startIdx += start.length();
+		}
+		if(includeEnd) {
+			endIdx += end.length();
+		}
+		
+		return str.substring(startIdx, endIdx);
 	}
-	public static String getStrInRangeWithStartInclude(String str, String start) {
+	public static String getStrInRangeWithStart(String str, String start, boolean include) {
 		int idx = str.indexOf(start);
 		if(idx != -1) {
+			if(! include) {
+				idx += start.length();
+			}
 			return str.substring(idx);
 		}
 		
 		return Tools.EMPTY_STR;
 	}
-	public static String getStrInRangeWithEndInclude(String str, String end) {
+	public static String getStrInRangeWithEnd(String str, String end, boolean include) {
 		int idx = str.indexOf(end);
 		if(idx != -1) {
-			return str.substring(0, idx + end.length());
+			if(include) {
+				idx += end.length();
+			}
+			return str.substring(0, idx);
 		}
 		
 		return Tools.EMPTY_STR;
 	}
+	// 整合这三类方法, 之前的实现有点冗余			--2015.12.17
+//	public static String getStrInRange(String str, String start, String end) {
+////		int startIdx = str.indexOf(start);
+////		if(startIdx == -1) {
+////			return Tools.EMPTY_STR;
+////		}
+////		
+////		int endIdx = str.indexOf(end, startIdx + start.length());
+////		if(endIdx == -1) {
+////			return Tools.EMPTY_STR;
+////		}
+////		
+////		return str.substring(startIdx + start.length(), endIdx);
+//		return getStrInRange0(str, start, end, false, false);
+//	}
 	
 	// ----------------- crawler 处理相关 -----------------------
 	// 获取处理过之后的文档

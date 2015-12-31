@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="D:/Assist/jar/apache/httpClient/httpclient-4.5.jar"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/apache/httpClient/httpclient-cache-4.5.jar"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/apache/httpClient/httpclient-win-4.5.jar"/>
-	<classpathentry kind="lib" path="D:/Assist/jar/apache/httpClient/httpcore-4.4.1.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/jar/apache/httpClient/httpcore-4.4.1.jar" sourcepath="D:/Assist/src/apache/common/httpcomponents-client-4.5-src.zip"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/apache/httpClient/httpmime-4.5.jar"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/apache/httpClient/jna-4.1.0.jar"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/apache/httpClient/jna-platform-4.1.0.jar"/>

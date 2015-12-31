@@ -64,6 +64,13 @@ public class CrawlerConfig {
 		}
 		this.headers = headersTmp;
 	}
+	public void setData(Map<String, String> data) {
+		List<NameValuePair> dataTmp = new ArrayList<>(data.size() );
+		for(Map.Entry<String, String> entry : data.entrySet() ) {
+			dataTmp.add(new BasicNameValuePair(entry.getKey(), entry.getValue()) );
+		}
+		this.data = dataTmp;
+	}
 	public Map<String, String> getCookies() {
 		return cookies;
 	}
@@ -77,12 +84,20 @@ public class CrawlerConfig {
 		this.data = data;
 	}
 	public void addHeader(String key, String value) {
+		int idx = indexOfHeader(key);
+		if(idx >= 0) {
+			headers.remove(idx);
+		}
 		headers.add(new BasicHeader(key, value));
 	}
 	public void addCookie(String key, String value) {
 		cookies.put(key, value);
 	}
 	public void addData(String key, String value) {
+		int idx = indexOfData(key);
+		if(idx >= 0) {
+			data.remove(idx);
+		}
 		data.add(new BasicNameValuePair(key, value) );
 	}
 	public int getTimeout() {
@@ -92,5 +107,24 @@ public class CrawlerConfig {
 		this.timeout = timeout;
 	}
 	
-
+	// key 在headers, data中的索引
+	private int indexOfHeader(String key) {
+		for(int i=0; i<headers.size(); i++) {
+			if(headers.get(i).getName().equals(key) ) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	private int indexOfData(String key) {
+		for(int i=0; i<data.size(); i++) {
+			if(data.get(i).getName().equals(key) ) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
 }
