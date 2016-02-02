@@ -87,7 +87,7 @@ public class IndexString {
 					valuesStack.push(res);
 					break ;
 				} else if(current.containsKey(EndPoint.ATTRIBUTE) ) {
-					res = new Attribute(current.getString(Constants.NAME), current.optString(Constants.XPATH, null), current.getString(EndPoint.ATTRIBUTE), valuesStack.peek() );
+					res = new Attribute(current.optString(Constants.NAME, Constants.ARRAY_ATTR), current.optString(Constants.XPATH, null), current.getString(EndPoint.ATTRIBUTE), valuesStack.peek() );
 					valuesStack.peek().addChild(res);
 					break ;
 				}

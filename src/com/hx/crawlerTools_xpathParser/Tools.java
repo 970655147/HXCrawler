@@ -136,6 +136,9 @@ public class Tools {
 	public static String JPEG = ".jpeg";
 	public static String JS = ".js";
 	public static String MAP = ".map";
+	public static String ZIP = ".zip";
+	public static String IDX = ".idx";
+	public static String FIV = ".fiv";
 	
 	// 字节的表示相关
 	public static String BYTE = "byte";
@@ -242,7 +245,7 @@ public class Tools {
 	
 	// 获取临时文件的下一个索引[生成文件名称]
 	private static String getNextTmpName() {
-		return TMP_NAME + (TMP_IDX.getAndIncrement() ) + SUFFIX;
+		return TMP_NAME + (TMP_IDX.getAndIncrement() );
 	}
 	
 	// ----------------- 文件操作相关方法 -----------------------
@@ -802,6 +805,7 @@ public class Tools {
 	// 思路 : 如果arr是空对象  则直接返回
 	// 否则 遍历各个数据, 如果值为String  则去掉其多余的空格, 然后在更新obj中对应key的值
 		// 否则如果 值为JSONObject, trimSpaces(JSONObject )
+		// 否则如果 值为JSONArray, 递归
 	public static void trimSpaces(JSONArray arr) {
 		if(arr == null || arr.isEmpty()) {
 			return ;
@@ -813,6 +817,8 @@ public class Tools {
 				arr.set(i, replaceMultiSpacesAsOne((String) val));
 			} else if(val instanceof JSONObject) {
 				trimSpaces((JSONObject) val);
+			} else if(val instanceof JSONArray) {
+				trimSpaces((JSONArray) val);
 			}
 		}
 	}

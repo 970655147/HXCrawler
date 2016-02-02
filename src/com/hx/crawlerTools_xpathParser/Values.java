@@ -20,17 +20,26 @@ public class Values extends EndPoint {
 		super(EndPoint.VALUES, name, xpath, parent);
 		childs = new ArrayList<>();
 	}
-
+	
 	// 添加子元素
 	public void addChild(EndPoint endPoint) {
 		childs.add(endPoint);
 	}
-	
 	// 获取子元素
 	public EndPoint getChild(int idx) {
 		return childs.get(idx);
 	}
 	
+	// values 的孩子个数为childs的结点数目[不用递归]
+	public int childSize() {
+		return childs.size();
+	}
+	
+	// 获取attr [values 不支持此操作]
+	public String getAttribute() {
+		throw new RuntimeException("unsupported operation exception ...");
+	}
+
 	// for debug ...
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -46,15 +55,5 @@ public class Values extends EndPoint {
 		
 		return sb.toString();
 	}
-
-	// values 的孩子个数为childs的结点数目[不用递归]
-	public int childSize() {
-		return childs.size();
-	}
 	
-	// 获取attr [values 不支持此操作]
-	public String getAttribute() {
-		throw new RuntimeException("unsupported operation exception ...");
-	}
-
 }
