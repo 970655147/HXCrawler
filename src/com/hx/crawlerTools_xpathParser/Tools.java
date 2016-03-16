@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -83,6 +84,11 @@ public class Tools {
 	public static final String DEBUG_ENABLE = "debugEnable";
 	public static final String FETCHED_RESULT = "fetchedResult";
 	public static final String SPENT = "spent";
+	public static final String DEPTH = "depth";
+	public static final String REQUEST = "request";
+	public static final String RESPONE = "response";
+	public static final String REASON = "reason";
+	public static final String MSG = "message";
 	
 	// http相关常量
 	public static final String COOKIE_STR = "Cookie";
@@ -119,7 +125,7 @@ public class Tools {
 	// 线程池相关
 	public static int CHECK_INTERVAL = DEFAULT_CHECK_INTERVAL;
 	public static int N_THREADS = DEFAULT_N_THREADS;
-	public static ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(N_THREADS);
+	public static ThreadPoolExecutor threadPool = null;
 	
 	// 临时文件相关
 	public static String TMP_NAME = DEFAULT_TMP_NAME;
@@ -205,6 +211,7 @@ public class Tools {
 				}
 			}
 		}
+		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(N_THREADS);
 		
 	}
 	// ----------------- 属性结束 -----------------------
@@ -274,13 +281,6 @@ public class Tools {
 				bos.close();
 			}
 		}
-	}
-	
-	// 刷出缓存的数据
-	public static void flushBuffer(StringBuffer sb, String path) throws IOException {
-	  Tools.append(sb.toString(), path);
-	  Log.log("flush buffer at : " + new Date().toString() + ", size : " + getKBytesByBytes(sb.length() << 1) + " kb" );
-	  sb.setLength(0);
 	}
 	
 	// 移除指定的文件
@@ -967,12 +967,11 @@ public class Tools {
 		appendCRLF(sb, str);
 	}
 	public static void appendCRLF(StringBuilder sb, String str) {
-		sb.append(str);
-		sb.append(CRLF);
+		sb.append(str + CRLF);
 	}
 	
 	// 获取taskName
-	public static String getTaskName(SingleUrlTask singleUrlTask) {
+	public static String getTaskName(ScriptParameter singleUrlTask) {
 		return " crawl " + singleUrlTask.getParam().get(Tools.TASK) + " from " + singleUrlTask.getParam().get(Tools.SITE) + "　";
 	}
 	
@@ -1160,7 +1159,7 @@ public class Tools {
 	
 	// ------------ 日志相关 --------------------
 	// 打印任务的日志信息
-	public static void logBeforeTask(SingleUrlTask singleUrlTask, boolean debugEnable) {
+	public static void logBeforeTask(ScriptParameter singleUrlTask, boolean debugEnable) {
 		if(debugEnable ) {
 			StringBuilder sb = new StringBuilder();
 		    Tools.appendCRLF(sb, "URL : " + singleUrlTask.getUrl() );
@@ -1168,7 +1167,7 @@ public class Tools {
 		    Log.log(sb.toString() );
 		}
 	}
-	public static void logAfterTask(SingleUrlTask singleUrlTask, String fetchedResult, String spent, boolean debugEnable) {
+	public static void logAfterTask(ScriptParameter singleUrlTask, String fetchedResult, String spent, boolean debugEnable) {
 		if(debugEnable ) {
 			StringBuilder sb = new StringBuilder();
 		    Tools.appendCRLF(sb, "fetched result : " + fetchedResult);
@@ -1177,8 +1176,16 @@ public class Tools {
 		    Log.log(sb.toString() );
 		}
 	}
-	public static void logErrorMsg(SingleUrlTask singleUrlTask, Exception e) {
+	public static void logErrorMsg(ScriptParameter singleUrlTask, Exception e) {
 		Log.err(e.getClass().getName() + " while fetch : " + Tools.getTaskName(singleUrlTask) + ", url : " + singleUrlTask.getUrl() );
+	}
+	
+	// 获取现在的毫秒数, 以及根据start获取开销的时间
+	public static long now() {
+		return System.currentTimeMillis();
+	}
+	public static long spent(long start) {
+		return now() - start;
 	}
 	
 	// ------------ 进制转换相关 --------------------
@@ -1213,6 +1220,98 @@ public class Tools {
 		return bytes >> 40;
 	}
 	
+	// ------------ 缓冲相关 ------- 2016.03.16 -------------
+	// 存放缓冲信息
+	static class BuffInfo {
+		// 输出路径, 刷出数据的阈值, 缓冲大小, StringBuffer
+		public String outputPath;
+		public int threshold;
+		public int buffSize;
+		public StringBuffer sb;
+		
+		// 初始化
+		public BuffInfo(String outputPath, int threshold, BuffSizeEstimator buffSizeEstimator) {
+			this.outputPath = outputPath;
+			this.threshold = threshold;
+			this.buffSize = buffSizeEstimator.getBuffSize(threshold);
+			this.sb = new StringBuffer(buffSize);
+		}
+	}
+	
+	// 根据buff阈值获取buffSize的接口
+	static interface BuffSizeEstimator {
+		public int getBuffSize(int threshold);
+	}
+	
+	// 存放各个buffer, 以及buffer的默认大小
+	// 默认的BuffSizeEstimator
+	private static Map<String, BuffInfo> bufferToBuffInfo = new HashMap<>(); 
+	public static int defaultBuffThreshold = 128 << 10;
+	public static BuffSizeEstimator defaultBuffSizeEstimator = new BuffSizeEstimator() {
+		public int getBuffSize(int threshold) {
+			return threshold + (threshold >> 3);
+		}
+	};
+	
+	// 创建一个缓冲区
+	public static void createAnBuffer(String bufName, String outputPath, BuffSizeEstimator buffSizeEstimator, int threshold) {
+		if(bufExists(bufName) ) {
+			throw new RuntimeException("the buffInfo with key : " + bufName + " is already exists !");
+		}
+		
+		BuffInfo buffInfo = new BuffInfo(outputPath, threshold, buffSizeEstimator);
+		bufferToBuffInfo.put(bufName, buffInfo);
+	}
+	public static void createAnBuffer(String bufName, String outputPath) {
+		createAnBuffer(bufName, outputPath, defaultBuffSizeEstimator, defaultBuffThreshold);
+	}
+	// 判断给定的bufName的buffer是否存在
+	public static boolean bufExists(String buffName) {
+		return bufferToBuffInfo.get(buffName) != null;
+	}
+	
+	// 向给定的缓冲区中添加数据 并检测buffer中的数据是否超过了阈值
+	public static void appendBuffer(String bufName, String content) throws IOException {
+		if(! bufExists(bufName)) {
+			throw new RuntimeException("have no buffInfo with key : " + bufName + ", please createAnBuffer first !");
+		}
+		
+		BuffInfo buffInfo = bufferToBuffInfo.get(bufName);
+		buffInfo.sb.append(content);
+		synchronized(buffInfo.sb) {
+			if(buffInfo.sb.length() > buffInfo.threshold) {
+				flushBuffer(buffInfo.sb, buffInfo.outputPath );
+			}
+		}
+	}
+	public static void appendBufferCRLF(String bufName, String content) throws IOException {
+		appendBuffer(bufName, content + CRLF);
+	}
+	
+	// 刷出缓存的数据
+	public static void flushBuffer(String bufName, boolean isLastBatch) throws IOException {
+		if(! bufExists(bufName)) {
+			throw new RuntimeException("have no buffInfo with key : " + bufName + ", please createAnBuffer first !");
+		}
+		
+		BuffInfo buffInfo = bufferToBuffInfo.get(bufName);
+		synchronized (buffInfo.sb) {
+			if(buffInfo.sb.length() > 0) {
+				flushBuffer(buffInfo.sb, buffInfo.outputPath );
+			}
+		}
+		if(isLastBatch) {
+			bufferToBuffInfo.remove(bufName);
+		}
+	}
+	public static void flushBuffer(String bufName) throws IOException {
+		flushBuffer(bufName, false);
+	}
+	public static void flushBuffer(StringBuffer sb, String path) throws IOException {
+	  Tools.append(sb.toString(), path);
+	  Log.log("flush buffer at : " + new Date().toString() + ", size : " + getKBytesByBytes(sb.length() << 1) + " kb" );
+	  sb.setLength(0);
+	}
 	
 	
 	// ------------ 待续 --------------------

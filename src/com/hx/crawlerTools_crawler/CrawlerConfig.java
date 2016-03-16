@@ -49,6 +49,13 @@ public class CrawlerConfig {
 			headers.add(new BasicHeader(header.getKey(), header.getValue()) );
 		}
 	}
+	public CrawlerConfig(CrawlerConfig config) {
+		this();
+		addHeaders(config.getHeaders() );
+		addDatas(config.getData() );
+		addCookies(config.getCookies() );
+		this.timeout = config.getTimeout();
+	}
 	
 	// getter & setter
 	public List<Header> getHeaders() {
@@ -83,22 +90,55 @@ public class CrawlerConfig {
 	public void setData(List<NameValuePair> data) {
 		this.data = data;
 	}
-	public void addHeader(String key, String value) {
+	public CrawlerConfig addHeader(String key, String value) {
 		int idx = indexOfHeader(key);
 		if(idx >= 0) {
 			headers.remove(idx);
 		}
 		headers.add(new BasicHeader(key, value));
+		
+		return this;
 	}
-	public void addCookie(String key, String value) {
+	public CrawlerConfig addCookie(String key, String value) {
 		cookies.put(key, value);
+		return this;
 	}
-	public void addData(String key, String value) {
+	public CrawlerConfig addData(String key, String value) {
 		int idx = indexOfData(key);
 		if(idx >= 0) {
 			data.remove(idx);
 		}
 		data.add(new BasicNameValuePair(key, value) );
+		
+		return this;
+	}
+	public CrawlerConfig addHeaders(List<Header> headers) {
+		for(Header header : headers ) {
+			addHeader(header.getName(), header.getValue() );
+		}
+		
+		return this;
+	}
+	public CrawlerConfig addCookies(Map<String, String> headers) {
+		for(Entry<String, String> header : headers.entrySet() ) {
+			addCookie(header.getKey(), header.getValue() );
+		}
+		
+		return this;
+	}
+	public CrawlerConfig addDatas(List<NameValuePair> datas) {
+		for(NameValuePair data : datas ) {
+			addData(data.getName(), data.getValue() );
+		}
+		
+		return this;
+	}
+	public CrawlerConfig addDatas(Map<String, String> datas) {
+		for(Entry<String, String> data : datas.entrySet() ) {
+			addData(data.getKey(), data.getValue() );
+		}
+		
+		return this;
 	}
 	public int getTimeout() {
 		return timeout;
