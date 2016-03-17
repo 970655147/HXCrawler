@@ -20,9 +20,23 @@ import com.hx.crawlerTools_xpathParser.Tools;
 // HtmlCrawler
 public class HtmlCrawler extends Crawler {
 
-	// 创建一个HtmlCrawler
+	// getInstance 获取到的唯一实例
+	private static HtmlCrawler instance;
+	
+	// 创建/ 获取一个HtmlCrawler
 	public static HtmlCrawler newInstance() {
 		return new HtmlCrawler();
+	}
+	public static HtmlCrawler getInstance() {
+		if(instance == null) {
+			synchronized (HtmlCrawler.class) {
+				if(instance == null) {
+					instance = newInstance();
+				}
+			}
+		}
+		
+		return instance;
 	}
 	
 	// getPage
@@ -83,8 +97,5 @@ public class HtmlCrawler extends Crawler {
 			req.addHeader(Tools.COOKIE_STR, Tools.getCookieStr(config.getCookies()) );
 		}
 	}
-	
-	
-	
 	
 }

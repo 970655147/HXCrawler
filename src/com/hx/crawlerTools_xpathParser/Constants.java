@@ -15,23 +15,23 @@ import java.util.Set;
 public class Constants {
 	
 	// indexString中可以出现的键
-	public static String NAME = "name";
-	public static String XPATH = "xpath";
-	public static String VALUES = "values";
-	public static String ATTRIBUTE = "attribute";
+	public final static String NAME = "name";
+	public final static String XPATH = "xpath";
+	public final static String VALUES = "values";
+	public final static String ATTRIBUTE = "attribute";
 	
 	// 各种属性[attribute]
-	public static String INDEX = ":index";
-	public static String TEXT = "text";
-	public static String INNER_TEXT = "innertext";
-	public static String INNER_HTML = "innerhtml";
-	public static String OUTER_HTML = "outerhtml";
+	public final static String INDEX = ":index";
+	public final static String TEXT = "text";
+	public final static String INNER_TEXT = "innertext";
+	public final static String INNER_HTML = "innerhtml";
+	public final static String OUTER_HTML = "outerhtml";
 	
 	// 其他值类型的常量
-	public static final String NULL = "null";
-	public static final String DEFAULT_VALUE = NULL;
-	public static final String ATTR_NOT_SUPPORT = "AttributeNotSupported";
-	public static final String ARRAY_ATTR = "JSONArrayAttribute";
+	public final static String NULL = "null";
+	public final static String DEFAULT_VALUE = NULL;
+	public final static String ATTR_NOT_SUPPORT = "AttributeNotSupported";
+	public final static String ARRAY_ATTR = "JSONArrayAttribute";
 	
 	// root元素
 	public static String ROOT = "#root";

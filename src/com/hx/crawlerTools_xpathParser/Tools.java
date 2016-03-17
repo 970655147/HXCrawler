@@ -56,8 +56,8 @@ import com.hx.crawlerTools_crawler.SingleUrlTask;
 public class Tools {
 	
 	// 常量
-	public static String EMPTY_STR = "";
-	public static String NULL = "null";
+	public static final String EMPTY_STR = "";
+	public static final String NULL = "null";
 	public static final Character SLASH = '\\';
 	public static final Character INV_SLASH = '/';
 	public static final Character DOT = '.';
@@ -69,7 +69,7 @@ public class Tools {
 	public static final Character LF = '\n';
 	public static final Character QUESTION = '?';
 	public static final String CRLF = "\r\n";
-	public static Random ran = new Random();
+	public static final Random ran = new Random();
 	public static String DEFAULT_CHARSET = "utf-8";
 	
 	// 业务相关常量
@@ -115,12 +115,12 @@ public class Tools {
 	public static final Class[] PARSE_METHOD_PARAMTYPES = new Class[]{ScriptParameter.class };
 	
 	// 默认的相关配置变量
-	private static String DEFAULT_TMP_NAME = "tmp";
-	private static String DEFAULT_TMP_DIR = "C:\\Users\\970655147\\Desktop\\tmp";
-	private static int DEFAULT_BUFF_SIZE = 2048;
-	private static String DEFAULT_SUFFIX = ".html";
-	private static int DEFAULT_CHECK_INTERVAL = 3 * 1000;
-	private static int DEFAULT_N_THREADS = 10;
+	private final static String DEFAULT_TMP_NAME = "tmp";
+	private final static String DEFAULT_TMP_DIR = "C:\\Users\\970655147\\Desktop\\tmp";
+	private final static int DEFAULT_BUFF_SIZE_ON_TRANS_STREAM = 2048;
+	private final static String DEFAULT_SUFFIX = ".html";
+	private final static int DEFAULT_CHECK_INTERVAL = 3 * 1000;
+	private final static int DEFAULT_N_THREADS = 10;
 	
 	// 线程池相关
 	public static int CHECK_INTERVAL = DEFAULT_CHECK_INTERVAL;
@@ -131,27 +131,49 @@ public class Tools {
 	public static String TMP_NAME = DEFAULT_TMP_NAME;
 	public static String TMP_DIR = DEFAULT_TMP_DIR;
 	public static AtomicInteger TMP_IDX = new AtomicInteger();
-	public static int BUFF_SIZE = DEFAULT_BUFF_SIZE;
 	public static String SUFFIX = DEFAULT_SUFFIX;
+	public static int BUFF_SIZE_ON_TRANS_STREAM = DEFAULT_BUFF_SIZE_ON_TRANS_STREAM;
 	
 	// 后缀相关
-	public static String HTML = ".html";
-	public static String JAVA = ".java";
-	public static String TXT = ".txt";
-	public static String PNG = ".png";
-	public static String JPEG = ".jpeg";
-	public static String JS = ".js";
-	public static String MAP = ".map";
-	public static String ZIP = ".zip";
-	public static String IDX = ".idx";
-	public static String FIV = ".fiv";
+	public final static String HTML = ".html";
+	public final static String JAVA = ".java";
+	public final static String TXT = ".txt";
+	public final static String PNG = ".png";
+	public final static String JPEG = ".jpeg";
+	public final static String JS = ".js";
+	public final static String MAP = ".map";
+	public final static String ZIP = ".zip";
+	public final static String IDX = ".idx";
+	public final static String FIV = ".fiv";
+	public final static String MP4 = ".mp4";
+	public final static String GP3 = ".3gp";
+	public final static String RMVB = ".rmvb";
+	public final static String RM = ".rm";
+	public final static String AVI = ".avi";
 	
 	// 字节的表示相关
-	public static String BYTE = "byte";
-	public static String KB = "kb";
-	public static String MB = "mb";
-	public static String GB = "gb";
-	public static String TB = "tb";
+	public final static String BYTE = "byte";
+	public final static String KB = "kb";
+	public final static String MB = "mb";
+	public final static String GB = "gb";
+	public final static String TB = "tb";
+	public final static String PB = "pb";
+	public final static String EB = "eb";
+	public final static String ZB = "zb";
+	public final static String YB = "yb";
+	
+	// 打印日志相关 [add at 2016.03.17]
+	public final static long LOG_ON_SAVE = 1 ;
+	public final static long LOG_ON_APPEND = LOG_ON_SAVE << 1 ;
+	public final static long LOG_ON_DELETE = LOG_ON_APPEND << 1 ;
+	public final static long LOG_ON_COPY = LOG_ON_DELETE << 1 ;
+	public final static long LOG_ON_DOWNLOAD = LOG_ON_COPY << 1 ;
+	public final static long LOG_ON_AWAIT_TASK_END = LOG_ON_DOWNLOAD << 1 ;
+	public final static long LOG_ON_FLUSH_BUFFER = LOG_ON_AWAIT_TASK_END << 1 ;
+	public final static long LOG_ON_ALL = LOG_ON_SAVE | LOG_ON_APPEND | LOG_ON_DELETE | LOG_ON_COPY 
+								| LOG_ON_DOWNLOAD | LOG_ON_AWAIT_TASK_END | LOG_ON_FLUSH_BUFFER;
+	public final static long LOG_ON_NONE = ~LOG_ON_ALL;
+	public static long LOG_ON_MINE_CONF = LOG_ON_ALL;
 	
 	// 文件名后面可能出现的其他符号
 	static Set<Character> mayBeFileNameSeps = new HashSet<>();
@@ -195,7 +217,7 @@ public class Tools {
 		if(! isException) {
 			TMP_NAME = props.getProperty("tmpName", DEFAULT_TMP_NAME);
 			TMP_DIR = props.getProperty("tmpDir", DEFAULT_TMP_DIR);
-			BUFF_SIZE = Integer.parseInt(props.getProperty("buffSize", String.valueOf(DEFAULT_BUFF_SIZE)) );
+			BUFF_SIZE_ON_TRANS_STREAM = Integer.parseInt(props.getProperty("buffSizeOnTransStream", String.valueOf(BUFF_SIZE_ON_TRANS_STREAM)) );
 			SUFFIX = props.getProperty("suffix", DEFAULT_SUFFIX);
 			CHECK_INTERVAL = Integer.parseInt(props.getProperty("checkInterval", String.valueOf(DEFAULT_CHECK_INTERVAL)) );
 			N_THREADS = Integer.parseInt(props.getProperty("nThreads", String.valueOf(DEFAULT_N_THREADS)) );
@@ -211,7 +233,7 @@ public class Tools {
 				}
 			}
 		}
-		threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(N_THREADS);
+		newFixedThreadPool(N_THREADS);
 		
 	}
 	// ----------------- 属性结束 -----------------------
@@ -220,7 +242,16 @@ public class Tools {
 	// ---------------临时文件相关---------------
 	// 获取临时路径的下一个路径[返回文件路径]
 	public static void setTmpIdx(int idx) {
-		TMP_IDX = new AtomicInteger(idx );
+		TMP_IDX.set(idx);
+	}
+	public static void setTmpDir(String tmpDir) {
+		TMP_DIR = tmpDir;
+	}
+	public static void setTmpName(String tmpName) {
+		TMP_NAME = tmpName;
+	}
+	public static void setSuffix(String suffix) {
+		SUFFIX = suffix;
 	}
 	public static String getNextTmpPath() {
 		return TMP_DIR + "\\" + getNextTmpName() + SUFFIX;
@@ -256,20 +287,47 @@ public class Tools {
 	}
 	
 	// ----------------- 文件操作相关方法 -----------------------
+	// 配置defaultCharSet
+	public static void setDefaultCharSet(String defaultCharSet) {
+		DEFAULT_CHARSET = defaultCharSet;
+	}
+	public static void setLogOnMine(long logOnMine) {
+		LOG_ON_MINE_CONF = logOnMine;
+	}
+	// 判断是否需要打印日志
+	public static boolean isLog(long logFlags, long logMask) {
+		return ((logFlags & logMask) != 0);
+	}
 	// 将html字符串保存到指定的文件中
+	public static void save(String html, String nextTmpName, long logFlags) throws IOException {
+		save(html, new File(nextTmpName), logFlags);
+	}
+	public static void save(String html, File nextTmpFile, long logFlags) throws IOException {
+		write0(html, nextTmpFile, DEFAULT_CHARSET, false);
+		if(isLog(logFlags, LOG_ON_SAVE) ) {
+			Log.log("save content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
+		}
+	}	
+	public static void append(String html, String nextTmpName, long logFlags) throws IOException {
+		append(html, new File(nextTmpName), logFlags );
+	}
+	public static void append(String html, File nextTmpFile, long logFlags) throws IOException {
+		write0(html, nextTmpFile, DEFAULT_CHARSET, true);
+		if(isLog(logFlags, LOG_ON_APPEND) ) {
+			Log.log("append content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
+		}
+	}
 	public static void save(String html, String nextTmpName) throws IOException {
-		save(html, new File(nextTmpName) );
+		save(html, nextTmpName, LOG_ON_MINE_CONF );
 	}
 	public static void save(String html, File nextTmpFile) throws IOException {
-		write0(html, nextTmpFile, DEFAULT_CHARSET, false);
-		Log.log("save content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
-	}	
+		save(html, nextTmpFile, LOG_ON_MINE_CONF);
+	}
 	public static void append(String html, String nextTmpName) throws IOException {
-		append(html, new File(nextTmpName) );
+		append(html, nextTmpName, LOG_ON_MINE_CONF );
 	}
 	public static void append(String html, File nextTmpFile) throws IOException {
-		write0(html, nextTmpFile, DEFAULT_CHARSET, true);
-		Log.log("append content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
+		append(html, nextTmpFile, LOG_ON_MINE_CONF);
 	}
 	private static void write0(String html, File nextTmpFile, String charset, boolean isAppend) throws IOException {
 		BufferedOutputStream bos = null;
@@ -284,41 +342,59 @@ public class Tools {
 	}
 	
 	// 移除指定的文件
-	public static void remove(String path) {
+	public static void delete(String path, long logFlags) {
 		File file = new File(path);
 		if(file.exists() ) {
 			boolean isSucc = file.delete();
-			if(isSucc) {
-				Log.log("delete \" " + path + " \" success ...");
-			} else {
-				Log.log("delete \" " + path + " \" failed, maybe inuse ...");
+			if(isLog(logFlags, LOG_ON_DELETE) ) {
+				if(isSucc) {
+					Log.log("delete \" " + path + " \" success ...");
+				} else {
+					Log.log("delete \" " + path + " \" failed, maybe inuse ...");
+				}
 			}
 		} else {
-			Log.log("\" " + path + " \" is not exists ...");
+			if(isLog(logFlags, LOG_ON_DELETE) ) {
+				Log.log("\" " + path + " \" is not exists ...");
+			}
 		}
+	}
+	public static void delete(String path) {
+		delete(path, LOG_ON_MINE_CONF);
 	}
 	
     // 复制指定的文件
-    public static void copy(String src, String dst) throws IOException {
+    public static void copy(String src, String dst, long logFlags) throws IOException {
         File srcFile = new File(src);
         File dstFile = new File(dst);
         if(srcFile.isDirectory() ) {
-            Log.log("srcFile \" " + src + " \" can't be folder ...");
+        	if(isLog(logFlags, LOG_ON_COPY) ) {
+        		Log.log("srcFile \" " + src + " \" can't be folder ...");
+        	}
             return ;
         }
         if(! srcFile.exists() ) {
-            Log.log("srcFile \" " + src + " \" do not exists ...");
+        	if(isLog(logFlags, LOG_ON_COPY) ) {
+        		Log.log("srcFile \" " + src + " \" do not exists ...");
+        	}
             return ;
         }
         if(dstFile.exists() ) {
-            Log.log("dstFile \" " + dst + " \" does exists, please remove it first [make sure it is not important] ...");
+        	if(isLog(logFlags, LOG_ON_COPY) ) {
+        		Log.log("dstFile \" " + dst + " \" does exists, please remove it first [make sure it is not important] ...");
+        	}
             return ;
         }
 
         FileInputStream fis = new FileInputStream(srcFile);
         FileOutputStream fos = new FileOutputStream(dstFile);
         copy(fis, fos);
-        Log.log("copy file \" " + src + " \" -> \" " + dst + " \" success ...");
+        if(isLog(logFlags, LOG_ON_COPY) ) {
+        	Log.log("copy file \" " + src + " \" -> \" " + dst + " \" success ...");
+        }
+    }
+    public static void copy(String src, String dst) throws IOException {
+    	copy(src, dst, LOG_ON_MINE_CONF);
     }
 
 	// 获取给定的输入流中的字符内容
@@ -670,6 +746,7 @@ public class Tools {
 	}
 	
 	// 通过xpath获取真实的xpath
+	// 可以改写为JSONArray.toString() 实现
 	public static String getRealXPathByXPathObj(String xpath) {
 		return "[" + xpath + "]";
 	}
@@ -718,10 +795,9 @@ public class Tools {
 	
 	// 为nextStageParams添加category
 	public static void addNameUrlSite(JSONObject category, JSONObject nextStageParams) {
-		nextStageParams.put(Tools.NAME, category.getString("name"));
-		nextStageParams.put(Tools.URL, category.getString("url"));
-		nextStageParams.put(Tools.SITE, nextStageParams.getString("site") + "." +category.getString("name"));
-		
+		nextStageParams.put(Tools.NAME, category.getString(NAME) );
+		nextStageParams.put(Tools.URL, category.getString(URL) );
+		nextStageParams.put(Tools.SITE, nextStageParams.getString(SITE) + "." + category.getString(NAME) );
 	}
 	
 	// 通过产品的数目, 以及每一页显示的产品的数目, 计算页数
@@ -743,6 +819,7 @@ public class Tools {
 	// 将str中多个相邻的空格替换为一个空格[SPACE]
 	// 如果结果的字符串长度为1 并且该字符为空格, 则直接返回空字符串
 	// 否则  去掉前后的空格, 返回之间的子字符串
+	// 可以直接使用正则进行处理
 	public static String replaceMultiSpacesAsOne(String str) {
 		if(str == null) {
 			return null;
@@ -944,7 +1021,7 @@ public class Tools {
 	}
 
 	// 过滤掉不需要的字符
-	public static Object filter(String str, Set<Character> needBeFiltered) {
+	public static String filter(String str, Set<Character> needBeFiltered) {
 		if((str == null) || (needBeFiltered == null) ) {
 			return null;
 		}
@@ -967,7 +1044,7 @@ public class Tools {
 		appendCRLF(sb, str);
 	}
 	public static void appendCRLF(StringBuilder sb, String str) {
-		sb.append(str + CRLF);
+		appendCRLF(sb, str + CRLF, false);
 	}
 	
 	// 获取taskName
@@ -1026,16 +1103,24 @@ public class Tools {
 	}
 	
 	// 从指定的url上面下载图片  保存到指定的路径下面 [也适用于下载其他的二进制数据]
-	public static void downloadFrom(String urlStr, String path) throws IOException {
+	public static void downloadFrom(String urlStr, String path, long logFlags) throws IOException {
 		URL url = new URL(urlStr);
 		InputStream is = url.openStream();
 		OutputStream os = new FileOutputStream(new File(path));
 		copy(is,  os);
 		
-		Log.log("download file \"" + path + "\" succcess ...");
+		if(isLog(logFlags, LOG_ON_DOWNLOAD) ) {
+			Log.log("download file \"" + path + "\" succcess ...");
+		}
+	}
+	public static void downloadFrom(String urlStr, String path) throws IOException {
+		downloadFrom(urlStr, path, LOG_ON_MINE_CONF);
 	}
 	
 	// 将输入流中的数据 复制到输出流
+	public static void setBuffSize(int buffSize) {
+		BUFF_SIZE_ON_TRANS_STREAM = buffSize;
+	}
 	public static void copy(InputStream is, OutputStream os, boolean isCloseStream) {
 		BufferedInputStream bis = null;
 		BufferedOutputStream bos = null;
@@ -1044,7 +1129,7 @@ public class Tools {
 			bis = new BufferedInputStream(is);
 			bos = new BufferedOutputStream(os);
 			int len = 0;
-			byte[] buf = new byte[BUFF_SIZE];
+			byte[] buf = new byte[BUFF_SIZE_ON_TRANS_STREAM];
 			while((len = bis.read(buf)) != -1) {
 				bos.write(buf, 0, len);
 			}
@@ -1114,40 +1199,67 @@ public class Tools {
 	public static void addTask(Runnable run) {
 		threadPool.execute(run);
 	}
-	
+    // 新建一个线程池
+    public static void newFixedThreadPool(int nThread) {
+    	threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThread);
+    }
+    // 配置checkInterval
+    public static void setCheckInterval(int checkInterval) {
+    	CHECK_INTERVAL = checkInterval;
+    }
+    // 配置线程池中线程的个数
+    public static void setNThread(int nThread) {
+    	if(isThreadPoolRunning(threadPool) ) {
+    		Log.err("the threadPool is running NOW, please try again later !");
+    		return ;
+    	}
+    	
+    	N_THREADS = nThread;
+    	newFixedThreadPool(N_THREADS);
+    }
+    
 	// shutdown 线程池
-	public static void awaitShutdown(ThreadPoolExecutor threadPool, int checkInterval, boolean isLog) {
-		awaitTasksEnd0(threadPool, checkInterval, true, isLog);
+	public static void awaitShutdown(ThreadPoolExecutor threadPool, int checkInterval, long logFlags) {
+		awaitTasksEnd(threadPool, checkInterval, true, logFlags);
 	}
 	public static void awaitShutdown() {
-		awaitShutdown(threadPool, CHECK_INTERVAL, false);
+		awaitShutdown(threadPool, CHECK_INTERVAL, LOG_ON_MINE_CONF);
 	}
 	
     // 等待 线程池中任务结束 [并不关闭线程池]
-    public static void awaitTasksEnd(ThreadPoolExecutor threadPool, int checkInterval, boolean isLog) {
-    	awaitTasksEnd0(threadPool, checkInterval, false, isLog);
+    public static void awaitTasksEnd(ThreadPoolExecutor threadPool, int checkInterval, long logFlags) {
+    	awaitTasksEnd(threadPool, checkInterval, false, logFlags);
     }
     public static void awaitTasksEnd() {
-    	awaitTasksEnd(threadPool, CHECK_INTERVAL, false);
+    	awaitTasksEnd(threadPool, CHECK_INTERVAL, false, LOG_ON_MINE_CONF);
     }
-    private static void awaitTasksEnd0(ThreadPoolExecutor threadPool, int checkInterval, boolean isShutdown, boolean isLog) {
+    public static void awaitTasksEnd(ThreadPoolExecutor threadPool, int checkInterval, boolean isShutdown, long logFlags) {
         while (! threadPool.isShutdown() ) {
         	int taskInQueue = threadPool.getQueue().size();
         	int activeTaskCount = threadPool.getActiveCount();
             if((taskInQueue == 0) && (activeTaskCount == 0) ) {
             	if(isShutdown) {
+            		if(isLog(logFlags, LOG_ON_AWAIT_TASK_END) ) {
+            			Log.log("threadPool is shuttingDown !");
+            		}
             		threadPool.shutdown();
             	}
                 break ;
             } else {
-            	if(isLog ) {
+            	if(isLog(logFlags, LOG_ON_AWAIT_TASK_END) ) {
             		Log.log("task in queue : " + taskInQueue + ", active task count : " + activeTaskCount + ", at : " + new Date().toString() + " !");
             	}
                 Tools.sleep(checkInterval);
             }
         }
     }
-    
+    // 判断给定的线程池是否还有任务在运行
+    public static boolean isThreadPoolRunning(ThreadPoolExecutor threadPool) {
+    	int taskInQueue = threadPool.getQueue().size();
+    	int activeTaskCount = threadPool.getActiveCount();
+    	return ((taskInQueue != 0) || (activeTaskCount != 0) );
+    }
+
 	// 让当前线程休息ms
 	public static void sleep(long ms) {
 		try {
@@ -1201,6 +1313,14 @@ public class Tools {
 			return Tools.getGBytesByBytes(length) + " " + Tools.GB;
 		} else if(equalsIgnoreCase(Tools.TB, dimen) ) {
 			return Tools.getTBytesByBytes(length) + " " + Tools.TB;
+		} else if(equalsIgnoreCase(Tools.PB, dimen) ) {
+			return Tools.getPBytesByBytes(length) + " " + Tools.PB;
+		} else if(equalsIgnoreCase(Tools.EB, dimen) ) {
+			return Tools.getEBytesByBytes(length) + " " + Tools.EB;
+		} else if(equalsIgnoreCase(Tools.ZB, dimen) ) {
+			return Tools.getZBytesByBytes(length) + " " + Tools.ZB;
+		} else if(equalsIgnoreCase(Tools.YB, dimen) ) {
+			return Tools.getYBytesByBytes(length) + " " + Tools.YB;
 		} else {
 			return length + " " + Tools.BYTE;
 		}
@@ -1218,6 +1338,18 @@ public class Tools {
 	}
 	public static long getTBytesByBytes(long bytes) {
 		return bytes >> 40;
+	}
+	public static long getPBytesByBytes(long bytes) {
+		return bytes >> 50;
+	}
+	public static long getEBytesByBytes(long bytes) {
+		return bytes >> 60;
+	}
+	public static long getZBytesByBytes(long bytes) {
+		return bytes >> 70;
+	}
+	public static long getYBytesByBytes(long bytes) {
+		return bytes >> 80;
 	}
 	
 	// ------------ 缓冲相关 ------- 2016.03.16 -------------
@@ -1265,13 +1397,20 @@ public class Tools {
 	public static void createAnBuffer(String bufName, String outputPath) {
 		createAnBuffer(bufName, outputPath, defaultBuffSizeEstimator, defaultBuffThreshold);
 	}
+	public static void closeAnBuffer(String bufName) {
+		if(! bufExists(bufName)) {
+			throw new RuntimeException("have no buffInfo with key : " + bufName + ", please createAnBuffer first !");
+		}
+		
+		bufferToBuffInfo.remove(bufName);
+	}
 	// 判断给定的bufName的buffer是否存在
 	public static boolean bufExists(String buffName) {
 		return bufferToBuffInfo.get(buffName) != null;
 	}
 	
 	// 向给定的缓冲区中添加数据 并检测buffer中的数据是否超过了阈值
-	public static void appendBuffer(String bufName, String content) throws IOException {
+	public static void appendBuffer(String bufName, String content, long logFlags) throws IOException {
 		if(! bufExists(bufName)) {
 			throw new RuntimeException("have no buffInfo with key : " + bufName + ", please createAnBuffer first !");
 		}
@@ -1280,16 +1419,22 @@ public class Tools {
 		buffInfo.sb.append(content);
 		synchronized(buffInfo.sb) {
 			if(buffInfo.sb.length() > buffInfo.threshold) {
-				flushBuffer(buffInfo.sb, buffInfo.outputPath );
+				flushBuffer(buffInfo.sb, buffInfo.outputPath, logFlags);
 			}
 		}
 	}
-	public static void appendBufferCRLF(String bufName, String content) throws IOException {
+	public static void appendBuffer(String bufName, String content) throws IOException {
+		appendBuffer(bufName, content, LOG_ON_MINE_CONF);
+	}
+	public static void appendBufferCRLF(String bufName, String content, long logFlags) throws IOException {
 		appendBuffer(bufName, content + CRLF);
+	}
+	public static void appendBufferCRLF(String bufName, String content) throws IOException {
+		appendBufferCRLF(bufName, content, LOG_ON_MINE_CONF);
 	}
 	
 	// 刷出缓存的数据
-	public static void flushBuffer(String bufName, boolean isLastBatch) throws IOException {
+	public static void flushBuffer(String bufName, boolean isLastBatch, long logFlags) throws IOException {
 		if(! bufExists(bufName)) {
 			throw new RuntimeException("have no buffInfo with key : " + bufName + ", please createAnBuffer first !");
 		}
@@ -1297,22 +1442,33 @@ public class Tools {
 		BuffInfo buffInfo = bufferToBuffInfo.get(bufName);
 		synchronized (buffInfo.sb) {
 			if(buffInfo.sb.length() > 0) {
-				flushBuffer(buffInfo.sb, buffInfo.outputPath );
+				flushBuffer(buffInfo.sb, buffInfo.outputPath, logFlags);
 			}
 		}
 		if(isLastBatch) {
-			bufferToBuffInfo.remove(bufName);
+			closeAnBuffer(bufName);
 		}
 	}
+	public static void flushBuffer(String bufName, long logFlags) throws IOException {
+		flushBuffer(bufName, false, logFlags);
+	}
+	public static void flushBuffer(String bufName, boolean isLastBatch) throws IOException {
+		flushBuffer(bufName, isLastBatch, LOG_ON_MINE_CONF);
+	}
 	public static void flushBuffer(String bufName) throws IOException {
-		flushBuffer(bufName, false);
+		flushBuffer(bufName, LOG_ON_MINE_CONF);
+	}
+	public static void flushBuffer(StringBuffer sb, String path, long logFlags) throws IOException {
+	  Tools.append(sb.toString(), path);
+	  long kbLength = getKBytesByBytes(sb.length() << 1);
+	  sb.setLength(0);
+	  if(isLog(logFlags, LOG_ON_FLUSH_BUFFER) ) {
+		  Log.log("flush buffer at : " + new Date().toString() + ", size : " + kbLength + " kb" );
+	  }
 	}
 	public static void flushBuffer(StringBuffer sb, String path) throws IOException {
-	  Tools.append(sb.toString(), path);
-	  Log.log("flush buffer at : " + new Date().toString() + ", size : " + getKBytesByBytes(sb.length() << 1) + " kb" );
-	  sb.setLength(0);
+		flushBuffer(sb, path, LOG_ON_MINE_CONF);
 	}
-	
 	
 	// ------------ 待续 --------------------
 
