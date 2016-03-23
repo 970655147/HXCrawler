@@ -6,15 +6,21 @@
 
 package com.hx.crawlerTools_xpathParser;
 
+
+
+import net.sf.json.JSONObject;
+
+import com.hx.crawler.interf.EndPoint;
+
 // attribute结点
-public class Attribute extends EndPoint {
+public final class Attribute extends EndPoint {
 	
 	// attribute[text, innertext, innerhtml, outerhtml]
 	private String attr;
 	
 	// 初始化
-	public Attribute(String name, String xpath, String attr, EndPoint parent) {
-		super(EndPoint.ATTRIBUTE, name, xpath, parent);
+	public Attribute(String name, String xpath, String attr, String handlerStr, EndPoint parent) {
+		super(EndPoint.ATTRIBUTE, name, xpath, handlerStr, parent);
 		this.attr = attr;
 	}
 
@@ -30,7 +36,7 @@ public class Attribute extends EndPoint {
 	
 	// for debug ...
 	public String toString() {
-		return "{ " + super.toString() + ", attribute : " + attr + " }";
+		return new JSONObject().element("fromEndPoint", super.toString() ).element("attribute", attr).toString();
 	}
 
 	// Attribute结点的孩子个数为0

@@ -4,11 +4,14 @@
  * created by 970655147
  */
 
-package com.hx.crawlerTools_crawler;
+package com.hx.crawler.interf;
 
 import java.io.IOException;
 
 import org.apache.http.entity.ContentType;
+
+import com.hx.crawlerTools_crawler.CrawlerConfig;
+import com.hx.crawlerTools_crawler.Page;
 
 // Cralwer ¹æ·¶
 public abstract class Crawler {

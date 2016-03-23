@@ -8,17 +8,21 @@ package com.hx.crawlerTools_xpathParser;
 
 import java.util.List;
 
-import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.dom4j.Element;
 
+import com.hx.crawler.interf.EndPoint;
+import com.hx.crawler.interf.EndPointHandler;
+import com.hx.crawler.util.Constants;
+import com.hx.crawler.util.Tools;
+
 // attribute 结点的相关业务处理
 public class AttributeHandler extends EndPointHandler {
 
 	@Override
-	public void handle(Element root, Element currentEle, String url, JSONArray res, int idx, EndPoint child, JSON curObj) {
+	public void handle(Element root, Element currentEle, String url, JSONArray res, int idx, EndPoint child, JSONObject curObj) {
 		if(! child.getName().equals(Constants.ARRAY_ATTR) ) {
 			if(child.getXPath() != null ) {
 //				List<Element> eles = getResultByXPath(root, currentEle, child.getXPath());
@@ -36,21 +40,32 @@ public class AttributeHandler extends EndPointHandler {
 //				}
 				
 				Element ele = Parser.getSingleResultByXPath(root, currentEle, child.getXPath());
-				((JSONObject) curObj).element(child.getName(), getValueByAttribute(ele, child.getAttribute(), url, 0) );
+				String handledResult = handleResult(child, getValueByAttribute(ele, child.getAttribute(), url, 0) );
+				curObj.element(child.getName(), handledResult );
 			} else {
-				((JSONObject) curObj).element(child.getName(), getValueByAttribute(currentEle, child.getAttribute(), url, idx) );
+				String handledResult = handleResult(child, getValueByAttribute(currentEle, child.getAttribute(), url, idx) );
+				curObj.element(child.getName(), handledResult );
 			}
 		} else {
 			JSONArray curArr = new JSONArray();
 			List<Element> eles = Parser.getResultByXPath(root, currentEle, child.getXPath() );
 			int idx2 = 0;
 			for(Element ele : eles) {
-				curArr.add(getValueByAttribute(ele, child.getAttribute(), url, idx2 ++) );
+				String handledResult = handleResult(child, getValueByAttribute(ele, child.getAttribute(), url, idx2 ++) ); 
+				curArr.add(handledResult );
 			}
 			res.add(curArr);
 		}
 	}
 
+	// 使用当前AttriBute的相关handler处理结果
+	private String handleResult(EndPoint child, String valueByAttribute) {
+		if(child.getAttrHandler() == null) {
+			return valueByAttribute;
+		}
+		
+		return child.getAttrHandler().handle(valueByAttribute); 
+ 	}
 	// 通过element 和attribute属性 获取其对应的值
 	private static String getValueByAttribute(Element ele, String attribute, String url, int idx) {
 		if(Constants.INDEX.equals(attribute)) {

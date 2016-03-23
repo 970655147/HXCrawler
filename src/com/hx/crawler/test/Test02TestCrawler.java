@@ -4,18 +4,22 @@
  * created by 970655147
  */
 
-package com.hx.crawlerTools_crawler;
+package com.hx.crawler.test;
 
 import java.io.IOException;
 
 import org.apache.http.entity.ContentType;
 
-import com.hx.crawlerTools_xpathParser.Log;
-import com.hx.crawlerTools_xpathParser.Tools;
+import com.hx.crawler.interf.Crawler;
+import com.hx.crawler.util.Log;
+import com.hx.crawler.util.Tools;
+import com.hx.crawlerTools_crawler.CrawlerConfig;
+import com.hx.crawlerTools_crawler.HtmlCrawler;
+import com.hx.crawlerTools_crawler.Page;
 
 
 // Main
-public class Main {
+public class Test02TestCrawler {
 
 	// 1. ≤‚ ‘Crawler. getPage/ postPage
 	public static void main(String []args) throws IOException {

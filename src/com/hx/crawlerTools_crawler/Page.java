@@ -19,7 +19,7 @@ import org.apache.http.client.fluent.Response;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import com.hx.crawlerTools_xpathParser.Tools;
+import com.hx.crawler.util.Tools;
 
 // Page
 public class Page {

@@ -6,6 +6,8 @@
 
 package com.hx.crawlerTools_crawler;
 
+import com.hx.crawler.interf.ScriptParameter;
+
 // singleUrlTask
 public class SingleUrlTask extends ScriptParameter {
 

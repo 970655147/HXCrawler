@@ -4,15 +4,18 @@
  * created by 970655147
  */
 
-package com.hx.crawlerTools_xpathParser;
+package com.hx.crawler.test;
 
 import net.sf.json.JSONArray;
 
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+import com.hx.crawler.util.Log;
+import com.hx.crawlerTools_xpathParser.Parser;
+
 // Main 
-public class Main {
+public class Test01TestXpathParser {
 
 	// ≤‚ ‘crawlerTools
 	// 1. test for indexString

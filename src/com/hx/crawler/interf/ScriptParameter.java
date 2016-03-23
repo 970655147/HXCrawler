@@ -4,12 +4,12 @@
  * created by 970655147
  */
 
-package com.hx.crawlerTools_crawler;
+package com.hx.crawler.interf;
 
 import java.util.Map;
 
 // 脚本的参数
-public class ScriptParameter {
+public abstract class ScriptParameter {
 	
 	// taskGroupId, taskId
 	// 请求的url, 参数, crawler

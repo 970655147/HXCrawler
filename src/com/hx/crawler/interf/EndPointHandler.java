@@ -4,16 +4,16 @@
  * created by 970655147
  */
 
-package com.hx.crawlerTools_xpathParser;
+package com.hx.crawler.interf;
 
-import net.sf.json.JSON;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import org.dom4j.Element;
 
 // 当碰到具体的Endpoint的时候, 处理其逻辑
 public abstract class EndPointHandler {
 
-	public abstract void handle(Element root, Element currentEle, String url, JSONArray res, int idx, EndPoint child, JSON curObj);
+	public abstract void handle(Element root, Element currentEle, String url, JSONArray res, int idx, EndPoint child, JSONObject curObj);
 	
 }

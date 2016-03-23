@@ -15,6 +15,9 @@ import net.sf.json.JSONObject;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+import com.hx.crawler.interf.EndPoint;
+import com.hx.crawler.util.Constants;
+
 public class Parser {
 	
 	// 以root为根节点, 解析xpath字符串[指定的格式]

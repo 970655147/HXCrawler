@@ -4,7 +4,7 @@
  * created by 970655147
  */
 
-package com.hx.crawlerTools_xpathParser;
+package com.hx.crawler.util;
 
 import java.util.Iterator;
 import java.util.List;

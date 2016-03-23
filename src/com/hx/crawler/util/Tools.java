@@ -4,7 +4,7 @@
  * created by 970655147
  */
 
-package com.hx.crawlerTools_xpathParser;
+package com.hx.crawler.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -47,9 +47,15 @@ import org.ccil.cowan.tagsoup.Parser;
 import org.ccil.cowan.tagsoup.XMLWriter;
 import org.xml.sax.InputSource;
 
-import com.hx.crawlerTools_crawler.Crawler;
+import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.interf.Crawler;
+import com.hx.crawler.interf.HandlerParser;
+import com.hx.crawler.interf.ResultJudger;
+import com.hx.crawler.interf.ScriptParameter;
+import com.hx.crawler.test.Test01TestXpathParser;
+import com.hx.crawlerTools_attrHandler.CompositeAttrHandler;
+import com.hx.crawlerTools_attrHandler.StandardHandlerParser;
 import com.hx.crawlerTools_crawler.HtmlCrawler;
-import com.hx.crawlerTools_crawler.ScriptParameter;
 import com.hx.crawlerTools_crawler.SingleUrlTask;
 
 // 工具类
@@ -61,13 +67,15 @@ public class Tools {
 	public static final Character SLASH = '\\';
 	public static final Character INV_SLASH = '/';
 	public static final Character DOT = '.';
-	public static final Character COMMON = ',';
+	public static final Character COMMA = ',';
 	public static final Character COLON = ':';	
 	public static final Character SPACE = ' ';
 	public static final Character TAB = '\t';
 	public static final Character CR = '\r';
 	public static final Character LF = '\n';
 	public static final Character QUESTION = '?';
+	public static final Character QUOTE = '\"';
+	public static final Character SINGLE_QUOTE = '\'';
 	public static final String CRLF = "\r\n";
 	public static final Random ran = new Random();
 	public static String DEFAULT_CHARSET = "utf-8";
@@ -89,6 +97,17 @@ public class Tools {
 	public static final String RESPONE = "response";
 	public static final String REASON = "reason";
 	public static final String MSG = "message";
+	// add at 2016.03.21
+	public static final String BRAND = "brand";
+	public static final String UPC = "universalProductCode";
+	public static final String MPN = "manufacturePartNumber";
+	public static final String LEVEL = "level";
+	public static final String VALUE = "value";
+	public static final String DESCRIPTION = "description";
+	public static final String LIST = "list";
+	public static final String REBATE = "rebate";
+	public static final String FINAL = "final";
+	public static final String PRICE = "price";
 	
 	// http相关常量
 	public static final String COOKIE_STR = "Cookie";
@@ -198,7 +217,7 @@ public class Tools {
 			// 前者为true, 后者为false
 //			Log.log(Main.class.getClass().getClassLoader() == null);
 //			Log.log(new Main().getClass().getClassLoader() == null);
-			InputStream config = new Main().getClass().getClassLoader().getResourceAsStream("config.conf");
+			InputStream config = new Test01TestXpathParser().getClass().getClassLoader().getResourceAsStream("config.conf");
 			props.load(config);
 		} catch (FileNotFoundException e) {
 //			e.printStackTrace();
@@ -819,23 +838,22 @@ public class Tools {
 	// 将str中多个相邻的空格替换为一个空格[SPACE]
 	// 如果结果的字符串长度为1 并且该字符为空格, 则直接返回空字符串
 	// 否则  去掉前后的空格, 返回之间的子字符串
-	// 可以直接使用正则进行处理
-	public static String replaceMultiSpacesAsOne(String str) {
+	// 可以直接使用正则进行处理		// str.replaceAll("\\s+", " ");
+	public static String trimSpacesAsOne(String str) {
 		if(str == null) {
 			return null;
 		}
 		
-		char[] chars = str.toCharArray();
 		StringBuilder sb = new StringBuilder();
-		for(int i=0; i<chars.length; i++) {
-			if(spaces.contains(chars[i])) {
+		for(int i=0; i<str.length(); i++) {
+			if(spaces.contains(str.charAt(i)) ) {
 				sb.append(SPACE);
 				int nextI = i+1;
-				while((nextI < chars.length) && spaces.contains(chars[nextI])) nextI++ ;
+				while((nextI < str.length() ) && spaces.contains(str.charAt(nextI)) ) nextI++ ;
 				i = nextI - 1;
 				continue ;
 			}
-			sb.append(chars[i]);
+			sb.append(str.charAt(i) );
 		}
 		
 		if((sb.length() == 0) || ((sb.length() == 1) && spaces.contains(sb.charAt(0))) ) {
@@ -851,6 +869,52 @@ public class Tools {
 			
 			return sb.substring(start, end);
 		}
+	}
+	public static String trimAllSpaces(String str) {
+		if(str == null) {
+			return null;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i<str.length(); i++) {
+			if(spaces.contains(str.charAt(i)) ) {
+				int nextI = i+1;
+				while((nextI < str.length() ) && spaces.contains(str.charAt(nextI)) ) nextI++ ;
+				i = nextI - 1;
+				continue ;
+			}
+			sb.append(str.charAt(i) );
+		}
+		return sb.toString();
+	}
+	public static String trimAllSpaces(String str, Map<Character, Character> escapeMap) {
+		if(str == null) {
+			return null;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i<str.length(); i++) {
+			Character ch = str.charAt(i);
+			if(escapeMap.containsKey(ch) ) {
+				int prevI = i;
+				i = str.indexOf(escapeMap.get(ch), i+1);
+				if(i >= 0) {
+					sb.append(str.substring(prevI, i+1) );
+				} else {
+					sb.append(str.substring(prevI) );
+					break ;
+				}
+				continue ;
+			}
+			if(spaces.contains(str.charAt(i)) ) {
+				int nextI = i+1;
+				while((nextI < str.length() ) && spaces.contains(str.charAt(nextI)) ) nextI++ ;
+				i = nextI - 1;
+				continue ;
+			}
+			sb.append(str.charAt(i) );
+		}
+		return sb.toString();
 	}
 
 	// 去掉掉obj中所有的字符串类的值的相邻的多个空格
@@ -869,7 +933,7 @@ public class Tools {
 			String key = it.next();
 			Object val = obj.get(key );
 			if(val instanceof String) {
-				obj.put(key, replaceMultiSpacesAsOne((String) val));
+				obj.put(key, trimSpacesAsOne((String) val));
 			} else if(val instanceof JSONObject) {
 				trimSpaces((JSONObject) val);
 			} else if(val instanceof JSONArray) {
@@ -891,7 +955,7 @@ public class Tools {
 		for(int i=0; i<arr.size(); i++ ) {
 			Object val = arr.get(i);
 			if(val instanceof String) {
-				arr.set(i, replaceMultiSpacesAsOne((String) val));
+				arr.set(i, trimSpacesAsOne((String) val));
 			} else if(val instanceof JSONObject) {
 				trimSpaces((JSONObject) val);
 			} else if(val instanceof JSONArray) {
@@ -1033,7 +1097,7 @@ public class Tools {
 			}
 		}
 		
-		return replaceMultiSpacesAsOne(sb.toString() );
+		return trimSpacesAsOne(sb.toString() );
 	}
 	
 	// 向sb中添加str
@@ -1375,7 +1439,7 @@ public class Tools {
 		public int getBuffSize(int threshold);
 	}
 	
-	// 存放各个buffer, 以及buffer的默认大小
+	// 存放各个buffer, 以及buffer的默认刷出阈值大小
 	// 默认的BuffSizeEstimator
 	private static Map<String, BuffInfo> bufferToBuffInfo = new HashMap<>(); 
 	public static int defaultBuffThreshold = 128 << 10;
@@ -1460,7 +1524,7 @@ public class Tools {
 	}
 	public static void flushBuffer(StringBuffer sb, String path, long logFlags) throws IOException {
 	  Tools.append(sb.toString(), path);
-	  long kbLength = getKBytesByBytes(sb.length() << 1);
+	  long kbLength = getKBytesByBytes(sb.length() );
 	  sb.setLength(0);
 	  if(isLog(logFlags, LOG_ON_FLUSH_BUFFER) ) {
 		  Log.log("flush buffer at : " + new Date().toString() + ", size : " + kbLength + " kb" );
@@ -1470,6 +1534,72 @@ public class Tools {
 		flushBuffer(sb, path, LOG_ON_MINE_CONF);
 	}
 	
+	// ------------ assert相关 ------- 2016.03.22 -------------
+	// 工具方法
+	// 确保boo为true, 否则 抛出异常
+	public static void assert0(String msg) {
+		assert0(false, msg);
+	}
+	public static void assert0(boolean boo, String msg) {
+		if(! boo) {
+			throw new RuntimeException("assert0Exception : " + msg);
+		}
+	}
+	// 确保val 和expected相同, 否则 抛出异常
+	public static void assert0(int val, int expect, String errorMsg) {
+		assert0(val, expect, true, errorMsg);
+	}
+	public static void assert0(int val, int expect, boolean isEquals, String errorMsg) {
+		if(isEquals ^ (val == expect)) {
+			String symbol = null;
+			if(isEquals) {
+				symbol = "!=";
+			} else {
+				symbol = "==";
+			}
+			assert0("assert0Exception : " + val + " " + symbol + ", expected : " + expect + ", MSG : " + errorMsg);
+		}
+	}
+	public static <T> void assert0(T val, T expect, String errorMsg) {
+		assert0(val, expect, true, errorMsg);
+	}
+	public static <T> void assert0(T val, T expect, boolean isEquals, String errorMsg) {
+		if(val == null) {
+			if(expect != null) {
+				assert0("assert0Exception : " + val + " == null, expected : " + expect + ", MSG : " + errorMsg);
+			}
+		}
+		if(isEquals ^ (val.equals(expect)) ) {
+			String symbol = null;
+			if(isEquals) {
+				symbol = "!=";
+			} else {
+				symbol = "==";
+			}
+			assert0("assert0Exception : " + String.valueOf(val) + " " + symbol + " " + String.valueOf(expect) + ", expected : " + String.valueOf(expect) + ", MSG : " + errorMsg );
+		}
+	}
+	
+	// ------------ handlerParser相关 ------- 2016.03.23 -------------
+	// 处理handlerParse相关的业务
+	public final static HandlerParser handlerParser = new StandardHandlerParser();
+	
+	// 将给定的字符串解析为AttrHandler
+	public static AttrHandler handlerParse(String handler) {
+		return handlerParser.handlerParse(handler);
+	}
+	
+	// 合并两个Handler
+	public static AttrHandler combineHandler(AttrHandler mainHandler, AttrHandler attachHander) {
+		CompositeAttrHandler attrHandler = new CompositeAttrHandler();
+		attrHandler.addHandler(mainHandler);
+		attrHandler.addHandler(attachHander);
+		return attrHandler;
+	}
+	
+	
 	// ------------ 待续 --------------------
 
+	
+	
 }

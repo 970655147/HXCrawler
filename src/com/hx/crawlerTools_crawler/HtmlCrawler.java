@@ -15,7 +15,8 @@ import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
-import com.hx.crawlerTools_xpathParser.Tools;
+import com.hx.crawler.interf.Crawler;
+import com.hx.crawler.util.Tools;
 
 // HtmlCrawler
 public class HtmlCrawler extends Crawler {

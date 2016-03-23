@@ -14,11 +14,15 @@ import net.sf.json.JSONObject;
 
 import org.dom4j.Element;
 
+import com.hx.crawler.interf.EndPoint;
+import com.hx.crawler.interf.EndPointHandler;
+import com.hx.crawler.util.Constants;
+
 //values 结点的相关业务处理
 public class ValuesHandler extends EndPointHandler {
 
 	@Override
-	public void handle(Element root, Element currentEle, String url, JSONArray res, int idx, EndPoint child, JSON curObj) {
+	public void handle(Element root, Element currentEle, String url, JSONArray res, int idx, EndPoint child, JSONObject curObj) {
 		if(! checkCompatible((Values) child) ) {
 			throw new RuntimeException("the valuesNode : " + child.getName() + ", xpath : " + child.getXPath() + " is not compatible with current version of HXCrawler !");
 		}
@@ -29,7 +33,7 @@ public class ValuesHandler extends EndPointHandler {
 			Parser.parse0(root, ele, url, child, curArr, idx2 ++);
 		}
 		
-		((JSONObject) curObj).element(child.getName(), curArr);
+		curObj.element(child.getName(), curArr);
 	}
 
 	// 校验给定的Values的兼容性 [不能同时存在name为"ArrayAttribute" 和name为其他字符串的属性]
