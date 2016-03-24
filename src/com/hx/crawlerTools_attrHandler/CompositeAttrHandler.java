@@ -6,37 +6,29 @@
 
 package com.hx.crawlerTools_attrHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.adapter.interf.MultiArgsAttrHandler;
 
 // 包含一个attrHandler链的AttrHandler
-public class CompositeAttrHandler extends AttrHandler {
-	// attrHandler链
-	private List<AttrHandler> handlerChain;
-
+public class CompositeAttrHandler extends MultiArgsAttrHandler {
 	// 初始化
 	public CompositeAttrHandler(List<AttrHandler> handlerChain) {
-		this.handlerChain = handlerChain;
+		super(handlerChain);
 	}
 	public CompositeAttrHandler(int initCap) {
-		this.handlerChain = new ArrayList<>(initCap);
+		super(initCap);
 	}
 	public CompositeAttrHandler() {
-		this(Constants.COMPOSITE_HANDLER_DEFAULT_CAP);
-	}
-
-	// 添加AttrHandler
-	public void addHandler(AttrHandler handler) {
-		handlerChain.add(handler);
+		super(Constants.COMPOSITE_HANDLER_DEFAULT_CAP);
 	}
 	
 	@Override
 	public String handle0(String result) {
 		String res = result;
-		for(AttrHandler handler : handlerChain) {
+		for(AttrHandler handler : handlers) {
 			res = handler.handle(res);
 		}
 		

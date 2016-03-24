@@ -22,13 +22,13 @@ public class ReplaceAttrHandler extends TwoStringArgsAttrHandler {
 		setArgs(regex, replacement);
 	}
 	public ReplaceAttrHandler() {
-		this(null, null);
+		this(Constants.HANDLER_UNDEFINED, Constants.HANDLER_UNDEFINED);
 	}
 
 	@Override
 	public String handle0(String result) {
-		Tools.assert0(regex != null, "error while calc the 'replace(String, String)', 'regex' be initialized illegal ! ");
-		Tools.assert0(replacement != null, "error while calc the 'matches(String, String)', 'replacement' be initialized illegal ! ");
+		Tools.assert0(! Constants.HANDLER_UNDEFINED.equals(regex), "error while calc the 'replace(String, String)', 'regex' be initialized illegal ! ");
+		Tools.assert0(! Constants.HANDLER_UNDEFINED.equals(replacement), "error while calc the 'matches(String, String)', 'replacement' be initialized illegal ! ");
 		return result.replaceAll(regex, replacement);
 	}
 

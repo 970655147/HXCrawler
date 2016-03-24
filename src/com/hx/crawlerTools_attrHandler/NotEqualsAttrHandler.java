@@ -13,16 +13,16 @@ import com.hx.crawlerTools_attrHandler.adapter.interf.OneOrTwoStringArgsAttrHand
 // trim, length等等也具有此用法
 // 1. 将$this和'abc'进行比较   2. 将传入的两个字符串进行比较
 // map(equals('abc') ), map(equals('abc', 'df') )
-public class EqualsAttrHandler extends OneOrTwoStringArgsAttrHandler {
+public class NotEqualsAttrHandler extends OneOrTwoStringArgsAttrHandler {
 	
 	// 初始化
-	public EqualsAttrHandler(String val, String expect) {
+	public NotEqualsAttrHandler(String val, String expect) {
 		super(val, expect);
 	}
-	public EqualsAttrHandler(String expect) {
+	public NotEqualsAttrHandler(String expect) {
 		this(expect, Constants.HANDLER_UNDEFINED);
 	}
-	public EqualsAttrHandler() {
+	public NotEqualsAttrHandler() {
 		this(Constants.HANDLER_UNDEFINED, Constants.HANDLER_UNDEFINED);
 	}
 	
@@ -30,12 +30,12 @@ public class EqualsAttrHandler extends OneOrTwoStringArgsAttrHandler {
 	protected String gotResult(String str, String expect, String result) {
 		if(expect == null) {
 			if(str == null) {
-				return Constants.TRUE;
-			} else {
 				return Constants.FALSE;
+			} else {
+				return Constants.TRUE;
 			}
 		}
-		return String.valueOf(expect.equals(str) );
+		return String.valueOf(! expect.equals(str) );
 	}
 
 	@Override

@@ -8,17 +8,22 @@ package com.hx.crawlerTools_attrHandler;
 
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
 
 // 获取给定的字符串的小写形式的Handler
-// map(toLowerCase )
-public class ToLowerCaseAttrHandler extends AttrHandler {
+// map(toLowerCase ), map(toLowerCase('abc') )
+public class ToLowerCaseAttrHandler extends NoneOrOneStringArgsAttrHandler {
 	// 初始化
+	public ToLowerCaseAttrHandler(String str) {
+		super(str);
+	}
 	public ToLowerCaseAttrHandler() {
+		this(Constants.HANDLER_UNDEFINED);
 	}
 
 	@Override
-	public String handle0(String result) {
-		return result.toLowerCase();
+	protected String gotResult(String str, String result) {
+		return str.toLowerCase();
 	}
 
 	@Override

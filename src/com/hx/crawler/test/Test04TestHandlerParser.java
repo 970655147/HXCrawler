@@ -9,7 +9,6 @@ package com.hx.crawler.test;
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.interf.HandlerParser;
 import com.hx.crawler.util.Log;
-import com.hx.crawler.util.Tools;
 import com.hx.crawlerTools_attrHandler.StandardHandlerParser;
 
 public class Test04TestHandlerParser {
@@ -38,15 +37,32 @@ public class Test04TestHandlerParser {
 //		String str = "sd(subString(1, indexOf('st'), 4) )";
 //		String str = "map(subString(trimSpaces().indexOf('|'), trim().indexOf('|') ) )";
 //		String str = "map(trimAsOne() )";
-		String str = "map(equals(12) )";
+//		String str = "map((not(!!!equals('abc'))) )";
+//		String str = "map((equals('abc', 'abc')) )";
+//		String str = "map(trimAll(' sdf sdf  d') + '..' )";
+//		String str = "map(eq(2, 2) )";
+					// afalse
+//		String str = "map( a + b == a + b )";
+//		String str = "map( (a + b) == (a + b) )";
+//		String str = "map(length('add') == 2 )";
+//		String str = "map(2 != 2)";
+//		String str = "map(and(true, true) )";
+//		String str = "map(tr + true && true )";
+//		String str = "map(sf + 3 > 2 + sdf )";
+//		String str = "map((false || true && true || false) && true && contains(c) )";
+//		String str = "map(false ? true : false )";
+//		String str = "map((3 >= 3) ? 'abc' + abc > a : 'sdf' )";
+//		String str = "filter(true ).map(sdf)";
+		String str = "map(sub(2, 6, 9) ) ";
+//		String str = "map(add(2, 6, 9) ) ";
 		
 //		String res = "       te-----             ---|st    ";
 //		String res = "te--|st";
-		String res = "te-   -|st";
+		String res = "te-    -|st";
 		HandlerParser parser = new StandardHandlerParser();
 		AttrHandler handler = parser.handlerParse(str);
 		Log.log(handler.handle(res) );
-		Log.log(res.substring(Tools.trimAllSpaces(res).indexOf('|'), res.trim().indexOf('|')) );
+//		Log.log(res.substring(Tools.trimAllSpaces(res).indexOf('|'), res.trim().indexOf('|')) );
 		
 	}
 	

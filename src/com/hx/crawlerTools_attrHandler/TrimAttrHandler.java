@@ -6,21 +6,26 @@
 
 package com.hx.crawlerTools_attrHandler;
 
-import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
 
 // 去掉字符串前后空格的handler
-// map(trim)
-public class TrimAttrHandler extends AttrHandler {
+// map(trim), map(trim('abc')
+public class TrimAttrHandler extends NoneOrOneStringArgsAttrHandler {
+	
 	// 初始化
+	public TrimAttrHandler(String str) {
+		super(str);
+	}
 	public TrimAttrHandler() {
+		this(Constants.HANDLER_UNDEFINED);
 	}
 
 	@Override
-	public String handle0(String result) {
-		return result.trim();
+	protected String gotResult(String str, String result) {
+		return str.trim();
 	}
-
+	
 	@Override
 	public String name() {
 		return Constants.TRIM;

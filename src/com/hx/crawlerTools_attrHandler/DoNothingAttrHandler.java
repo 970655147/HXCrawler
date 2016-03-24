@@ -6,19 +6,23 @@
 
 package com.hx.crawlerTools_attrHandler;
 
-import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
 
 // 什么都不做的AttrHandler
 // map(doNothing)
-public class DoNothingAttrHandler extends AttrHandler {
+public class DoNothingAttrHandler extends NoneOrOneStringArgsAttrHandler {
 	
 	// 初始化
+	public DoNothingAttrHandler(String str) {
+		super(str);
+	}
 	public DoNothingAttrHandler() {
+		this(Constants.HANDLER_UNDEFINED);
 	}
 
 	@Override
-	public String handle0(String result) {
+	protected String gotResult(String str, String result) {
 		return result;
 	}
 

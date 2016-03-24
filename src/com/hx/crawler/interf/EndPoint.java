@@ -25,7 +25,10 @@ public abstract class EndPoint {
 	protected String name;
 	protected String xpath;
 	protected EndPoint parent;
-	protected AttrHandler attrHandler;
+	// mapHandler, filterHanlder, 以及是否被filter的标志位
+	protected AttrHandler mapHandler;
+	protected AttrHandler filterHandler;
+		protected boolean beFiltered;
 	
 	// 初始化
 	public EndPoint(String type, String name, String xpath, String handlerStr, EndPoint parent) {
@@ -33,23 +36,29 @@ public abstract class EndPoint {
 		this.name = name;
 		this.parent = parent;
 		this.xpath = xpath;
+		this.beFiltered = false;
 		
 		if(handlerStr != null) {
 			if(handlerStr.startsWith(Constants.HANDLER_ADDED) ) {
-				if(parent.attrHandler == null) {
-					this.attrHandler = Tools.handlerParse(handlerStr.substring(1) );
+				if(parent.mapHandler == null) {
+					this.mapHandler = Tools.handlerParse(handlerStr.substring(1) );
+					this.filterHandler = Tools.removeIfLastWorkedHandlerIsFilter(this.mapHandler);
 				} else {
-					this.attrHandler = Tools.combineHandler(parent.attrHandler, Tools.handlerParse(handlerStr.substring(1)) );
+					this.mapHandler = Tools.combineHandler(parent.mapHandler, Tools.handlerParse(handlerStr.substring(1)) );
+					AttrHandler filterHandler0 = Tools.removeIfLastWorkedHandlerIsFilter(this.mapHandler);
+					this.filterHandler = (filterHandler0 != null) ? filterHandler0 : this.filterHandler;
 				}
 			} else if(handlerStr.startsWith(Constants.HANDLER_OVERRIDE) ) {
-				this.attrHandler = Tools.handlerParse(handlerStr.substring(1));
+				this.mapHandler = Tools.handlerParse(handlerStr.substring(1));
+				this.filterHandler = Tools.removeIfLastWorkedHandlerIsFilter(this.mapHandler);
 			} else {
 				Tools.assert0("the handler should startWith : [" + Constants.HANDLER_ADDED + ", " + Constants.HANDLER_OVERRIDE + "], around : " + this.toString() );
 			}
 		} else {
 			// default inhert from parent
 			if(parent != null) {
-				this.attrHandler = parent.attrHandler;
+				this.mapHandler = parent.mapHandler;
+				this.filterHandler = parent.filterHandler;
 			}
 		}
 		
@@ -82,8 +91,17 @@ public abstract class EndPoint {
 	public String getName() {
 		return name;
 	}
-	public AttrHandler getAttrHandler() {
-		return attrHandler;
+	public AttrHandler getMapHandler() {
+		return mapHandler;
+	}
+	public AttrHandler getFilterHandler() {
+		return filterHandler;
+	}
+	public void setBeFiltered(boolean beFiltered) {
+		this.beFiltered = beFiltered;
+	}
+	public boolean beFiltered() {
+		return this.beFiltered;
 	}
 	
 	// 通过传入的xpath, 获取真实的xpath

@@ -40,12 +40,19 @@ public class Parser {
 	// 先序遍历ep结点, 一次解析每一个结点的数据, 结果存放于res中
 	static void parse0(Element root, Element currentEle, String url, EndPoint ep, JSONArray res, int idx) {
 		JSONObject curObj = new JSONObject();
+		boolean beFiltered = false;
 		for(int i=0; i<ep.childSize(); i++) {
 			EndPoint child = ep.getChild(i);
 			Constants.endpointToHandler.get(child.getType() ).handle(root, currentEle, url, res, idx, child, curObj);
+			if(child.beFiltered() ) {
+				beFiltered = true;
+				break ;
+			}
 		}
-		if(curObj.size() > 0) {
-			res.add(curObj);
+		if(! beFiltered) {
+			if(curObj.size() > 0) {
+				res.add(curObj);
+			}
 		}
 	}
 

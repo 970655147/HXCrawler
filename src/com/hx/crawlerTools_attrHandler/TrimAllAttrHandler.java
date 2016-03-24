@@ -6,25 +6,29 @@
 
 package com.hx.crawlerTools_attrHandler;
 
-import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Tools;
+import com.hx.crawlerTools_attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
 
 // 去掉字符串的所有空格的handler
 // map(trimAll)
-public class TrimAllAttrHandler extends AttrHandler {
+public class TrimAllAttrHandler extends NoneOrOneStringArgsAttrHandler {
 	// 初始化
+	public TrimAllAttrHandler(String arg) {
+		super(arg);
+	}
 	public TrimAllAttrHandler() {
+		this(Constants.HANDLER_UNDEFINED);
 	}
 
 	@Override
-	public String handle0(String result) {
-		return Tools.trimAllSpaces(result);
+	protected String gotResult(String str, String result) {
+		return Tools.trimAllSpaces(str);
 	}
 
 	@Override
 	public String name() {
 		return Constants.TRIM_ALL;
 	}
-	
+
 }

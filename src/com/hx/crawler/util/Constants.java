@@ -73,8 +73,19 @@ public class Constants {
 	public final static String EMPTY_OPERAND_NAME = "emptyOperand";
 	public final static int COMPOSITE_HANDLER_DEFAULT_CAP = 2;
 	public final static int CONCATE_HANDLER_DEFAULT_CAP = 2;
+	public final static int CUTTING_DOOR_HANDLER_DEFAULT_CAP = 2;
+	public final static int CALC_HANDLER_DEFAULT_CAP = 2;
+	public final static int MULTI_ARG_HANDLER_DEFAULT_CAP = 2;
 	public final static int OPERAND_DEFAULT_CAP = 2;
 	public final static String STRING_CONCATE = "+";
+	public final static String STRING_NOT = "!";
+	public final static String GT = ">";
+	public final static String LT = "<";
+	public final static String EQ = "=";
+	public final static String AND = "&";
+	public final static String OR = "|";
+	public final static String COND_EXP_COND = "?";
+	public final static String COND_EXP_BRANCH = ":";
 	public final static String PARAM_SEP = ",";
 	public final static String SUB_HANDLER_CALL = ".";
 	public final static String QUOTE = "'";
@@ -82,7 +93,7 @@ public class Constants {
 	public final static String TRUE = Boolean.TRUE.toString();
 	public final static String FALSE = Boolean.FALSE.toString();
 	public final static String HANDLER_UNDEFINED = "-1";
-	public final static int TARGET_UNDEFINED = -1;
+	public final static int TARGET_UNDEFINED = Integer.parseInt(HANDLER_UNDEFINED);
 	
 	// 各个可用的方法的标识符
 	public final static String CONCATE = "concate";
@@ -103,22 +114,54 @@ public class Constants {
 	public final static String EQUALS = "equals";
 	public final static String MATCHES = "matches";
 	public final static String CONTAINS = "contains";
+	public final static String NOT = "not";
 	
 	public final static String COMPOSITE = "composite";
 	
+	public final static String GREATER_THAN = "gt";
+	public final static String GREATER_EQUALS_THAN = "get";
+	public final static String LESS_THAN = "lt";
+	public final static String LESS_EQUALS_THAN = "let";
+	public final static String _EQUALS = "eq";
+	public final static String NOT_EQUALS = "neq";
+	
+	public final static String CUTTING_OUT_AND = "and";
+	public final static String CUTTING_OUT_OR = "or";
+	
+	public final static String COND_EXP = "condExp";
+	
+	public final static String ADD = "add";
+	public final static String SUB = "sub";
+
+	// handler支持的两种操作
+	public final static String MAP = "map";
+	public final static String FILTER = "filter";
+	
 	// HandlerParser的相关分隔符
 	// 需要跳过的符号对, 括号对
+	public final static Set<String> handlerSet = new HashSet<>();
 	public final static Set<String> handlerParserSeps = new HashSet<>();
 	public final static Map<String, String> escapeMap = new HashMap<>();
 	public final static Map<Character, Character> escapeCharMap = new HashMap<>();
 	public final static Map<String, String> bracketPair = new HashMap<>();
 	static {
+		handlerSet.add(MAP);
+		handlerSet.add(FILTER);
+		
 		handlerParserSeps.add("(");
 		handlerParserSeps.add(")");
 		handlerParserSeps.add("+");
 		handlerParserSeps.add(",");
 		handlerParserSeps.add(".");
 		handlerParserSeps.add("'");
+		handlerParserSeps.add("!");
+		handlerParserSeps.add(">");
+		handlerParserSeps.add("<");
+		handlerParserSeps.add("=");
+		handlerParserSeps.add("&");
+		handlerParserSeps.add("|");
+		handlerParserSeps.add("?");
+		handlerParserSeps.add(":");
 		
 		escapeMap.put("\"", "\"");
 		escapeMap.put("'", "'");

@@ -1591,13 +1591,35 @@ public class Tools {
 	
 	// 合并两个Handler
 	public static AttrHandler combineHandler(AttrHandler mainHandler, AttrHandler attachHander) {
+		Tools.assert0(! mainHandler.operationReturn().isFinal, "the first handler's returnType is final, can't concate 'AttrHandler' anymore ! please check it ! ");
 		CompositeAttrHandler attrHandler = new CompositeAttrHandler();
 		attrHandler.addHandler(mainHandler);
 		attrHandler.addHandler(attachHander);
 		return attrHandler;
 	}
-	
-	
+	// 获取给定的attrHander中最后一个有效的AttrHandler[非Composite]
+	public static AttrHandler lastWorkedHandler(AttrHandler attrHandler) {
+		if(attrHandler instanceof CompositeAttrHandler) {
+			CompositeAttrHandler compositeHandler = ((CompositeAttrHandler) attrHandler);
+			return lastWorkedHandler(compositeHandler.handler(compositeHandler.handlers().size() ) );
+		}
+		
+		return attrHandler;
+	}
+	public static AttrHandler removeIfLastWorkedHandlerIsFilter(AttrHandler attrHandler) {
+		if(attrHandler instanceof CompositeAttrHandler) {
+			CompositeAttrHandler compositeHandler = ((CompositeAttrHandler) attrHandler);
+			AttrHandler lastAttrHandler = compositeHandler.handler(compositeHandler.handlers().size() - 1);
+			if(lastAttrHandler instanceof CompositeAttrHandler) {
+				return removeIfLastWorkedHandlerIsFilter(lastAttrHandler);
+			}
+			if(Constants.FILTER.equals(lastAttrHandler.operationType()) ) {
+				return compositeHandler.removeHandler(compositeHandler.handlers().size() - 1);
+			}
+		}
+		
+		return null;
+	}
 	// ------------ 待续 --------------------
 
 	

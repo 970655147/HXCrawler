@@ -11,13 +11,11 @@ import java.util.List;
 
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.adapter.interf.MultiArgsAttrHandler;
 
 // 连接字符串的handler
 // map(hello + $this + world)
-public class ConcateAttrHandler extends AttrHandler {
-	// 给定的结果前后需要添加的字符串
-	private List<AttrHandler> handlers;
-	
+public class ConcateAttrHandler extends MultiArgsAttrHandler {
 	// 初始化
 	public ConcateAttrHandler(List<AttrHandler> handlers) {
 		this.handlers = handlers;
@@ -27,11 +25,6 @@ public class ConcateAttrHandler extends AttrHandler {
 	}
 	public ConcateAttrHandler() {
 		this(Constants.CONCATE_HANDLER_DEFAULT_CAP);
-	}
-	
-	// 添加handler
-	public void addHandler(AttrHandler handler) {
-		this.handlers.add(handler);
 	}
 	
 	@Override

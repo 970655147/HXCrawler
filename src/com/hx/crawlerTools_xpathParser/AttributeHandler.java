@@ -13,6 +13,7 @@ import net.sf.json.JSONObject;
 
 import org.dom4j.Element;
 
+import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.interf.EndPoint;
 import com.hx.crawler.interf.EndPointHandler;
 import com.hx.crawler.util.Constants;
@@ -24,6 +25,7 @@ public class AttributeHandler extends EndPointHandler {
 	@Override
 	public void handle(Element root, Element currentEle, String url, JSONArray res, int idx, EndPoint child, JSONObject curObj) {
 		if(! child.getName().equals(Constants.ARRAY_ATTR) ) {
+			child.setBeFiltered(false);
 			if(child.getXPath() != null ) {
 //				List<Element> eles = getResultByXPath(root, currentEle, child.getXPath());
 //				int idx2 = 0;
@@ -51,8 +53,11 @@ public class AttributeHandler extends EndPointHandler {
 			List<Element> eles = Parser.getResultByXPath(root, currentEle, child.getXPath() );
 			int idx2 = 0;
 			for(Element ele : eles) {
-				String handledResult = handleResult(child, getValueByAttribute(ele, child.getAttribute(), url, idx2 ++) ); 
-				curArr.add(handledResult );
+				child.setBeFiltered(false);
+				String handledResult = handleResult(child, getValueByAttribute(ele, child.getAttribute(), url, idx2 ++) );
+				if(! child.beFiltered() ) {
+					curArr.add(handledResult );
+				}
 			}
 			res.add(curArr);
 		}
@@ -60,11 +65,13 @@ public class AttributeHandler extends EndPointHandler {
 
 	// 使用当前AttriBute的相关handler处理结果
 	private String handleResult(EndPoint child, String valueByAttribute) {
-		if(child.getAttrHandler() == null) {
-			return valueByAttribute;
+		if(child.getMapHandler() != null) {
+			valueByAttribute = child.getMapHandler().handle(valueByAttribute);
 		}
 		
-		return child.getAttrHandler().handle(valueByAttribute); 
+		AttrHandler filterHandler = child.getFilterHandler();
+		child.setBeFiltered((filterHandler != null) && (Constants.TRUE.equals(filterHandler.handle(valueByAttribute))) );
+		return valueByAttribute;
  	}
 	// 通过element 和attribute属性 获取其对应的值
 	private static String getValueByAttribute(Element ele, String attribute, String url, int idx) {

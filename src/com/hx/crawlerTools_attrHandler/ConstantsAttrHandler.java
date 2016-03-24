@@ -10,7 +10,7 @@ import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 返回res的AttrHandler
-// 内部使用
+// 适配常量
 public class ConstantsAttrHandler extends AttrHandler {
 	// 处理结果得到的常量值
 	private String res;

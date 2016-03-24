@@ -6,19 +6,23 @@
 
 package com.hx.crawlerTools_attrHandler;
 
-import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
 
-//获取给定的字符串的大写形式的Handler
-//map(toUpperCase )
-public class ToUpperCaseAttrHandler extends AttrHandler {
+// 获取给定的字符串的大写形式的Handler
+// map(toUpperCase ), map(toUpperCase('abc') )
+public class ToUpperCaseAttrHandler extends NoneOrOneStringArgsAttrHandler {
 	// 初始化
+	public ToUpperCaseAttrHandler(String str) {
+		super(str);
+	}
 	public ToUpperCaseAttrHandler() {
+		this(Constants.HANDLER_UNDEFINED);
 	}
 
 	@Override
-	public String handle0(String result) {
-		return result.toUpperCase();
+	protected String gotResult(String str, String result) {
+		return str.toUpperCase();
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import com.hx.crawlerTools_attrHandler.adapter.interf.OneStringArgsAttrHandler;
 import com.hx.crawlerTools_attrHandler.adapter.interf.StringIntArgsAttrHandler;
 import com.hx.crawlerTools_attrHandler.adapter.interf.TwoIntArgsAttrHandler;
 
-// 截取字符串的handler
+// 构造(String, Int)参数的AttrHandler的Handler适配器
 // map(trim)
 public class StringIntResultHandlerArgsAttrHandler extends AttrHandler {
 	// 处理数据的handler, 获取参数的handler

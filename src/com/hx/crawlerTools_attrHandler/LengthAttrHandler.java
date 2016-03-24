@@ -6,19 +6,25 @@
 
 package com.hx.crawlerTools_attrHandler;
 
-import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
+import com.hx.crawlerTools_attrHandler.adapter.interf.OneStringArgsAttrHandler;
 
 // 获取给定的字符串的长度的handler
 // map(length )	or map(length() )
-public class LengthAttrHandler extends AttrHandler {
+public class LengthAttrHandler extends NoneOrOneStringArgsAttrHandler {
+	
 	// 初始化
+	public LengthAttrHandler(String str) {
+		super(str);
+	}
 	public LengthAttrHandler() {
+		this(Constants.HANDLER_UNDEFINED);
 	}
 
 	@Override
-	public String handle0(String result) {
-		return String.valueOf(result.length() );
+	protected String gotResult(String str, String result) {
+		return String.valueOf(str.length() );
 	}
 
 	@Override

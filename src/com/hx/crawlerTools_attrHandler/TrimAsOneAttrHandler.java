@@ -6,20 +6,25 @@
 
 package com.hx.crawlerTools_attrHandler;
 
-import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Tools;
+import com.hx.crawlerTools_attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
 
 // 将字符串的多个空格合并为一个的handler
-// map(trimAsOne)
-public class TrimAsOneAttrHandler extends AttrHandler {
+// map(trimAsOne), map(trimAsOne('abc') )
+public class TrimAsOneAttrHandler extends NoneOrOneStringArgsAttrHandler {
+	
 	// 初始化
 	public TrimAsOneAttrHandler() {
+		this(Constants.HANDLER_UNDEFINED);
 	}
-
+	public TrimAsOneAttrHandler(String str) {
+		super(str);
+	}
+	
 	@Override
-	public String handle0(String result) {
-		return Tools.trimSpacesAsOne(result);
+	protected String gotResult(String str, String result) {
+		return Tools.trimSpacesAsOne(str);
 	}
 
 	@Override

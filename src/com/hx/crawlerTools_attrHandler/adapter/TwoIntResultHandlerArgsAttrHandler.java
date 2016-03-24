@@ -11,7 +11,7 @@ import com.hx.crawler.util.Constants;
 import com.hx.crawlerTools_attrHandler.ConstantsAttrHandler;
 import com.hx.crawlerTools_attrHandler.adapter.interf.TwoIntArgsAttrHandler;
 
-// 截取字符串的handler
+// 构造两个int参数的AttrHandler的Handler适配器
 // map(trim)
 public class TwoIntResultHandlerArgsAttrHandler extends AttrHandler {
 	// 处理数据的handler, 获取参数的handler

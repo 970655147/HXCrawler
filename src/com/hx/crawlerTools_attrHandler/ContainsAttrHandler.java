@@ -8,36 +8,32 @@ package com.hx.crawlerTools_attrHandler;
 
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Tools;
-import com.hx.crawlerTools_attrHandler.adapter.interf.OneStringArgsAttrHandler;
+import com.hx.crawlerTools_attrHandler.adapter.interf.OneOrTwoStringArgsAttrHandler;
 
 // 判断给定的result中是否包含contains
-// 内部使用
-public class ContainsAttrHandler extends OneStringArgsAttrHandler {
-	// 需求包含的值
-	private String contains;
+// 类似于equals
+// 1. map(contains('abc') )		2. map(contains('abc', 'a') )
+public class ContainsAttrHandler extends OneOrTwoStringArgsAttrHandler {
 	
 	// 初始化
+	public ContainsAttrHandler(String str, String contains) {
+		super(str, contains);
+	}
 	public ContainsAttrHandler(String contains) {
-		setArgs(contains);
+		this(contains, Constants.HANDLER_UNDEFINED);
 	}
 	public ContainsAttrHandler() {
-		this(null);
+		this(Constants.HANDLER_UNDEFINED, Constants.HANDLER_UNDEFINED);
 	}
 
 	@Override
-	public String handle0(String result) {
+	protected String gotResult(String str, String contains, String result) {
 		Tools.assert0(contains != null, "error while calc the 'matches(String)', pattern be initialized illegal ! ");
-		return String.valueOf(result.contains(contains) );
+		return String.valueOf(str.contains(contains) );
 	}
-
+	
 	@Override
 	public String name() {
 		return Constants.CONSTANTS;
 	}
-
-	@Override
-	public void setArgs(String arg) {
-		this.contains = arg;
-	}
-	
 }
