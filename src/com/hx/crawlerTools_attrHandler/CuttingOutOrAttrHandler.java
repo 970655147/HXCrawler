@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
 import com.hx.crawlerTools_attrHandler.adapter.interf.MultiArgsAttrHandler;
 
 // 短路与
@@ -18,12 +19,14 @@ public class CuttingOutOrAttrHandler extends MultiArgsAttrHandler {
 	// 初始化
 	public CuttingOutOrAttrHandler(List<AttrHandler> handlers) {
 		super(handlers);
+		operationReturn(Types.Boolean);
 	}
 	public CuttingOutOrAttrHandler(int initCap) {
 		super(initCap);
+		operationReturn(Types.Boolean);
 	}
 	public CuttingOutOrAttrHandler() {
-		super(Constants.CUTTING_DOOR_HANDLER_DEFAULT_CAP);
+		this(Constants.CUTTING_DOOR_HANDLER_DEFAULT_CAP);
 	}
 	
 	@Override

@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
 import com.hx.crawlerTools_attrHandler.adapter.interf.MultiArgsAttrHandler;
 
 // 连接字符串的handler
@@ -18,10 +19,12 @@ import com.hx.crawlerTools_attrHandler.adapter.interf.MultiArgsAttrHandler;
 public class ConcateAttrHandler extends MultiArgsAttrHandler {
 	// 初始化
 	public ConcateAttrHandler(List<AttrHandler> handlers) {
-		this.handlers = handlers;
+		super(handlers);
+		operationReturn(Types.String);
 	}
 	public ConcateAttrHandler(int initCap) {
-		this.handlers = new ArrayList<>(initCap);
+		super(initCap);
+		operationReturn(Types.String);
 	}
 	public ConcateAttrHandler() {
 		this(Constants.CONCATE_HANDLER_DEFAULT_CAP);

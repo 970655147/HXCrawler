@@ -19,8 +19,8 @@ public final class Attribute extends EndPoint {
 	private String attr;
 	
 	// ≥ı ºªØ
-	public Attribute(String name, String xpath, String attr, String handlerStr, EndPoint parent) {
-		super(EndPoint.ATTRIBUTE, name, xpath, handlerStr, parent);
+	public Attribute(String name, String xpath, String attr, String mapHandler, String filterHandler, EndPoint parent) {
+		super(EndPoint.ATTRIBUTE, name, xpath, mapHandler, filterHandler, parent);
 		this.attr = attr;
 	}
 

@@ -61,6 +61,10 @@ public class StandardHandlerParser extends HandlerParser {
 		handlerToResultType.put(Constants.LENGTH, Types.Int);
 		handlerToResultType.put(Constants.ADD, Types.Int);
 		handlerToResultType.put(Constants.SUB, Types.Int);
+		handlerToResultType.put(Constants.MUL, Types.Int);
+		handlerToResultType.put(Constants.DIV, Types.Int);
+		handlerToResultType.put(Constants.MOD, Types.Int);
+		handlerToResultType.put(Constants.TO_INT, Types.Int);
 		
 		handlerToResultType.put(Constants.EQUALS, Types.Boolean);
 		handlerToResultType.put(Constants.MATCHES, Types.Boolean);
@@ -74,6 +78,7 @@ public class StandardHandlerParser extends HandlerParser {
 		handlerToResultType.put(Constants.NOT_EQUALS, Types.Boolean);
 		handlerToResultType.put(Constants.CUTTING_OUT_AND, Types.Boolean);
 		handlerToResultType.put(Constants.CUTTING_OUT_OR, Types.Boolean);
+		handlerToResultType.put(Constants.TO_BOOLEAN, Types.Boolean);
 	}
 	
 	// 没有参数的方法, 一个字符串参数的方法, 两个字符串参数的方法, 多种选择的参数的方法
@@ -96,6 +101,8 @@ public class StandardHandlerParser extends HandlerParser {
 		noneOrStringArgsMap.add(Constants.TO_LOWERCASE);
 		noneOrStringArgsMap.add(Constants.LENGTH);
 		noneOrStringArgsMap.add(Constants.DO_NOTHING);
+		noneOrStringArgsMap.add(Constants.TO_INT);
+		noneOrStringArgsMap.add(Constants.TO_BOOLEAN);
 		
 		// !(true), not(true)
 		oneBooleanArgsMap.add(Constants.NOT);
@@ -120,6 +127,9 @@ public class StandardHandlerParser extends HandlerParser {
 		// add(arg01, arg02)
 		multiIntArgsMap.add(Constants.ADD);
 		multiIntArgsMap.add(Constants.SUB);
+		multiIntArgsMap.add(Constants.MUL);
+		multiIntArgsMap.add(Constants.DIV);
+		multiIntArgsMap.add(Constants.MOD);
 		
 		// indexOf('abc'), indexOf('abc', 3)
 		stringOrStringIntArgsMap.add(Constants.INDEX_OF);
@@ -138,13 +148,13 @@ public class StandardHandlerParser extends HandlerParser {
 	
 	// -------------------- business method ----------------------------------
 	// 各个分隔符的位置
-	public AttrHandler handlerParse(String handler) {
+	public AttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn) {
 		CompositeAttrHandler hanlder = new CompositeAttrHandler();
-		handler = Tools.trimAllSpaces(handler, Constants.escapeCharMap);
-		Types lastOperationReturn = null;
+		handlerStr = Tools.trimAllSpaces(handlerStr, Constants.escapeCharMap);
 		String lastOperationType = null;
+		List<String> suppertedOperations = Constants.handlerTypeToHandleOperations.get(handlerType);
 		
-		WordsSeprator sep = new WordsSeprator(handler, newSepToPos(), Constants.escapeMap, true);
+		WordsSeprator sep = new WordsSeprator(handlerStr, newSepToPos(), Constants.escapeMap, true);
 		while(sep.hasNext() ) {
 			if(lastOperationReturn != null) {
 				if(lastOperationReturn.isFinal ) {
@@ -152,7 +162,8 @@ public class StandardHandlerParser extends HandlerParser {
 				}
 			}
 			lastOperationType = sep.next();
-			Tools.assert0(Constants.handlerSet.contains(lastOperationType), "have no this opearnd : '" + lastOperationType + "' ! from now on support : " + Constants.handlerSet.toString() );
+			Tools.assert0(suppertedOperations.contains(lastOperationType), "have no this opearnd : '" + lastOperationType + "', in operation : '" + handlerType 
+							+ "' ! from now on support : " + Constants.handlerTypeToHandleOperations.get(handlerType).toString() );
 			String bracket = sep.next();
 			Tools.assert0(Constants.bracketPair.containsKey(bracket), "expect a bracket : '" + bracket + "' ! , please check your format['" + sep.rest() + "'] ! ");
 			Operand handlerOperand = getAttrHandlerContent(sep, bracket, Constants.bracketPair);
@@ -170,8 +181,12 @@ public class StandardHandlerParser extends HandlerParser {
 			}
 			Tools.assert0(".".equals(dotOrNull), "expect a dot : '.' ! , please check your format['" + sep.rest() + "'] ! ");
 		}
+		hanlder.operationReturn(lastOperationReturn);
 		
 		return hanlder;
+	}
+	public AttrHandler handlerParse(String handlerStr, String handlerType) {
+		return handlerParse(handlerStr, handlerType, null);
 	}
 	
 	// 获取当前的AttrHandler的各个数据结构
@@ -378,14 +393,14 @@ public class StandardHandlerParser extends HandlerParser {
 	// 校验当前handler
 	private void checkHandler(AttrHandler handlerNow) {
 		switch (handlerNow.operationType() ) {
-		case Constants.MAP:
+		case Constants.MAP_OPERATION:
 			
 			break;
-		case Constants.FILTER:
+		case Constants.FILTER_OPERATION:
 			Tools.assert0(Types.Boolean == handlerNow.operationReturn(), "operation : 'filter' just support (Boolean) as parameter !");
 			break;
 		default:
-			Tools.assert0("have no this operationType ! from now on support : " + Constants.handlerSet.toString() );
+			Tools.assert0("have no this operationType ! from now on support : " + Constants.handlerTypeToHandleOperations.keySet().toString() );
 			break;
 		}
 	}
@@ -436,7 +451,7 @@ public class StandardHandlerParser extends HandlerParser {
 					|| bracketpair.get(bracket).equals(sep.seek())
 					|| (isFrom(flags, isFromConcate) && (Constants.STRING_CONCATE.equals(sep.seek())) || Constants.COND_EXP_BRANCH.equals(sep.seek() ) ) 
 					|| (isFrom(flags, isFromCuttingOut) && Constants.STRING_CONCATE.equals(sep.seek()) ) 
-					|| (isFrom(flags, isFromComp) && (Constants.STRING_CONCATE.equals(sep.seek()) || Constants.AND.equals(sep.seek()) || Constants.OR.equals(sep.seek())) ) 
+					|| (isFrom(flags, isFromComp) && (Constants.STRING_CONCATE.equals(sep.seek()) || Constants.AND.equals(sep.seek()) || Constants.OR.equals(sep.seek()) || Constants.COND_EXP_COND.equals(sep.seek()) ) ) 
 					|| (isFrom(flags, isFromCondExp) && Constants.COND_EXP_BRANCH.equals(sep.seek()) ) 
 					) {
 				return operand;
@@ -574,6 +589,10 @@ public class StandardHandlerParser extends HandlerParser {
 			return getNoneOrOneStringArgsHandler0(sep, ope, new LengthAttrHandler() );
 		case Constants.DO_NOTHING:
 			return getNoneOrOneStringArgsHandler0(sep, ope, new DoNothingAttrHandler() );
+		case Constants.TO_INT:
+			return getNoneOrOneStringArgsHandler0(sep, ope, new ToIntAttrHandler() );
+		case Constants.TO_BOOLEAN:
+			return getNoneOrOneStringArgsHandler0(sep, ope, new ToBooleanAttrHandler() );
 		default:
 			Tools.assert0("got an unknow 'noArgs' method : " + attrHandler.name() );
 			return null;
@@ -870,6 +889,12 @@ public class StandardHandlerParser extends HandlerParser {
 						return getMultiIntArgsHandler0(sep, attrHandler, new AddAttrHandler() );
 				case Constants.SUB:
 					return getMultiIntArgsHandler0(sep, attrHandler, new SubAttrHandler() );						
+				case Constants.MUL:
+					return getMultiIntArgsHandler0(sep, attrHandler, new MultiplyAttrHandler() );						
+				case Constants.DIV:
+					return getMultiIntArgsHandler0(sep, attrHandler, new DivAttrHandler() );						
+				case Constants.MOD:
+					return getMultiIntArgsHandler0(sep, attrHandler, new ModAttrHandler() );						
 				default :
 					Tools.assert0("got an unknow '(Int, Int)' method : " + attrHandler.name() );
 					break ;

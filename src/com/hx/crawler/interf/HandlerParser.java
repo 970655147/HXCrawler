@@ -6,11 +6,16 @@
 
 package com.hx.crawler.interf;
 
-import java.util.List;
+import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
 
 // 解析handler, 将"handle"属性, 解析为AttrHandler链, 进行处理
 public abstract class HandlerParser {
 
-	public abstract AttrHandler handlerParse(String handler);
+	public AttrHandler handlerParse(String handlerStr, String handlerType) {
+		return handlerParse(handlerStr, handlerType, null);
+	}
+	
+	// 核心需要重写的业务方法
+	public abstract AttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn);
 	
 }

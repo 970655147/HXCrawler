@@ -6,8 +6,11 @@
 
 package com.hx.crawler.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,7 +26,8 @@ public class Constants {
 	public final static String XPATH = "xpath";
 	public final static String VALUES = "values";
 	public final static String ATTRIBUTE = "attribute";
-	public final static String HANDLER = "handler";
+	public final static String MAP_HANDLER = "map";
+	public final static String FILTER_HANDLER = "filter";
 	
 	// handler处理相关, + 表示在父节点的基础上面增加当前handler数据, - 表示重写父节点的attrHandler
 	public final static String HANDLER_ADDED = "+";
@@ -132,21 +136,27 @@ public class Constants {
 	
 	public final static String ADD = "add";
 	public final static String SUB = "sub";
+	public final static String MUL = "mul";
+	public final static String DIV = "div";
+	public final static String MOD = "mod";
+	
+	public final static String TO_INT = "toInt";
+	public final static String TO_BOOLEAN = "toBool";
 
 	// handler支持的两种操作
-	public final static String MAP = "map";
-	public final static String FILTER = "filter";
+	public final static String MAP_OPERATION = "map";
+	public final static String FILTER_OPERATION = "filter";
 	
 	// HandlerParser的相关分隔符
 	// 需要跳过的符号对, 括号对
-	public final static Set<String> handlerSet = new HashSet<>();
+	public final static Map<String, List<String>> handlerTypeToHandleOperations = new HashMap<>();
 	public final static Set<String> handlerParserSeps = new HashSet<>();
 	public final static Map<String, String> escapeMap = new HashMap<>();
 	public final static Map<Character, Character> escapeCharMap = new HashMap<>();
 	public final static Map<String, String> bracketPair = new HashMap<>();
 	static {
-		handlerSet.add(MAP);
-		handlerSet.add(FILTER);
+		handlerTypeToHandleOperations.put(MAP_HANDLER, Arrays.asList(MAP_OPERATION) );
+		handlerTypeToHandleOperations.put(FILTER_HANDLER, Arrays.asList(FILTER_OPERATION) );
 		
 		handlerParserSeps.add("(");
 		handlerParserSeps.add(")");

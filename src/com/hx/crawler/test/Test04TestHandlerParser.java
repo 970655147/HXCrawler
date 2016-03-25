@@ -8,6 +8,7 @@ package com.hx.crawler.test;
 
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.interf.HandlerParser;
+import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Log;
 import com.hx.crawlerTools_attrHandler.StandardHandlerParser;
 
@@ -53,14 +54,15 @@ public class Test04TestHandlerParser {
 //		String str = "map(false ? true : false )";
 //		String str = "map((3 >= 3) ? 'abc' + abc > a : 'sdf' )";
 //		String str = "filter(true ).map(sdf)";
-		String str = "map(sub(2, 6, 9) ) ";
-//		String str = "map(add(2, 6, 9) ) ";
+//		String str = "map(add(18, 5, 7) ) ";
+//		String str = "map(add(toInt('2'), 6, 9) ) ";
+		String str = "map(length>15?(subString(0,12)+'...'):$this ) ";
 		
 //		String res = "       te-----             ---|st    ";
 //		String res = "te--|st";
-		String res = "te-    -|st";
+		String res = "te-   abslkdjflskfjgf -|st";
 		HandlerParser parser = new StandardHandlerParser();
-		AttrHandler handler = parser.handlerParse(str);
+		AttrHandler handler = parser.handlerParse(str, Constants.MAP_HANDLER);
 		Log.log(handler.handle(res) );
 //		Log.log(res.substring(Tools.trimAllSpaces(res).indexOf('|'), res.trim().indexOf('|')) );
 		

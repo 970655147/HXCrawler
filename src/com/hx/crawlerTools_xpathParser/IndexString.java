@@ -59,7 +59,7 @@ public class IndexString {
 		stack = new LinkedList<>();
 		valuesStack = new LinkedList<>();
 		stack.push(idxArr.iterator());
-		root = new Values(Constants.ROOT, null, null, null);
+		root = new Values(Constants.ROOT, null, null, null, null);
 		valuesStack.push(root);
 		
 		parse();
@@ -85,7 +85,8 @@ public class IndexString {
 				if(current.containsKey(EndPoint.VALUES) ) {
 					JSONArray values = current.getJSONArray(EndPoint.VALUES);
 					res = new Values(current.getString(Constants.NAME), current.getString(Constants.XPATH),
-									current.optString(Constants.HANDLER, null), valuesStack.peek() );
+									current.optString(Constants.MAP_HANDLER, null), current.optString(Constants.FILTER_HANDLER, null),  
+									valuesStack.peek() );
 					stack.push(values.iterator() );
 					valuesStack.peek().addChild(res);
 					valuesStack.push(res);
@@ -93,7 +94,8 @@ public class IndexString {
 				} else if(current.containsKey(EndPoint.ATTRIBUTE) ) {
 					res = new Attribute(current.optString(Constants.NAME, Constants.ARRAY_ATTR), 
 										current.optString(Constants.XPATH, null), current.getString(EndPoint.ATTRIBUTE), 
-										current.optString(Constants.HANDLER, null), valuesStack.peek() );
+										current.optString(Constants.MAP_HANDLER, null), current.optString(Constants.FILTER_HANDLER, null),
+										valuesStack.peek() );
 					valuesStack.peek().addChild(res);
 					break ;
 				}

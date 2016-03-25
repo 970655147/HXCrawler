@@ -31,37 +31,15 @@ public abstract class EndPoint {
 		protected boolean beFiltered;
 	
 	// 初始化
-	public EndPoint(String type, String name, String xpath, String handlerStr, EndPoint parent) {
+	public EndPoint(String type, String name, String xpath, String mapHandler, String filterHandler, EndPoint parent) {
 		this.type = type;
 		this.name = name;
 		this.parent = parent;
 		this.xpath = xpath;
 		this.beFiltered = false;
 		
-		if(handlerStr != null) {
-			if(handlerStr.startsWith(Constants.HANDLER_ADDED) ) {
-				if(parent.mapHandler == null) {
-					this.mapHandler = Tools.handlerParse(handlerStr.substring(1) );
-					this.filterHandler = Tools.removeIfLastWorkedHandlerIsFilter(this.mapHandler);
-				} else {
-					this.mapHandler = Tools.combineHandler(parent.mapHandler, Tools.handlerParse(handlerStr.substring(1)) );
-					AttrHandler filterHandler0 = Tools.removeIfLastWorkedHandlerIsFilter(this.mapHandler);
-					this.filterHandler = (filterHandler0 != null) ? filterHandler0 : this.filterHandler;
-				}
-			} else if(handlerStr.startsWith(Constants.HANDLER_OVERRIDE) ) {
-				this.mapHandler = Tools.handlerParse(handlerStr.substring(1));
-				this.filterHandler = Tools.removeIfLastWorkedHandlerIsFilter(this.mapHandler);
-			} else {
-				Tools.assert0("the handler should startWith : [" + Constants.HANDLER_ADDED + ", " + Constants.HANDLER_OVERRIDE + "], around : " + this.toString() );
-			}
-		} else {
-			// default inhert from parent
-			if(parent != null) {
-				this.mapHandler = parent.mapHandler;
-				this.filterHandler = parent.filterHandler;
-			}
-		}
-		
+		initHandler(Constants.MAP_HANDLER, mapHandler);
+		initHandler(Constants.FILTER_HANDLER, filterHandler);
 //		if(xpath != null) {
 //			this.xpath = Tools.getXPath(this, xpath);
 //		}
@@ -102,6 +80,53 @@ public abstract class EndPoint {
 	}
 	public boolean beFiltered() {
 		return this.beFiltered;
+	}
+	
+	// 初始化filter
+	// 分为四种情况
+	// 1. handlerString 为null, 直接继承parent的handler
+	// 2. 如果handlerString以"+"开头, 并且parent的相应的handler为null  直接创建新的Handler
+	// 3. 如果handlerString以"-"开头, 直接创建新的Handler
+	// 4. 否则  combine parent的Handler, 和自己的Handler
+	private void initHandler(String handlerType, String handlerStr) {
+		if(handlerStr != null) {
+			if((handlerStr.startsWith(Constants.HANDLER_ADDED) 
+					&& ( ((Constants.MAP_HANDLER.equals(handlerType) ) && (parent.mapHandler == null) )
+							|| ((Constants.FILTER_HANDLER.equals(handlerType) ) && (parent.filterHandler == null)) ) )
+					|| handlerStr.startsWith(Constants.HANDLER_OVERRIDE)
+					) {
+					if(Constants.MAP_HANDLER.equals(handlerType) ) {
+						this.mapHandler = Tools.handlerParse(handlerStr.substring(1), Constants.MAP_HANDLER );
+					} else if(Constants.FILTER_HANDLER.equals(handlerType) ) {
+						this.filterHandler = Tools.handlerParse(handlerStr.substring(1), Constants.FILTER_HANDLER );
+					} else {
+						Tools.assert0("have no this handlerType : " + handlerType + ", please check it !");
+					}
+			} else if(handlerStr.startsWith(Constants.HANDLER_ADDED)
+					&& (((Constants.MAP_HANDLER.equals(handlerType) ) && (parent.mapHandler != null) ) 
+						|| ((Constants.FILTER_HANDLER.equals(handlerType) ) && (parent.filterHandler != null)) ) ) {
+				if(Constants.MAP_HANDLER.equals(handlerType) ) {
+					this.mapHandler = Tools.combineHandler(parent.mapHandler, Tools.handlerParse(handlerStr.substring(1), Constants.MAP_HANDLER) );
+				} else if(Constants.FILTER_HANDLER.equals(handlerType) ) {
+					this.filterHandler = Tools.combineCuttingOutHandler(parent.filterHandler, Tools.handlerParse(handlerStr.substring(1), Constants.FILTER_HANDLER), false );
+				} else {
+					Tools.assert0("have no this handlerType : " + handlerType + ", please check it !");
+				}
+			} else {
+				Tools.assert0("the handler should startWith : [" + Constants.HANDLER_ADDED + ", " + Constants.HANDLER_OVERRIDE + "], around : " + handlerStr );
+			}
+		} else {
+			// default inhert from parent
+			if(parent != null) {
+				if(Constants.MAP_HANDLER.equals(handlerType) ) {
+					this.mapHandler = parent.mapHandler;
+				} else if(Constants.FILTER_HANDLER.equals(handlerType) ) {
+					this.filterHandler = parent.filterHandler;
+				} else {
+					Tools.assert0("have no this handlerType : " + handlerType + ", please check it !");
+				}
+			}
+		}
 	}
 	
 	// 通过传入的xpath, 获取真实的xpath

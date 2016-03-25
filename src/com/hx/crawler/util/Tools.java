@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,7 +55,10 @@ import com.hx.crawler.interf.ResultJudger;
 import com.hx.crawler.interf.ScriptParameter;
 import com.hx.crawler.test.Test01TestXpathParser;
 import com.hx.crawlerTools_attrHandler.CompositeAttrHandler;
+import com.hx.crawlerTools_attrHandler.CuttingOutAndAttrHandler;
+import com.hx.crawlerTools_attrHandler.CuttingOutOrAttrHandler;
 import com.hx.crawlerTools_attrHandler.StandardHandlerParser;
+import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
 import com.hx.crawlerTools_crawler.HtmlCrawler;
 import com.hx.crawlerTools_crawler.SingleUrlTask;
 
@@ -1585,8 +1589,11 @@ public class Tools {
 	public final static HandlerParser handlerParser = new StandardHandlerParser();
 	
 	// 将给定的字符串解析为AttrHandler
-	public static AttrHandler handlerParse(String handler) {
-		return handlerParser.handlerParse(handler);
+	public static AttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn) {
+		return handlerParser.handlerParse(handlerStr, handlerType, lastOperationReturn);
+	}
+	public static AttrHandler handlerParse(String handlerStr, String handlerType) {
+		return handlerParse(handlerStr, handlerType, null);
 	}
 	
 	// 合并两个Handler
@@ -1595,8 +1602,20 @@ public class Tools {
 		CompositeAttrHandler attrHandler = new CompositeAttrHandler();
 		attrHandler.addHandler(mainHandler);
 		attrHandler.addHandler(attachHander);
+			attrHandler.operationReturn(attachHander.operationReturn() );
 		return attrHandler;
 	}
+	// 合并两个返回值为逻辑值的Handler, isAnd表示使用"&&"连接 还是"||"连接
+	public static AttrHandler combineCuttingOutHandler(AttrHandler mainHandler, AttrHandler attachHander, boolean isAnd) {
+		Tools.assert0(Types.Boolean == mainHandler.operationReturn(), "combineCuttingOutHandler need '(Boolean, Boolean)' as parameter ! please check it ! ");
+		Tools.assert0(Types.Boolean == attachHander.operationReturn(), "combineCuttingOutHandler need '(Boolean, Boolean)' as parameter ! please check it ! ");
+		if(isAnd) {
+			return new CuttingOutAndAttrHandler(Arrays.asList(mainHandler, attachHander) );
+		} else {
+			return new CuttingOutOrAttrHandler(Arrays.asList(mainHandler, attachHander) );
+		}
+	}
+
 	// 获取给定的attrHander中最后一个有效的AttrHandler[非Composite]
 	public static AttrHandler lastWorkedHandler(AttrHandler attrHandler) {
 		if(attrHandler instanceof CompositeAttrHandler) {
@@ -1613,13 +1632,14 @@ public class Tools {
 			if(lastAttrHandler instanceof CompositeAttrHandler) {
 				return removeIfLastWorkedHandlerIsFilter(lastAttrHandler);
 			}
-			if(Constants.FILTER.equals(lastAttrHandler.operationType()) ) {
+			if(Constants.FILTER_OPERATION.equals(lastAttrHandler.operationType()) ) {
 				return compositeHandler.removeHandler(compositeHandler.handlers().size() - 1);
 			}
 		}
 		
 		return null;
 	}
+	
 	// ------------ 待续 --------------------
 
 	

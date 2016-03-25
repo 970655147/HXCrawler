@@ -20,8 +20,8 @@ public final class Values extends EndPoint {
 	private List<EndPoint> childs;
 	
 	// ≥ı ºªØ
-	public Values(String name, String xpath, String handlerStr, EndPoint parent) {
-		super(EndPoint.VALUES, name, xpath, handlerStr, parent);
+	public Values(String name, String xpath, String mapHandler, String filterHandler, EndPoint parent) {
+		super(EndPoint.VALUES, name, xpath, mapHandler, filterHandler, parent);
 		childs = new ArrayList<>();
 	}
 	
