@@ -56,7 +56,9 @@ public class Test04TestHandlerParser {
 //		String str = "filter(true ).map(sdf)";
 //		String str = "map(add(18, 5, 7) ) ";
 //		String str = "map(add(toInt('2'), 6, 9) ) ";
-		String str = "map(length>15?(subString(0,12)+'...'):$this ) ";
+//		String str = "map(length>15?(subString(0,12)+'...'):$this ) ";
+//		String str = "map(toBool('bac') )";
+		String str = "map(toString(toInt('7')) )";
 		
 //		String res = "       te-----             ---|st    ";
 //		String res = "te--|st";

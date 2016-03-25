@@ -18,6 +18,7 @@ import java.util.Set;
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.interf.HandlerParser;
 import com.hx.crawler.util.Constants;
+import com.hx.crawler.util.Log;
 import com.hx.crawler.util.Tools;
 import com.hx.crawler.util.WordsSeprator;
 import com.hx.crawlerTools_attrHandler.adapter.OneBooleanResultHandlerArgsAttrHandler;
@@ -55,6 +56,7 @@ public class StandardHandlerParser extends HandlerParser {
 		handlerToResultType.put(Constants.TO_LOWERCASE, Types.String);
 		handlerToResultType.put(Constants.DO_NOTHING, Types.String);
 		handlerToResultType.put(Constants.COND_EXP, Types.String);
+		handlerToResultType.put(Constants.TO_STRING, Types.String);
 		
 		handlerToResultType.put(Constants.INDEX_OF, Types.Int);
 		handlerToResultType.put(Constants.LAST_INDEX_OF, Types.Int);
@@ -82,16 +84,16 @@ public class StandardHandlerParser extends HandlerParser {
 	}
 	
 	// 没有参数的方法, 一个字符串参数的方法, 两个字符串参数的方法, 多种选择的参数的方法
-	public final static Set<String> noneOrStringArgsMap = new HashSet<>();
-	public final static Set<String> oneBooleanArgsMap = new HashSet<>();
-	public final static Set<String> oneOrTwoStringArgsMap = new HashSet<>();
-	public final static Set<String> oneOrTwoIntArgsMap = new HashSet<>();
-	public final static Set<String> twoStringArgsMap = new HashSet<>();
-	public final static Set<String> stringOrStringIntArgsMap = new HashSet<>();
-	public final static Set<String> oneBooleanTwoStringArgsMap = new HashSet<>();
-	public final static Set<String> multiStringArgsMap = new HashSet<>();
-	public final static Set<String> multiBooleanArgsMap = new HashSet<>();
-	public final static Set<String> multiIntArgsMap = new HashSet<>();
+	private final static Set<String> noneOrStringArgsMap = new HashSet<>();
+	private final static Set<String> oneBooleanArgsMap = new HashSet<>();
+	private final static Set<String> oneOrTwoStringArgsMap = new HashSet<>();
+	private final static Set<String> oneOrTwoIntArgsMap = new HashSet<>();
+	private final static Set<String> twoStringArgsMap = new HashSet<>();
+	private final static Set<String> stringOrStringIntArgsMap = new HashSet<>();
+	private final static Set<String> oneBooleanTwoStringArgsMap = new HashSet<>();
+	private final static Set<String> multiStringArgsMap = new HashSet<>();
+	private final static Set<String> multiBooleanArgsMap = new HashSet<>();
+	private final static Set<String> multiIntArgsMap = new HashSet<>();
 	static {
 		// trim, trim()
 		noneOrStringArgsMap.add(Constants.TRIM);
@@ -103,6 +105,7 @@ public class StandardHandlerParser extends HandlerParser {
 		noneOrStringArgsMap.add(Constants.DO_NOTHING);
 		noneOrStringArgsMap.add(Constants.TO_INT);
 		noneOrStringArgsMap.add(Constants.TO_BOOLEAN);
+		noneOrStringArgsMap.add(Constants.TO_STRING);
 		
 		// !(true), not(true)
 		oneBooleanArgsMap.add(Constants.NOT);
@@ -234,10 +237,11 @@ public class StandardHandlerParser extends HandlerParser {
 				Tools.assert0(((operand.operands() != null) && (operand.operands().size() == 1) ), "anonyOperand can only take one parameter, please check it ! around : " + sep.rest(operand.pos()) );
 				curType = checkHandlerContent(sep, attrHandlerContent.operand(0) );
 			} else if(noneOrStringArgsMap.contains(operand.name()) ) {
+				Types param = checkHandlerContent(sep, operand.operand(0));
 				boolean isValid = (operand.operands() == null) 
 								|| ( (operand.operands().size() == 1) 
-									 && (Constants.EMPTY_OPERAND_NAME.equals(operand.operand(0).name())) || (stringAble(operand.operand(0).type())) );
-				Tools.assert0(isValid, "the operand : '" + operand.name() + "' take ([String]), 'no parameter or String' , please check it ! around : " + sep.rest(operand.pos()) );
+									 && (Constants.EMPTY_OPERAND_NAME.equals(operand.operand(0).name())) || (stringAble(param)) );
+				Tools.assert0(isValid, "the operand : '" + operand.name() + "' take ([String]), 'no parameter or String', but got (" + operand.operand(0).type() + ") please check it ! around : " + sep.rest(operand.pos()) );
 			} else if(oneBooleanArgsMap.contains(operand.name()) ) {
 				Types param = checkHandlerContent(sep, operand.operand(0));
 				boolean isValid = (operand.operands() != null) 
@@ -593,6 +597,8 @@ public class StandardHandlerParser extends HandlerParser {
 			return getNoneOrOneStringArgsHandler0(sep, ope, new ToIntAttrHandler() );
 		case Constants.TO_BOOLEAN:
 			return getNoneOrOneStringArgsHandler0(sep, ope, new ToBooleanAttrHandler() );
+		case Constants.TO_STRING:
+			return getNoneOrOneStringArgsHandler0(sep, ope, new ToStringAttrHandler() );
 		default:
 			Tools.assert0("got an unknow 'noArgs' method : " + attrHandler.name() );
 			return null;
@@ -916,7 +922,7 @@ public class StandardHandlerParser extends HandlerParser {
 		
 	// 判断给定的类型是否是Method
 	private boolean stringAble(OperandTypes type) {
-		return type == OperandTypes.String || type == OperandTypes.Int;
+		return type == OperandTypes.String || type == OperandTypes.Int || type == OperandTypes.Boolean;
 	}
 	private boolean stringAble(Types type) {
 		return type == Types.String || type == Types.Int || type == Types.Boolean;

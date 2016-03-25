@@ -142,6 +142,7 @@ public class Constants {
 	
 	public final static String TO_INT = "toInt";
 	public final static String TO_BOOLEAN = "toBool";
+	public final static String TO_STRING = "toString";
 
 	// handler支持的两种操作
 	public final static String MAP_OPERATION = "map";

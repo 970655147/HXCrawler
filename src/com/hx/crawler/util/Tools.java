@@ -773,7 +773,7 @@ public class Tools {
 	public static String getRealXPathByXPathObj(String xpath) {
 		return "[" + xpath + "]";
 	}
-	public static String getRealXPathByXPathObj(String[] xpathes) {
+	public static String getRealXPathByXPathObj(String... xpathes) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 		sb.append(xpathes[0]);
@@ -1465,12 +1465,8 @@ public class Tools {
 	public static void createAnBuffer(String bufName, String outputPath) {
 		createAnBuffer(bufName, outputPath, defaultBuffSizeEstimator, defaultBuffThreshold);
 	}
-	public static void closeAnBuffer(String bufName) {
-		if(! bufExists(bufName)) {
-			throw new RuntimeException("have no buffInfo with key : " + bufName + ", please createAnBuffer first !");
-		}
-		
-		bufferToBuffInfo.remove(bufName);
+	public static void closeAnBuffer(String bufName) throws IOException {
+		flushBuffer(bufName, true);
 	}
 	// 判断给定的bufName的buffer是否存在
 	public static boolean bufExists(String buffName) {
@@ -1514,7 +1510,7 @@ public class Tools {
 			}
 		}
 		if(isLastBatch) {
-			closeAnBuffer(bufName);
+			bufferToBuffInfo.remove(bufName);
 		}
 	}
 	public static void flushBuffer(String bufName, long logFlags) throws IOException {
