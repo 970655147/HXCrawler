@@ -48,21 +48,21 @@ import org.ccil.cowan.tagsoup.Parser;
 import org.ccil.cowan.tagsoup.XMLWriter;
 import org.xml.sax.InputSource;
 
+import com.hx.crawler.attrHandler.CompositeAttrHandler;
+import com.hx.crawler.attrHandler.CuttingOutAndAttrHandler;
+import com.hx.crawler.attrHandler.CuttingOutOrAttrHandler;
+import com.hx.crawler.attrHandler.StandardHandlerParser;
+import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
+import com.hx.crawler.attrHandler.operation.CompositeOperationAttrHandler;
+import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;
+import com.hx.crawler.crawler.HtmlCrawler;
+import com.hx.crawler.crawler.SingleUrlTask;
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.interf.Crawler;
 import com.hx.crawler.interf.HandlerParser;
 import com.hx.crawler.interf.ResultJudger;
 import com.hx.crawler.interf.ScriptParameter;
 import com.hx.crawler.test.Test01TestXpathParser;
-import com.hx.crawlerTools_attrHandler.CompositeAttrHandler;
-import com.hx.crawlerTools_attrHandler.CuttingOutAndAttrHandler;
-import com.hx.crawlerTools_attrHandler.CuttingOutOrAttrHandler;
-import com.hx.crawlerTools_attrHandler.StandardHandlerParser;
-import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
-import com.hx.crawlerTools_attrHandler.operation.CompositeOperationAttrHandler;
-import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
-import com.hx.crawlerTools_crawler.HtmlCrawler;
-import com.hx.crawlerTools_crawler.SingleUrlTask;
 
 // 工具类
 public class Tools {
@@ -706,7 +706,7 @@ public class Tools {
 	
 	// 通过xpath 获取结果
 	public static JSONArray getResultByXPath(String html, String url, String xpath) throws Exception {
-		return com.hx.crawlerTools_xpathParser.Parser.parse(Tools.normalize(html), url, xpath);
+		return com.hx.crawler.xpathParser.Parser.parse(Tools.normalize(html), url, xpath);
 	}
 	public static JSONArray getResultByXPathes(String html, String url, String[] xpathes, ResultJudger judger) throws Exception {
 		for(int i=0; i<xpathes.length; i++) {			

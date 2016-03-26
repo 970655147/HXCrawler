@@ -6,8 +6,8 @@
 
 package com.hx.crawler.interf;
 
-import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
-import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
+import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
+import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;
 
 // 解析handler, 将"handle"属性, 解析为AttrHandler链, 进行处理
 public abstract class HandlerParser {

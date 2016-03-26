@@ -6,11 +6,11 @@
 
 package com.hx.crawler.test;
 
+import com.hx.crawler.attrHandler.StandardHandlerParser;
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.interf.HandlerParser;
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Log;
-import com.hx.crawlerTools_attrHandler.StandardHandlerParser;
 
 public class Test04TestHandlerParser {
 	

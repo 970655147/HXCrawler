@@ -10,8 +10,8 @@ import java.io.IOException;
 
 import org.apache.http.entity.ContentType;
 
-import com.hx.crawlerTools_crawler.CrawlerConfig;
-import com.hx.crawlerTools_crawler.Page;
+import com.hx.crawler.crawler.CrawlerConfig;
+import com.hx.crawler.crawler.Page;
 
 // Cralwer ¹æ·¶
 public abstract class Crawler {

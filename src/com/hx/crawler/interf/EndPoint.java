@@ -8,9 +8,9 @@ package com.hx.crawler.interf;
 
 import net.sf.json.JSONObject;
 
+import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Tools;
-import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
 
 // 一个EndPint[终端结点 : "values" & "attribute"]
 public abstract class EndPoint {

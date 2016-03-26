@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.hx.crawler.attrHandler.DoNothingAttrHandler;
+import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
+import com.hx.crawler.attrHandler.operation.MapOperationAttrHandler;
+import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;
 import com.hx.crawler.interf.EndPointHandler;
-import com.hx.crawlerTools_attrHandler.DoNothingAttrHandler;
-import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
-import com.hx.crawlerTools_attrHandler.operation.MapOperationAttrHandler;
-import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
-import com.hx.crawlerTools_xpathParser.AttributeHandler;
-import com.hx.crawlerTools_xpathParser.ValuesHandler;
+import com.hx.crawler.xpathParser.AttributeHandler;
+import com.hx.crawler.xpathParser.ValuesHandler;
 
 // ³£Á¿
 public class Constants {
