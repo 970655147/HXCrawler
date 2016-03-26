@@ -11,11 +11,6 @@ import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
 
 // handler相关的超类
 public abstract class AttrHandler {
-
-	// 当前AttrHandler的操作
-	protected String operationType;
-	protected Types operationReturn;
-	
 	// 初始化
 	public AttrHandler() {
 		
@@ -29,20 +24,6 @@ public abstract class AttrHandler {
 		return res;
 	}
 	
-	// sett & getter
-	public void operationType(String operationType) {
-		this.operationType = operationType;
-	}
-	public String operationType() {
-		return this.operationType;
-	}
-	public Types operationReturn() {
-		return operationReturn;
-	}
-	public void operationReturn(Types operationReturn) {
-		this.operationReturn = operationReturn;
-	}
-
 	// 核心处理给定的字符串, 获取handler的名称
 	protected abstract String handle0(String result);
 	public abstract String name();

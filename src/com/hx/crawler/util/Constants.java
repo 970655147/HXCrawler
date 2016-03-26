@@ -6,7 +6,6 @@
 
 package com.hx.crawler.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +14,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hx.crawler.interf.EndPointHandler;
+import com.hx.crawlerTools_attrHandler.DoNothingAttrHandler;
+import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
+import com.hx.crawlerTools_attrHandler.operation.MapOperationAttrHandler;
+import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
 import com.hx.crawlerTools_xpathParser.AttributeHandler;
 import com.hx.crawlerTools_xpathParser.ValuesHandler;
 
@@ -26,8 +29,7 @@ public class Constants {
 	public final static String XPATH = "xpath";
 	public final static String VALUES = "values";
 	public final static String ATTRIBUTE = "attribute";
-	public final static String MAP_HANDLER = "map";
-	public final static String FILTER_HANDLER = "filter";
+	public final static String HANDLER = "handler";
 	
 	// handler处理相关, + 表示在父节点的基础上面增加当前handler数据, - 表示重写父节点的attrHandler
 	public final static String HANDLER_ADDED = "+";
@@ -144,20 +146,32 @@ public class Constants {
 	public final static String TO_BOOLEAN = "toBool";
 	public final static String TO_STRING = "toString";
 
-	// handler支持的两种操作
+	// operation相关
+	public final static String OPERATION_COMPOSITE = "operationComposite";
 	public final static String MAP_OPERATION = "map";
 	public final static String FILTER_OPERATION = "filter";
+	public final static String ASSERT_OPERATION = "assert";
 	
-	// HandlerParser的相关分隔符
+	// 校验不通过即时返回的消息, 默认的OperationHandler[没有配置, 则默认使用这个]
+	public final static String immediateOperationMsg;
+	public final static OperationAttrHandler defaultOperationAttrHandler = new MapOperationAttrHandler(new DoNothingAttrHandler(), Types.String);
+	
+	// <handlerType -> operation>
+	// 校验不通过需要即时返回的操作, HandlerParser的相关分隔符
 	// 需要跳过的符号对, 括号对
 	public final static Map<String, List<String>> handlerTypeToHandleOperations = new HashMap<>();
+	public final static Set<String> immediateOperation = new HashSet<>();
 	public final static Set<String> handlerParserSeps = new HashSet<>();
 	public final static Map<String, String> escapeMap = new HashMap<>();
 	public final static Map<Character, Character> escapeCharMap = new HashMap<>();
 	public final static Map<String, String> bracketPair = new HashMap<>();
 	static {
-		handlerTypeToHandleOperations.put(MAP_HANDLER, Arrays.asList(MAP_OPERATION) );
-		handlerTypeToHandleOperations.put(FILTER_HANDLER, Arrays.asList(FILTER_OPERATION) );
+		handlerTypeToHandleOperations.put(HANDLER, Arrays.asList(MAP_OPERATION, FILTER_OPERATION, ASSERT_OPERATION) );
+		
+		immediateOperation.add(FILTER_OPERATION);
+		immediateOperation.add(ASSERT_OPERATION);
+		
+		immediateOperationMsg = immediateOperation.toString();
 		
 		handlerParserSeps.add("(");
 		handlerParserSeps.add(")");

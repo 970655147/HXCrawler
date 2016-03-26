@@ -6,6 +6,8 @@
 
 package com.hx.crawlerTools_attrHandler.adapter;
 
+import net.sf.json.JSONObject;
+
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawlerTools_attrHandler.ConstantsAttrHandler;
@@ -37,6 +39,11 @@ public class OneBooleanResultHandlerArgsAttrHandler extends AttrHandler {
 	@Override
 	public String name() {
 		return handler.name();
+	}
+	
+	@Override
+	public String toString() {
+		return new JSONObject().element("handler", handler.toString() ).element("arg", arg.toString() ).toString();
 	}
 	
 }

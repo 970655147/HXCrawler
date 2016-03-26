@@ -27,7 +27,7 @@ public class ToUpperCaseAttrHandler extends NoneOrOneStringArgsAttrHandler {
 
 	@Override
 	public String name() {
-		return Constants.LENGTH;
+		return Constants.TO_UPPERCASE;
 	}
 	
 }

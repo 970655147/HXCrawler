@@ -34,7 +34,7 @@ public class NotAttrHandler extends OneBooleanArgsAttrHandler {
 
 	@Override
 	public String name() {
-		return Constants.EQUALS;
+		return Constants.NOT;
 	}
 
 	@Override

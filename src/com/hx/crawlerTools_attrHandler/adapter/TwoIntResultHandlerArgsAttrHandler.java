@@ -6,6 +6,9 @@
 
 package com.hx.crawlerTools_attrHandler.adapter;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawlerTools_attrHandler.ConstantsAttrHandler;
@@ -16,8 +19,8 @@ import com.hx.crawlerTools_attrHandler.adapter.interf.TwoIntArgsAttrHandler;
 public class TwoIntResultHandlerArgsAttrHandler extends AttrHandler {
 	// 处理数据的handler, 获取参数的handler
 	private TwoIntArgsAttrHandler handler;
-	private AttrHandler start;
-	private AttrHandler end;
+	private AttrHandler arg01;
+	private AttrHandler arg02;
 	
 	// 初始化
 	// 6个方法
@@ -26,8 +29,8 @@ public class TwoIntResultHandlerArgsAttrHandler extends AttrHandler {
 	// (arg01)			([arg01])
 	public TwoIntResultHandlerArgsAttrHandler(TwoIntArgsAttrHandler handler, AttrHandler start, AttrHandler end) {
 		this.handler = handler;
-		this.start = start;
-		this.end = end;
+		this.arg01 = start;
+		this.arg02 = end;
 	}
 	public TwoIntResultHandlerArgsAttrHandler(TwoIntArgsAttrHandler handler, int start, int end) {
 		this(handler, new ConstantsAttrHandler(String.valueOf(start)),
@@ -48,7 +51,7 @@ public class TwoIntResultHandlerArgsAttrHandler extends AttrHandler {
 	
 	@Override
 	public String handle0(String result) {
-		handler.setArgs(Integer.parseInt(start.handle(result)), Integer.parseInt(end.handle(result)) );
+		handler.setArgs(Integer.parseInt(arg01.handle(result)), Integer.parseInt(arg02.handle(result)) );
 		return handler.handle(result);
 	}
 
@@ -57,4 +60,8 @@ public class TwoIntResultHandlerArgsAttrHandler extends AttrHandler {
 		return handler.name();
 	}
 	
+	@Override
+	public String toString() {
+		return new JSONObject().element("handler", handler.toString() ).element("arg01", arg01.toString() ).element("arg02", arg02.toString() ).toString();
+	}
 }

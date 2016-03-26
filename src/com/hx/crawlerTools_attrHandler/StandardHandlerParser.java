@@ -18,7 +18,6 @@ import java.util.Set;
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.interf.HandlerParser;
 import com.hx.crawler.util.Constants;
-import com.hx.crawler.util.Log;
 import com.hx.crawler.util.Tools;
 import com.hx.crawler.util.WordsSeprator;
 import com.hx.crawlerTools_attrHandler.adapter.OneBooleanResultHandlerArgsAttrHandler;
@@ -32,6 +31,11 @@ import com.hx.crawlerTools_attrHandler.adapter.interf.OneBooleanArgsAttrHandler;
 import com.hx.crawlerTools_attrHandler.adapter.interf.StringIntArgsAttrHandler;
 import com.hx.crawlerTools_attrHandler.adapter.interf.TwoIntArgsAttrHandler;
 import com.hx.crawlerTools_attrHandler.adapter.interf.TwoStringArgsAttrHandler;
+import com.hx.crawlerTools_attrHandler.operation.AssertOperationAttrHandler;
+import com.hx.crawlerTools_attrHandler.operation.CompositeOperationAttrHandler;
+import com.hx.crawlerTools_attrHandler.operation.FilterOperationAttrHandler;
+import com.hx.crawlerTools_attrHandler.operation.MapOperationAttrHandler;
+import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
 
 // Std 标准的处理handler字符串的解析器
 public class StandardHandlerParser extends HandlerParser {
@@ -151,8 +155,8 @@ public class StandardHandlerParser extends HandlerParser {
 	
 	// -------------------- business method ----------------------------------
 	// 各个分隔符的位置
-	public AttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn) {
-		CompositeAttrHandler hanlder = new CompositeAttrHandler();
+	public OperationAttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn) {
+		CompositeOperationAttrHandler<OperationAttrHandler> compositeOperationAttrHandler = new CompositeOperationAttrHandler<>();
 		handlerStr = Tools.trimAllSpaces(handlerStr, Constants.escapeCharMap);
 		String lastOperationType = null;
 		List<String> suppertedOperations = Constants.handlerTypeToHandleOperations.get(handlerType);
@@ -171,11 +175,10 @@ public class StandardHandlerParser extends HandlerParser {
 			Tools.assert0(Constants.bracketPair.containsKey(bracket), "expect a bracket : '" + bracket + "' ! , please check your format['" + sep.rest() + "'] ! ");
 			Operand handlerOperand = getAttrHandlerContent(sep, bracket, Constants.bracketPair);
 			lastOperationReturn = checkHandlerContent(sep, handlerOperand );
-			AttrHandler handlerNow = getAttrHandler(sep, handlerOperand);
-				handlerNow.operationType(lastOperationType);
-				handlerNow.operationReturn(lastOperationReturn);
-			checkHandler(handlerNow);
-			hanlder.addHandler(handlerNow);
+			checkHandler(lastOperationType, lastOperationReturn);
+			OperationAttrHandler handlerNow = getOperationAttrHandler(lastOperationType, getAttrHandler(sep, handlerOperand), lastOperationReturn, compositeOperationAttrHandler );
+			lastOperationReturn = handlerNow.operationReturn();
+			compositeOperationAttrHandler.addHandler(handlerNow);
 //			Log.log(handlerOperand );
 			
 			String dotOrNull = sep.next();
@@ -184,11 +187,10 @@ public class StandardHandlerParser extends HandlerParser {
 			}
 			Tools.assert0(".".equals(dotOrNull), "expect a dot : '.' ! , please check your format['" + sep.rest() + "'] ! ");
 		}
-		hanlder.operationReturn(lastOperationReturn);
 		
-		return hanlder;
+		return compositeOperationAttrHandler;
 	}
-	public AttrHandler handlerParse(String handlerStr, String handlerType) {
+	public OperationAttrHandler handlerParse(String handlerStr, String handlerType) {
 		return handlerParse(handlerStr, handlerType, null);
 	}
 	
@@ -241,7 +243,7 @@ public class StandardHandlerParser extends HandlerParser {
 				boolean isValid = (operand.operands() == null) 
 								|| ( (operand.operands().size() == 1) 
 									 && (Constants.EMPTY_OPERAND_NAME.equals(operand.operand(0).name())) || (stringAble(param)) );
-				Tools.assert0(isValid, "the operand : '" + operand.name() + "' take ([String]), 'no parameter or String', but got (" + operand.operand(0).type() + ") please check it ! around : " + sep.rest(operand.pos()) );
+				Tools.assert0(isValid, "the operand : '" + operand.name() + "' take ([String]), 'no parameter or String', but got (" + param + ") please check it ! around : " + sep.rest(operand.pos()) );
 			} else if(oneBooleanArgsMap.contains(operand.name()) ) {
 				Types param = checkHandlerContent(sep, operand.operand(0));
 				boolean isValid = (operand.operands() != null) 
@@ -365,47 +367,65 @@ public class StandardHandlerParser extends HandlerParser {
 		
 		return attrHandlerChain;
 	}
-	private AttrHandler getAttrHandler0(WordsSeprator sep, Operand attrHandler) {
-		if(Constants.ANONY_OPERAND_NAME.equals(attrHandler.name()) ) {
-			return getAttrHandler(sep, attrHandler.operand(0) );
+		private AttrHandler getAttrHandler0(WordsSeprator sep, Operand attrHandler) {
+			if(Constants.ANONY_OPERAND_NAME.equals(attrHandler.name()) ) {
+				return getAttrHandler(sep, attrHandler.operand(0) );
+			}
+			if(noneOrStringArgsMap.contains(attrHandler.name()) ) {
+				return getNoneOrStringArgsHandler(sep, attrHandler);
+			} else if(oneBooleanArgsMap.contains(attrHandler.name()) ) {
+				return getOneBooleanArgsHandler(sep, attrHandler);
+			} else if(oneOrTwoStringArgsMap.contains(attrHandler.name()) ) {
+				return getOneOrTwoStringArgsHandler(sep, attrHandler);
+			} else if(twoStringArgsMap.contains(attrHandler.name()) ) {
+				return getTwoStringArgsHandler(sep, attrHandler);
+			} else if(stringOrStringIntArgsMap.contains(attrHandler.name()) ) {
+				return getStringOrStringIntArgsHandler(sep, attrHandler);
+			} else if(oneOrTwoIntArgsMap.contains(attrHandler.name()) ) {
+				return getOneOrTwoIntArgsHandler(sep, attrHandler);
+			} else if(oneBooleanTwoStringArgsMap.contains(attrHandler.name()) ) {
+				return getOneBooleanTwoStringArgsHandler(sep, attrHandler);
+			} else if(multiStringArgsMap.contains(attrHandler.name()) ) {
+				return getMultiStringArgsHandler(sep, attrHandler);
+			} else if(multiBooleanArgsMap.contains(attrHandler.name()) ) {
+				return getMultiBooleanArgsHandler(sep, attrHandler);
+			} else if(multiIntArgsMap.contains(attrHandler.name()) ) {
+				return getMultiIntArgsHandler(sep, attrHandler);
+			} else {
+				// recorvey as 'ConstantsStringValue'
+				return new ConstantsAttrHandler(attrHandler.name() );
+			}
 		}
-		if(noneOrStringArgsMap.contains(attrHandler.name()) ) {
-			return getNoneOrStringArgsHandler(sep, attrHandler);
-		} else if(oneBooleanArgsMap.contains(attrHandler.name()) ) {
-			return getOneBooleanArgsHandler(sep, attrHandler);
-		} else if(oneOrTwoStringArgsMap.contains(attrHandler.name()) ) {
-			return getOneOrTwoStringArgsHandler(sep, attrHandler);
-		} else if(twoStringArgsMap.contains(attrHandler.name()) ) {
-			return getTwoStringArgsHandler(sep, attrHandler);
-		} else if(stringOrStringIntArgsMap.contains(attrHandler.name()) ) {
-			return getStringOrStringIntArgsHandler(sep, attrHandler);
-		} else if(oneOrTwoIntArgsMap.contains(attrHandler.name()) ) {
-			return getOneOrTwoIntArgsHandler(sep, attrHandler);
-		} else if(oneBooleanTwoStringArgsMap.contains(attrHandler.name()) ) {
-			return getOneBooleanTwoStringArgsHandler(sep, attrHandler);
-		} else if(multiStringArgsMap.contains(attrHandler.name()) ) {
-			return getMultiStringArgsHandler(sep, attrHandler);
-		} else if(multiBooleanArgsMap.contains(attrHandler.name()) ) {
-			return getMultiBooleanArgsHandler(sep, attrHandler);
-		} else if(multiIntArgsMap.contains(attrHandler.name()) ) {
-			return getMultiIntArgsHandler(sep, attrHandler);
-		} else {
-			// recorvey as 'ConstantsStringValue'
-			return new ConstantsAttrHandler(attrHandler.name() );
+	private OperationAttrHandler getOperationAttrHandler(String operationType, AttrHandler attrHandler, Types operationReturn, CompositeOperationAttrHandler<OperationAttrHandler> compositeOperationAttrHandler ) {
+		switch(operationType) {
+			case Constants.MAP_OPERATION:
+				return new MapOperationAttrHandler(attrHandler, operationReturn);
+			case Constants.FILTER_OPERATION:
+				return new FilterOperationAttrHandler(attrHandler, compositeOperationAttrHandler.lastReturnType() );
+			case Constants.ASSERT_OPERATION:
+				return new AssertOperationAttrHandler(attrHandler, compositeOperationAttrHandler.lastReturnType() );
+			default:
+				Tools.assert0("have no this operationType ! from now on support : " + Constants.handlerTypeToHandleOperations.keySet().toString() );
+				break;
 		}
+		
+		return null;
 	}
 	// 校验当前handler
-	private void checkHandler(AttrHandler handlerNow) {
-		switch (handlerNow.operationType() ) {
-		case Constants.MAP_OPERATION:
-			
-			break;
-		case Constants.FILTER_OPERATION:
-			Tools.assert0(Types.Boolean == handlerNow.operationReturn(), "operation : 'filter' just support (Boolean) as parameter !");
-			break;
-		default:
-			Tools.assert0("have no this operationType ! from now on support : " + Constants.handlerTypeToHandleOperations.keySet().toString() );
-			break;
+	private void checkHandler(String operationType, Types returnType) {
+		switch (operationType ) {
+			case Constants.MAP_OPERATION:
+				
+				break;
+			case Constants.FILTER_OPERATION:
+				Tools.assert0(Types.Boolean == returnType, "operation : 'filter' just support (Boolean) as parameter ! but got : (" + returnType + ")" );
+				break;
+			case Constants.ASSERT_OPERATION:
+				Tools.assert0(Types.Boolean == returnType, "operation : 'assert' just support (Boolean) as parameter ! but got : (" + returnType + ")" );
+				break;
+			default:
+				Tools.assert0("have no this operationType ! from now on support : " + Constants.handlerTypeToHandleOperations.keySet().toString() );
+				break;
 		}
 	}
 
@@ -852,7 +872,7 @@ public class StandardHandlerParser extends HandlerParser {
 		
 		return null;
 	}
-		private AttrHandler getMultiStringArgsHandler0(WordsSeprator sep, Operand attrHandler, MultiArgsAttrHandler handler) {
+		private AttrHandler getMultiStringArgsHandler0(WordsSeprator sep, Operand attrHandler, MultiArgsAttrHandler<AttrHandler> handler) {
 			for(Operand operand : attrHandler.operands()) {
 				if(stringAble(operand.type()) ) {
 					handler.addHandler(new ConstantsAttrHandler(operand.name()) );
@@ -866,9 +886,9 @@ public class StandardHandlerParser extends HandlerParser {
 	private AttrHandler getMultiBooleanArgsHandler(WordsSeprator sep, Operand attrHandler) {
 		switch (attrHandler.name() ) {
 			case Constants.CUTTING_OUT_AND :
-				return getMultiBooleanArgsHandler0(sep, attrHandler, new CuttingOutAndAttrHandler(attrHandler.operands().size()) );
+				return getMultiBooleanArgsHandler0(sep, attrHandler, new CuttingOutAndAttrHandler<AttrHandler>(attrHandler.operands().size()) );
 			case Constants.CUTTING_OUT_OR :
-				return getMultiBooleanArgsHandler0(sep, attrHandler, new CuttingOutOrAttrHandler(attrHandler.operands().size()) );
+				return getMultiBooleanArgsHandler0(sep, attrHandler, new CuttingOutOrAttrHandler<AttrHandler>(attrHandler.operands().size()) );
 			default :
 				Tools.assert0("got an unknow '(String, String, ...)' method : " + attrHandler.name() );
 				break ;
@@ -876,7 +896,7 @@ public class StandardHandlerParser extends HandlerParser {
 		
 		return null;
 	}
-		private AttrHandler getMultiBooleanArgsHandler0(WordsSeprator sep, Operand attrHandler, MultiArgsAttrHandler handler) {
+		private AttrHandler getMultiBooleanArgsHandler0(WordsSeprator sep, Operand attrHandler, MultiArgsAttrHandler<AttrHandler> handler) {
 			for(Operand operand : attrHandler.operands()) {
 				if(OperandTypes.Boolean == operand.type() ) {
 					handler.addHandler(new ConstantsAttrHandler(operand.name()) );
@@ -888,8 +908,6 @@ public class StandardHandlerParser extends HandlerParser {
 			return handler;
 		}
 		private AttrHandler getMultiIntArgsHandler(WordsSeprator sep, Operand attrHandler) {
-			Operand ope = attrHandler.operand(0);
-			Operand ope02 = attrHandler.operand(1);
 			switch (attrHandler.name() ) {
 				case Constants.ADD:
 						return getMultiIntArgsHandler0(sep, attrHandler, new AddAttrHandler() );
@@ -908,7 +926,7 @@ public class StandardHandlerParser extends HandlerParser {
 			
 			return null;
 		}
-			private AttrHandler getMultiIntArgsHandler0(WordsSeprator sep, Operand attrHandler, MultiArgsAttrHandler handler) {
+			private AttrHandler getMultiIntArgsHandler0(WordsSeprator sep, Operand attrHandler, MultiArgsAttrHandler<AttrHandler> handler) {
 				for(Operand operand : attrHandler.operands()) {
 					if(OperandTypes.Int == operand.type() ) {
 						handler.addHandler(new ConstantsAttrHandler(operand.name()) );

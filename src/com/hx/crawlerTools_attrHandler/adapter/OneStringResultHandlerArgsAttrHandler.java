@@ -6,10 +6,10 @@
 
 package com.hx.crawlerTools_attrHandler.adapter;
 
+import net.sf.json.JSONObject;
+
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawlerTools_attrHandler.ConstantsAttrHandler;
-import com.hx.crawlerTools_attrHandler.adapter.interf.OneBooleanArgsAttrHandler;
-import com.hx.crawlerTools_attrHandler.adapter.interf.OneStringArgsAttrHandler;
 import com.hx.crawlerTools_attrHandler.adapter.interf.OneStringArgsAttrHandler;
 
 // 构造一个字符串参数的AttrHandler的Handler适配器
@@ -39,4 +39,8 @@ public class OneStringResultHandlerArgsAttrHandler extends AttrHandler {
 		return handler.name();
 	}
 	
+	@Override
+	public String toString() {
+		return new JSONObject().element("handler", handler.toString() ).element("arg", arg.toString() ).toString();
+	}
 }

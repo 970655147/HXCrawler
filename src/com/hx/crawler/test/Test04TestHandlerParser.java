@@ -64,7 +64,7 @@ public class Test04TestHandlerParser {
 //		String res = "te--|st";
 		String res = "te-   abslkdjflskfjgf -|st";
 		HandlerParser parser = new StandardHandlerParser();
-		AttrHandler handler = parser.handlerParse(str, Constants.MAP_HANDLER);
+		AttrHandler handler = parser.handlerParse(str, Constants.HANDLER);
 		Log.log(handler.handle(res) );
 //		Log.log(res.substring(Tools.trimAllSpaces(res).indexOf('|'), res.trim().indexOf('|')) );
 		

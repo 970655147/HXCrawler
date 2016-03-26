@@ -7,6 +7,7 @@
 package com.hx.crawler.interf;
 
 import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
+import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
 
 // 解析handler, 将"handle"属性, 解析为AttrHandler链, 进行处理
 public abstract class HandlerParser {
@@ -16,6 +17,6 @@ public abstract class HandlerParser {
 	}
 	
 	// 核心需要重写的业务方法
-	public abstract AttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn);
+	public abstract OperationAttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn);
 	
 }

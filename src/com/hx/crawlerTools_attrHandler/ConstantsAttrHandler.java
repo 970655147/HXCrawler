@@ -6,6 +6,9 @@
 
 package com.hx.crawlerTools_attrHandler;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
@@ -38,5 +41,9 @@ public class ConstantsAttrHandler extends AttrHandler {
 	public String name() {
 		return Constants.CONSTANTS;
 	}
-	
+
+	@Override
+	public String toString() {
+		return new JSONObject().element("name", name() ).element("operands", res).toString();
+	}
 }

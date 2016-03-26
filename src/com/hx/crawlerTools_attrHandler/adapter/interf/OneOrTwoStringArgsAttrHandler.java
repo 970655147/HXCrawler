@@ -6,7 +6,10 @@
 
 package com.hx.crawlerTools_attrHandler.adapter.interf;
 
-import com.hx.crawler.interf.AttrHandler;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import com.hx.crawler.util.Constants;
 
 
@@ -29,14 +32,19 @@ public abstract class OneOrTwoStringArgsAttrHandler extends TwoStringArgsAttrHan
 	}
 	// 重写handle0, 处理逻辑[将核心逻辑留在了gotResult中]
 	public String handle0(String result) {
-		if(! Constants.HANDLER_UNDEFINED.equals(arg02) ) {
-			return gotResult(arg01, arg02, result);
+		if(Constants.HANDLER_UNDEFINED.equals(arg02) ) {
+			arg02 = arg01;
+			arg01 = result;
 		}
 		
-		return gotResult(result, arg01, result);
+		return gotResult(arg01, arg02, result);
 	}
 	
 	// 核心业务
 	protected abstract String gotResult(String arg01, String arg02, String result);
 	
+	@Override
+	public String toString() {
+		return new JSONObject().element("name", name() ).element("operands", new JSONArray().element(arg01.toString()).element(arg02.toString()) ).toString();
+	}
 }

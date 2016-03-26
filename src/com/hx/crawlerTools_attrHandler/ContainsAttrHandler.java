@@ -34,6 +34,6 @@ public class ContainsAttrHandler extends OneOrTwoStringArgsAttrHandler {
 	
 	@Override
 	public String name() {
-		return Constants.CONSTANTS;
+		return Constants.CONTAINS;
 	}
 }

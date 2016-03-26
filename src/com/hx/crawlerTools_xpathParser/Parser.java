@@ -44,9 +44,12 @@ public class Parser {
 		for(int i=0; i<ep.childSize(); i++) {
 			EndPoint child = ep.getChild(i);
 			Constants.endpointToHandler.get(child.getType() ).handle(root, currentEle, url, res, idx, child, curObj);
-			if(child.beFiltered() ) {
-				beFiltered = true;
-				break ;
+			if(! child.getName().equals(Constants.ARRAY_ATTR) ) {
+				if(child.getHandler().immediateReturn() ) {
+					child.getHandler().handleImmediateReturn();
+					beFiltered = true;
+					break ;
+				}
 			}
 		}
 		if(! beFiltered) {

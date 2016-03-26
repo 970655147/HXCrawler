@@ -13,7 +13,6 @@ import net.sf.json.JSONObject;
 
 import org.dom4j.Element;
 
-import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.interf.EndPoint;
 import com.hx.crawler.interf.EndPointHandler;
 import com.hx.crawler.util.Constants;
@@ -25,7 +24,7 @@ public class AttributeHandler extends EndPointHandler {
 	@Override
 	public void handle(Element root, Element currentEle, String url, JSONArray res, int idx, EndPoint child, JSONObject curObj) {
 		if(! child.getName().equals(Constants.ARRAY_ATTR) ) {
-			child.setBeFiltered(false);
+			child.getHandler().cleanImmediateReturnFlag();
 			if(child.getXPath() != null ) {
 //				List<Element> eles = getResultByXPath(root, currentEle, child.getXPath());
 //				int idx2 = 0;
@@ -53,9 +52,11 @@ public class AttributeHandler extends EndPointHandler {
 			List<Element> eles = Parser.getResultByXPath(root, currentEle, child.getXPath() );
 			int idx2 = 0;
 			for(Element ele : eles) {
-				child.setBeFiltered(false);
+				child.getHandler().cleanImmediateReturnFlag();
 				String handledResult = handleResult(child, getValueByAttribute(ele, child.getAttribute(), url, idx2 ++) );
-				if(! child.beFiltered() ) {
+				if(child.getHandler().immediateReturn() ) {
+					child.getHandler().handleImmediateReturn();
+				} else {
 					curArr.add(handledResult );
 				}
 			}
@@ -65,13 +66,7 @@ public class AttributeHandler extends EndPointHandler {
 
 	// 使用当前AttriBute的相关handler处理结果
 	private String handleResult(EndPoint child, String valueByAttribute) {
-		if(child.getMapHandler() != null) {
-			valueByAttribute = child.getMapHandler().handle(valueByAttribute);
-		}
-		
-		AttrHandler filterHandler = child.getFilterHandler();
-		child.setBeFiltered((filterHandler != null) && (Constants.TRUE.equals(filterHandler.handle(valueByAttribute))) );
-		return valueByAttribute;
+		return child.getHandler().handle(valueByAttribute);
  	}
 	// 通过element 和attribute属性 获取其对应的值
 	private static String getValueByAttribute(Element ele, String attribute, String url, int idx) {

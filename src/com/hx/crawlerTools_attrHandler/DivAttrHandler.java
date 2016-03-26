@@ -14,7 +14,7 @@ import com.hx.crawlerTools_attrHandler.adapter.interf.MultiArgsAttrHandler;
 
 // 将给定的字符串替换为目标字符串
 // map(replace(src, tar) )
-public class DivAttrHandler extends MultiArgsAttrHandler {
+public class DivAttrHandler extends MultiArgsAttrHandler<AttrHandler> {
 	
 	// 初始化
 	public DivAttrHandler(List<AttrHandler> handlerChain) {

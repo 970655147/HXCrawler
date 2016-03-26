@@ -13,7 +13,7 @@ import com.hx.crawler.util.Constants;
 import com.hx.crawlerTools_attrHandler.adapter.interf.MultiArgsAttrHandler;
 
 // 包含一个attrHandler链的AttrHandler
-public class CompositeAttrHandler extends MultiArgsAttrHandler {
+public class CompositeAttrHandler extends MultiArgsAttrHandler<AttrHandler> {
 	// 初始化
 	public CompositeAttrHandler(List<AttrHandler> handlerChain) {
 		super(handlerChain);

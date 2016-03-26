@@ -6,6 +6,9 @@
 
 package com.hx.crawlerTools_attrHandler.adapter;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawlerTools_attrHandler.ConstantsAttrHandler;
@@ -52,4 +55,8 @@ public class TwoStringResultHandlerArgsAttrHandler extends AttrHandler {
 		return handler.name();
 	}
 	
+	@Override
+	public String toString() {
+		return new JSONObject().element("handler", handler.toString() ).element("arg01", arg01.toString() ).element("arg02", arg02.toString() ).toString();
+	}
 }

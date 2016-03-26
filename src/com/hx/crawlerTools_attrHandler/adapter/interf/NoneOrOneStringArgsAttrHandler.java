@@ -6,7 +6,8 @@
 
 package com.hx.crawlerTools_attrHandler.adapter.interf;
 
-import com.hx.crawler.interf.AttrHandler;
+import net.sf.json.JSONObject;
+
 import com.hx.crawler.util.Constants;
 
 
@@ -26,14 +27,18 @@ public abstract class NoneOrOneStringArgsAttrHandler extends OneStringArgsAttrHa
 	}
 	// 重写handle0, 处理逻辑[将核心逻辑留在了gotResult中]
 	public String handle0(String result) {
-		if(! Constants.HANDLER_UNDEFINED.equals(arg) ) {
-			return gotResult(arg, result);
+		if(Constants.HANDLER_UNDEFINED.equals(arg) ) {
+			arg = result;
 		}
 		
-		return gotResult(result, result);
+		return gotResult(arg, result);
 	}
 	
 	// 核心业务
 	protected abstract String gotResult(String arg, String result);
 	
+	@Override
+	public String toString() {
+		return new JSONObject().element("name", name() ).element("operands", arg.toString() ).toString();
+	}
 }

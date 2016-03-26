@@ -46,6 +46,6 @@ public class LessThanAttrHandler extends OneOrTwoStringArgsAttrHandler {
 	
 	@Override
 	public String name() {
-		return Constants.GREATER_THAN;
+		return Constants.LESS_THAN;
 	}
 }

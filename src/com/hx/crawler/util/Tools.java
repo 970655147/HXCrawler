@@ -59,6 +59,8 @@ import com.hx.crawlerTools_attrHandler.CuttingOutAndAttrHandler;
 import com.hx.crawlerTools_attrHandler.CuttingOutOrAttrHandler;
 import com.hx.crawlerTools_attrHandler.StandardHandlerParser;
 import com.hx.crawlerTools_attrHandler.StandardHandlerParser.Types;
+import com.hx.crawlerTools_attrHandler.operation.CompositeOperationAttrHandler;
+import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
 import com.hx.crawlerTools_crawler.HtmlCrawler;
 import com.hx.crawlerTools_crawler.SingleUrlTask;
 
@@ -1004,8 +1006,7 @@ public class Tools {
 			return ;
 		}
 		
-		JSONArray names = obj.names();
-		Iterator<String> it = names.iterator();
+		Iterator<String> it = obj.names().iterator();
 		while(it.hasNext()) {
 			String key = it.next();
 			Object val = obj.get(key );
@@ -1585,32 +1586,31 @@ public class Tools {
 	public final static HandlerParser handlerParser = new StandardHandlerParser();
 	
 	// 将给定的字符串解析为AttrHandler
-	public static AttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn) {
+	public static OperationAttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn) {
 		return handlerParser.handlerParse(handlerStr, handlerType, lastOperationReturn);
 	}
-	public static AttrHandler handlerParse(String handlerStr, String handlerType) {
+	public static OperationAttrHandler handlerParse(String handlerStr, String handlerType) {
 		return handlerParse(handlerStr, handlerType, null);
 	}
 	
 	// 合并两个Handler
-	public static AttrHandler combineHandler(AttrHandler mainHandler, AttrHandler attachHander) {
+	public static OperationAttrHandler combineHandler(OperationAttrHandler mainHandler, OperationAttrHandler attachHander) {
 		Tools.assert0(! mainHandler.operationReturn().isFinal, "the first handler's returnType is final, can't concate 'AttrHandler' anymore ! please check it ! ");
-		CompositeAttrHandler attrHandler = new CompositeAttrHandler();
+		CompositeOperationAttrHandler<OperationAttrHandler> attrHandler = new CompositeOperationAttrHandler<>();
 		attrHandler.addHandler(mainHandler);
 		attrHandler.addHandler(attachHander);
-			attrHandler.operationReturn(attachHander.operationReturn() );
 		return attrHandler;
 	}
-	// 合并两个返回值为逻辑值的Handler, isAnd表示使用"&&"连接 还是"||"连接
-	public static AttrHandler combineCuttingOutHandler(AttrHandler mainHandler, AttrHandler attachHander, boolean isAnd) {
-		Tools.assert0(Types.Boolean == mainHandler.operationReturn(), "combineCuttingOutHandler need '(Boolean, Boolean)' as parameter ! please check it ! ");
-		Tools.assert0(Types.Boolean == attachHander.operationReturn(), "combineCuttingOutHandler need '(Boolean, Boolean)' as parameter ! please check it ! ");
-		if(isAnd) {
-			return new CuttingOutAndAttrHandler(Arrays.asList(mainHandler, attachHander) );
-		} else {
-			return new CuttingOutOrAttrHandler(Arrays.asList(mainHandler, attachHander) );
-		}
-	}
+//	// 合并两个返回值为逻辑值的Handler, isAnd表示使用"&&"连接 还是"||"连接
+//	public static AttrHandler combineCuttingOutHandler(OperationAttrHandler mainHandler, OperationAttrHandler attachHander, boolean isAnd) {
+//		Tools.assert0(Types.Boolean == mainHandler.operationReturn(), "combineCuttingOutHandler need '(Boolean, Boolean)' as parameter ! please check it ! ");
+//		Tools.assert0(Types.Boolean == attachHander.operationReturn(), "combineCuttingOutHandler need '(Boolean, Boolean)' as parameter ! please check it ! ");
+//		if(isAnd) {
+//			return new CuttingOutAndAttrHandler<AttrHandler>(Arrays.asList(mainHandler, attachHander) );
+//		} else {
+//			return new CuttingOutOrAttrHandler<AttrHandler>(Arrays.asList(mainHandler, attachHander) );
+//		}
+//	}
 
 	// 获取给定的attrHander中最后一个有效的AttrHandler[非Composite]
 	public static AttrHandler lastWorkedHandler(AttrHandler attrHandler) {
@@ -1621,20 +1621,28 @@ public class Tools {
 		
 		return attrHandler;
 	}
-	public static AttrHandler removeIfLastWorkedHandlerIsFilter(AttrHandler attrHandler) {
-		if(attrHandler instanceof CompositeAttrHandler) {
-			CompositeAttrHandler compositeHandler = ((CompositeAttrHandler) attrHandler);
-			AttrHandler lastAttrHandler = compositeHandler.handler(compositeHandler.handlers().size() - 1);
-			if(lastAttrHandler instanceof CompositeAttrHandler) {
-				return removeIfLastWorkedHandlerIsFilter(lastAttrHandler);
-			}
-			if(Constants.FILTER_OPERATION.equals(lastAttrHandler.operationType()) ) {
-				return compositeHandler.removeHandler(compositeHandler.handlers().size() - 1);
-			}
+	public static OperationAttrHandler lastWorkedHandler(OperationAttrHandler attrHandler) {
+		if(attrHandler instanceof CompositeOperationAttrHandler) {
+			CompositeOperationAttrHandler<OperationAttrHandler> compositeHandler = ((CompositeOperationAttrHandler<OperationAttrHandler>) attrHandler);
+			return lastWorkedHandler(compositeHandler.handler(compositeHandler.handlers().size() ) );
 		}
 		
-		return null;
+		return attrHandler;
 	}
+//	public static AttrHandler removeIfLastWorkedHandlerIsFilter(OperationAttrHandler attrHandler) {
+//		if(attrHandler instanceof CompositeOperationAttrHandler) {
+//			CompositeOperationAttrHandler<OperationAttrHandler> compositeHandler = ((CompositeOperationAttrHandler<OperationAttrHandler>) attrHandler);
+//			OperationAttrHandler lastAttrHandler = compositeHandler.handler(compositeHandler.handlers().size() - 1);
+//			if(lastAttrHandler instanceof CompositeOperationAttrHandler) {
+//				return removeIfLastWorkedHandlerIsFilter(lastAttrHandler);
+//			}
+//			if(Constants.FILTER_OPERATION.equals(lastAttrHandler.operationType()) ) {
+//				return compositeHandler.removeHandler(compositeHandler.handlers().size() - 1);
+//			}
+//		}
+//		
+//		return null;
+//	}
 	
 	// ------------ 待续 --------------------
 

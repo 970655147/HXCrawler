@@ -40,6 +40,6 @@ public class NotEqualsAttrHandler extends OneOrTwoStringArgsAttrHandler {
 
 	@Override
 	public String name() {
-		return Constants.EQUALS;
+		return Constants.NOT_EQUALS;
 	}
 }

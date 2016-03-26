@@ -10,6 +10,7 @@ import net.sf.json.JSONObject;
 
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Tools;
+import com.hx.crawlerTools_attrHandler.operation.interf.OperationAttrHandler;
 
 // 一个EndPint[终端结点 : "values" & "attribute"]
 public abstract class EndPoint {
@@ -26,20 +27,16 @@ public abstract class EndPoint {
 	protected String xpath;
 	protected EndPoint parent;
 	// mapHandler, filterHanlder, 以及是否被filter的标志位
-	protected AttrHandler mapHandler;
-	protected AttrHandler filterHandler;
-		protected boolean beFiltered;
+	protected OperationAttrHandler handler;
 	
 	// 初始化
-	public EndPoint(String type, String name, String xpath, String mapHandler, String filterHandler, EndPoint parent) {
+	public EndPoint(String type, String name, String xpath, String handlerStr, EndPoint parent) {
 		this.type = type;
 		this.name = name;
 		this.parent = parent;
 		this.xpath = xpath;
-		this.beFiltered = false;
 		
-		initHandler(Constants.MAP_HANDLER, mapHandler);
-		initHandler(Constants.FILTER_HANDLER, filterHandler);
+		initHandler(Constants.HANDLER, handlerStr);
 //		if(xpath != null) {
 //			this.xpath = Tools.getXPath(this, xpath);
 //		}
@@ -69,17 +66,8 @@ public abstract class EndPoint {
 	public String getName() {
 		return name;
 	}
-	public AttrHandler getMapHandler() {
-		return mapHandler;
-	}
-	public AttrHandler getFilterHandler() {
-		return filterHandler;
-	}
-	public void setBeFiltered(boolean beFiltered) {
-		this.beFiltered = beFiltered;
-	}
-	public boolean beFiltered() {
-		return this.beFiltered;
+	public OperationAttrHandler getHandler() {
+		return handler;
 	}
 	
 	// 初始化filter
@@ -91,24 +79,19 @@ public abstract class EndPoint {
 	private void initHandler(String handlerType, String handlerStr) {
 		if(handlerStr != null) {
 			if((handlerStr.startsWith(Constants.HANDLER_ADDED) 
-					&& ( ((Constants.MAP_HANDLER.equals(handlerType) ) && (parent.mapHandler == null) )
-							|| ((Constants.FILTER_HANDLER.equals(handlerType) ) && (parent.filterHandler == null)) ) )
+					&& (Constants.HANDLER.equals(handlerType) && (parent.handler == null)) )
 					|| handlerStr.startsWith(Constants.HANDLER_OVERRIDE)
 					) {
-					if(Constants.MAP_HANDLER.equals(handlerType) ) {
-						this.mapHandler = Tools.handlerParse(handlerStr.substring(1), Constants.MAP_HANDLER );
-					} else if(Constants.FILTER_HANDLER.equals(handlerType) ) {
-						this.filterHandler = Tools.handlerParse(handlerStr.substring(1), Constants.FILTER_HANDLER );
+					if(Constants.HANDLER.equals(handlerType) ) {
+						this.handler = Tools.handlerParse(handlerStr.substring(1), Constants.HANDLER );
 					} else {
 						Tools.assert0("have no this handlerType : " + handlerType + ", please check it !");
 					}
 			} else if(handlerStr.startsWith(Constants.HANDLER_ADDED)
-					&& (((Constants.MAP_HANDLER.equals(handlerType) ) && (parent.mapHandler != null) ) 
-						|| ((Constants.FILTER_HANDLER.equals(handlerType) ) && (parent.filterHandler != null)) ) ) {
-				if(Constants.MAP_HANDLER.equals(handlerType) ) {
-					this.mapHandler = Tools.combineHandler(parent.mapHandler, Tools.handlerParse(handlerStr.substring(1), Constants.MAP_HANDLER) );
-				} else if(Constants.FILTER_HANDLER.equals(handlerType) ) {
-					this.filterHandler = Tools.combineCuttingOutHandler(parent.filterHandler, Tools.handlerParse(handlerStr.substring(1), Constants.FILTER_HANDLER), false );
+					&& (Constants.HANDLER.equals(handlerType) && (parent.handler != null) ) 
+					) {
+				if(Constants.HANDLER.equals(handlerType) ) {
+					this.handler = Tools.combineHandler(parent.handler, Tools.handlerParse(handlerStr.substring(1), Constants.HANDLER) );
 				} else {
 					Tools.assert0("have no this handlerType : " + handlerType + ", please check it !");
 				}
@@ -118,13 +101,14 @@ public abstract class EndPoint {
 		} else {
 			// default inhert from parent
 			if(parent != null) {
-				if(Constants.MAP_HANDLER.equals(handlerType) ) {
-					this.mapHandler = parent.mapHandler;
-				} else if(Constants.FILTER_HANDLER.equals(handlerType) ) {
-					this.filterHandler = parent.filterHandler;
+				if(Constants.HANDLER.equals(handlerType) ) {
+					this.handler = parent.handler;
 				} else {
 					Tools.assert0("have no this handlerType : " + handlerType + ", please check it !");
 				}
+			} else {
+				// doNothing
+				this.handler = Constants.defaultOperationAttrHandler;
 			}
 		}
 	}

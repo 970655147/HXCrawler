@@ -4,41 +4,41 @@
  * created by 970655147
  */
 
-package com.hx.crawlerTools_attrHandler.adapter.interf;
+package com.hx.crawlerTools_attrHandler.operation.interf;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 组合了多个Handler的AttrHandler
-public abstract class MultiArgsAttrHandler<T extends AttrHandler> extends AttrHandler {
+public abstract class MultiArgsOperationAttrHandler<T extends OperationAttrHandler> extends OperationAttrHandler {
 	
 	// 各个子handler条件
 	protected List<T> handlers;
 	
 	// 初始化
-	public MultiArgsAttrHandler(List<T> handlers) {
+	public MultiArgsOperationAttrHandler(List<T> handlers) {
+		super();
 		this.handlers = handlers;
 	}
-	public MultiArgsAttrHandler(int initCap) {
+	public MultiArgsOperationAttrHandler(int initCap) {
+		super();
 		this.handlers = new ArrayList<>(initCap);
 	}
-	public MultiArgsAttrHandler() {
+	public MultiArgsOperationAttrHandler() {
 		this(Constants.CONCATE_HANDLER_DEFAULT_CAP);
 	}
 	
 	// 添加handler
 	public void addHandler(T handler) {
 		this.handlers.add(handler);
+		operationReturn(handler.operationReturn() );
 	}
 	// 获取handler
-	public AttrHandler handler(int idx) {
+	public T handler(int idx) {
 		if((handlers == null) || (idx < 0) || (idx >= handlers.size()) ) {
 			return null;
 		}
@@ -57,12 +57,11 @@ public abstract class MultiArgsAttrHandler<T extends AttrHandler> extends AttrHa
 	}
 	
 	@Override
-	public String toString() {
-		JSONArray arr = new JSONArray();
-		for(AttrHandler handler : handlers) {
-			arr.add(handler.toString() );
+	public void cleanImmediateReturnFlag() {
+		super.cleanImmediateReturnFlag();
+		for(OperationAttrHandler handler : handlers) {
+			handler.cleanImmediateReturnFlag();
 		}
-		return new JSONObject().element("name", name() ).element("operands", arr.toString() ).toString();
 	}
 	
 }

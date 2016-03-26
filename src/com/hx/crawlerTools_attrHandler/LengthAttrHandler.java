@@ -29,7 +29,7 @@ public class LengthAttrHandler extends NoneOrOneStringArgsAttrHandler {
 
 	@Override
 	public String name() {
-		return Constants.TO_UPPERCASE;
+		return Constants.LENGTH;
 	}
 	
 }

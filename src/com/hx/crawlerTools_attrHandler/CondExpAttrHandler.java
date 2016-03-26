@@ -6,6 +6,9 @@
 
 package com.hx.crawlerTools_attrHandler;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
@@ -52,5 +55,10 @@ public class CondExpAttrHandler extends AttrHandler {
 	@Override
 	public String name() {
 		return Constants.COND_EXP;
+	}
+	
+	@Override
+	public String toString() {
+		return new JSONObject().element("name", name() ).element("operands", new JSONArray().element(condAttr).element(truePart).element(falsePart) ).toString();
 	}
 }
