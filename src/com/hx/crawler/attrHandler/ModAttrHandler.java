@@ -9,7 +9,7 @@ package com.hx.crawler.attrHandler;
 import java.util.List;
 
 import com.hx.crawler.attrHandler.adapter.interf.MultiArgsAttrHandler;
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 将给定的字符串替换为目标字符串

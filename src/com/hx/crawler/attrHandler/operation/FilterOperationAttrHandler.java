@@ -7,8 +7,8 @@
 package com.hx.crawler.attrHandler.operation;
 
 import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;
-import com.hx.crawler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // filterHandler

@@ -22,7 +22,6 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,20 +48,18 @@ import org.ccil.cowan.tagsoup.XMLWriter;
 import org.xml.sax.InputSource;
 
 import com.hx.crawler.attrHandler.CompositeAttrHandler;
-import com.hx.crawler.attrHandler.CuttingOutAndAttrHandler;
-import com.hx.crawler.attrHandler.CuttingOutOrAttrHandler;
 import com.hx.crawler.attrHandler.StandardHandlerParser;
 import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.HandlerParser;
 import com.hx.crawler.attrHandler.operation.CompositeOperationAttrHandler;
 import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;
 import com.hx.crawler.crawler.HtmlCrawler;
 import com.hx.crawler.crawler.SingleUrlTask;
-import com.hx.crawler.interf.AttrHandler;
-import com.hx.crawler.interf.Crawler;
-import com.hx.crawler.interf.HandlerParser;
-import com.hx.crawler.interf.ResultJudger;
-import com.hx.crawler.interf.ScriptParameter;
+import com.hx.crawler.crawler.interf.Crawler;
+import com.hx.crawler.crawler.interf.ScriptParameter;
 import com.hx.crawler.test.Test01TestXpathParser;
+import com.hx.crawler.xpathParser.interf.ResultJudger;
 
 // 工具类
 public class Tools {
@@ -305,6 +302,9 @@ public class Tools {
 	public static String getTmpDir(String name) {
 		return TMP_DIR + "\\" + name;
 	}
+	public static String getFilePath(String dir, String file) {
+		return Tools.removeIfEndsWith(dir, "/") + Tools.addIfNotStartsWith(file, "/");
+	}
 	
 	// 获取临时文件的下一个索引[生成文件名称]
 	private static String getNextTmpName() {
@@ -325,19 +325,31 @@ public class Tools {
 	}
 	// 将html字符串保存到指定的文件中
 	public static void save(String html, String nextTmpName, long logFlags) throws IOException {
-		save(html, new File(nextTmpName), logFlags);
+		save(html, nextTmpName, DEFAULT_CHARSET, logFlags);
 	}
-	public static void save(String html, File nextTmpFile, long logFlags) throws IOException {
-		write0(html, nextTmpFile, DEFAULT_CHARSET, false);
+	public static void save(String html, String nextTmpName, String charset, long logFlags) throws IOException {
+		save(html, new File(nextTmpName), charset, logFlags);
+	}
+	public static void save(String html, File nextTmpFile, String charset, long logFlags) throws IOException {
+		write0(html, nextTmpFile, charset, false);
 		if(isLog(logFlags, LOG_ON_SAVE) ) {
 			Log.log("save content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
 		}
+	}
+	public static void save(String html, File nextTmpFile, long logFlags) throws IOException {
+		save(html, nextTmpFile, DEFAULT_CHARSET, logFlags);
 	}	
 	public static void append(String html, String nextTmpName, long logFlags) throws IOException {
-		append(html, new File(nextTmpName), logFlags );
+		append(html, nextTmpName, DEFAULT_CHARSET, logFlags );
+	}
+	public static void append(String html, String nextTmpName, String charset, long logFlags) throws IOException {
+		append(html, new File(nextTmpName), charset, logFlags );
 	}
 	public static void append(String html, File nextTmpFile, long logFlags) throws IOException {
-		write0(html, nextTmpFile, DEFAULT_CHARSET, true);
+		append(html, nextTmpFile, DEFAULT_CHARSET, logFlags);
+	}
+	public static void append(String html, File nextTmpFile, String charset, long logFlags) throws IOException {
+		write0(html, nextTmpFile, charset, true);
 		if(isLog(logFlags, LOG_ON_APPEND) ) {
 			Log.log("append content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
 		}
@@ -345,14 +357,26 @@ public class Tools {
 	public static void save(String html, String nextTmpName) throws IOException {
 		save(html, nextTmpName, LOG_ON_MINE_CONF );
 	}
+	public static void save(String html, String nextTmpName, String charset) throws IOException {
+		save(html, nextTmpName, charset, LOG_ON_MINE_CONF );
+	}
 	public static void save(String html, File nextTmpFile) throws IOException {
 		save(html, nextTmpFile, LOG_ON_MINE_CONF);
+	}
+	public static void save(String html, File nextTmpFile, String charset) throws IOException {
+		save(html, nextTmpFile, charset, LOG_ON_MINE_CONF);
 	}
 	public static void append(String html, String nextTmpName) throws IOException {
 		append(html, nextTmpName, LOG_ON_MINE_CONF );
 	}
+	public static void append(String html, String nextTmpName, String charset) throws IOException {
+		append(html, nextTmpName, charset, LOG_ON_MINE_CONF );
+	}
 	public static void append(String html, File nextTmpFile) throws IOException {
 		append(html, nextTmpFile, LOG_ON_MINE_CONF);
+	}
+	public static void append(String html, File nextTmpFile, String charset) throws IOException {
+		append(html, nextTmpFile, charset, LOG_ON_MINE_CONF);
 	}
 	private static void write0(String html, File nextTmpFile, String charset, boolean isAppend) throws IOException {
 		BufferedOutputStream bos = null;
@@ -578,14 +602,14 @@ public class Tools {
 		return str;
 	}
 	// 如果不是给定的字符串以startsWith, 则添加startsWith
-	public static String appendIfNotStartsWith(String str, String startsWith) {
+	public static String addIfNotStartsWith(String str, String startsWith) {
 		if(! str.startsWith(startsWith) ) {
 			return startsWith + str;
 		}
 		
 		return str;
 	}
-	public static String appendIfNotEndsWith(String str, String endsWith) {
+	public static String addIfNotEndsWith(String str, String endsWith) {
 		if(! str.endsWith(endsWith) ) {
 			return str + endsWith;
 		}
@@ -1106,11 +1130,20 @@ public class Tools {
 	}
 	
 	// 向sb中添加str
+	public static void append(StringBuilder sb, String str, boolean isClean) {
+		if(isClean) {
+			sb.setLength(0);
+		}
+		sb.append(str);
+	}
+	public static void append(StringBuilder sb, String str) {
+		append(sb, str, false);
+	}
 	public static void appendCRLF(StringBuilder sb, String str, boolean isClean) {
 		if(isClean) {
 			sb.setLength(0);
 		}
-		appendCRLF(sb, str);
+		append(sb, str);
 	}
 	public static void appendCRLF(StringBuilder sb, String str) {
 		appendCRLF(sb, str + CRLF, false);

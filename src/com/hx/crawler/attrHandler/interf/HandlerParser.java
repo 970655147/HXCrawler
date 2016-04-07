@@ -4,7 +4,7 @@
  * created by 970655147
  */
 
-package com.hx.crawler.interf;
+package com.hx.crawler.attrHandler.interf;
 
 import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
 import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;

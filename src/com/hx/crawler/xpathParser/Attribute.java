@@ -10,7 +10,7 @@ package com.hx.crawler.xpathParser;
 
 import net.sf.json.JSONObject;
 
-import com.hx.crawler.interf.EndPoint;
+import com.hx.crawler.xpathParser.interf.EndPoint;
 
 // attribute½áµã
 public final class Attribute extends EndPoint {

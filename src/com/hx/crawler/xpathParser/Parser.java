@@ -15,8 +15,8 @@ import net.sf.json.JSONObject;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import com.hx.crawler.interf.EndPoint;
 import com.hx.crawler.util.Constants;
+import com.hx.crawler.xpathParser.interf.EndPoint;
 
 public class Parser {
 	

@@ -13,7 +13,7 @@ import java.util.List;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 组合了多个Handler的AttrHandler

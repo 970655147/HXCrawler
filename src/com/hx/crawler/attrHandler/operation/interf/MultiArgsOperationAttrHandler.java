@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 组合了多个Handler的AttrHandler

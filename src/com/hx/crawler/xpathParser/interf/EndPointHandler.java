@@ -4,7 +4,7 @@
  * created by 970655147
  */
 
-package com.hx.crawler.interf;
+package com.hx.crawler.xpathParser.interf;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

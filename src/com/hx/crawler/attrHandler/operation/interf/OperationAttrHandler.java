@@ -7,7 +7,7 @@
 package com.hx.crawler.attrHandler.operation.interf;
 
 import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.util.Log;
 import com.hx.crawler.util.Tools;
 

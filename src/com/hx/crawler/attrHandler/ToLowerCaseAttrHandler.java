@@ -7,7 +7,7 @@
 package com.hx.crawler.attrHandler;
 
 import com.hx.crawler.attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 获取给定的字符串的小写形式的Handler

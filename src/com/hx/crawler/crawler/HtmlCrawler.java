@@ -15,7 +15,7 @@ import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
-import com.hx.crawler.interf.Crawler;
+import com.hx.crawler.crawler.interf.Crawler;
 import com.hx.crawler.util.Tools;
 
 // HtmlCrawler
@@ -94,7 +94,8 @@ public class HtmlCrawler extends Crawler {
 			req.addHeader(header );
 		}
 		
-		if(! existCookiesInHeader) {
+		// add "&& ((config.getCookies().size() > 0))" incase of have no cookie		add at 2016.04.07
+		if((! existCookiesInHeader) && ((config.getCookies().size() > 0)) ) {
 			req.addHeader(Tools.COOKIE_STR, Tools.getCookieStr(config.getCookies()) );
 		}
 	}

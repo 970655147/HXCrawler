@@ -12,7 +12,7 @@ import net.sf.json.JSONObject;
 
 import com.hx.crawler.attrHandler.ConstantsAttrHandler;
 import com.hx.crawler.attrHandler.adapter.interf.StringIntArgsAttrHandler;
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 构造(String, Int)参数的AttrHandler的Handler适配器

@@ -14,9 +14,9 @@ import net.sf.json.JSONObject;
 
 import org.dom4j.Element;
 
-import com.hx.crawler.interf.EndPoint;
-import com.hx.crawler.interf.EndPointHandler;
 import com.hx.crawler.util.Constants;
+import com.hx.crawler.xpathParser.interf.EndPoint;
+import com.hx.crawler.xpathParser.interf.EndPointHandler;
 
 //values 结点的相关业务处理
 public class ValuesHandler extends EndPointHandler {

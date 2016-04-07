@@ -17,9 +17,9 @@ import com.hx.crawler.attrHandler.DoNothingAttrHandler;
 import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
 import com.hx.crawler.attrHandler.operation.MapOperationAttrHandler;
 import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;
-import com.hx.crawler.interf.EndPointHandler;
 import com.hx.crawler.xpathParser.AttributeHandler;
 import com.hx.crawler.xpathParser.ValuesHandler;
+import com.hx.crawler.xpathParser.interf.EndPointHandler;
 
 // ³£Á¿
 public class Constants {

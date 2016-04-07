@@ -10,8 +10,8 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import com.hx.crawler.interf.EndPoint;
 import com.hx.crawler.util.Constants;
+import com.hx.crawler.xpathParser.interf.EndPoint;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

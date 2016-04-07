@@ -10,7 +10,7 @@ import net.sf.json.JSONObject;
 
 import com.hx.crawler.attrHandler.ConstantsAttrHandler;
 import com.hx.crawler.attrHandler.adapter.interf.OneStringArgsAttrHandler;
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 
 // 构造一个字符串参数的AttrHandler的Handler适配器
 // map(trim)

@@ -9,7 +9,7 @@ package com.hx.crawler.attrHandler;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 条件表达式的handler

@@ -9,7 +9,7 @@ package com.hx.crawler.attrHandler;
 import java.util.List;
 
 import com.hx.crawler.attrHandler.adapter.interf.MultiArgsAttrHandler;
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.util.Constants;
 
 // ¶ÌÂ·Óë

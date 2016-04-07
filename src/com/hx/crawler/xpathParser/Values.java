@@ -11,7 +11,7 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
-import com.hx.crawler.interf.EndPoint;
+import com.hx.crawler.xpathParser.interf.EndPoint;
 
 // values ÔªËØ
 public final class Values extends EndPoint {

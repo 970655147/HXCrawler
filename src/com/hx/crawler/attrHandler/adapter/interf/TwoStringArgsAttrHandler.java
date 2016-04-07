@@ -6,7 +6,7 @@
 
 package com.hx.crawler.attrHandler.adapter.interf;
 
-import com.hx.crawler.interf.AttrHandler;
+import com.hx.crawler.attrHandler.interf.AttrHandler;
 
 
 // 两个整形参数的AttrHandler
