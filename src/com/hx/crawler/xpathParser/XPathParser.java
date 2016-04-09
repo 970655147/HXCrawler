@@ -12,25 +12,28 @@ import java.util.List;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.xpathParser.interf.EndPoint;
+import com.hx.crawler.xpathParser.interf.Parser;
+import com.hx.crawler.xpathParser.interf.Parser;
 
-public class Parser {
+public final class XPathParser extends Parser {
 	
 	// 以root为根节点, 解析xpath字符串[指定的格式]
-	public static JSONArray parse(Element root, String url, String xpath) {
+	public JSONArray parse(Element root, String url, String xpath) {
 		JSONArray res = new JSONArray();
-		IndexString idxStr = new IndexString(xpath);
+		XpathIndexString idxStr = new XpathIndexString(xpath);
 		
 		EndPoint rootEp = idxStr.getRoot();
 		parse0(root, root, url, rootEp, res, 0);
 		
 		return res;
 	}
-	public static JSONArray parse(String html, String url, String xpath) throws Exception {
+	public JSONArray parse(String html, String url, String xpath) throws Exception {
 		SAXReader saxReader = new SAXReader();
 		Element root = saxReader.read(new StringReader(html)).getRootElement();
 		return parse(root, url, xpath);

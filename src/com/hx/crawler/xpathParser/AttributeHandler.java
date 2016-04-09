@@ -40,7 +40,7 @@ public class AttributeHandler extends EndPointHandler {
 //					curObj.element(child.getName(), attrVals);
 //				}
 				
-				Element ele = Parser.getSingleResultByXPath(root, currentEle, child.getXPath());
+				Element ele = XPathParser.getSingleResultByXPath(root, currentEle, child.getXPath());
 				String handledResult = handleResult(child, getValueByAttribute(ele, child.getAttribute(), url, 0) );
 				curObj.element(child.getName(), handledResult );
 			} else {
@@ -49,7 +49,7 @@ public class AttributeHandler extends EndPointHandler {
 			}
 		} else {
 			JSONArray curArr = new JSONArray();
-			List<Element> eles = Parser.getResultByXPath(root, currentEle, child.getXPath() );
+			List<Element> eles = XPathParser.getResultByXPath(root, currentEle, child.getXPath() );
 			int idx2 = 0;
 			for(Element ele : eles) {
 				child.getHandler().cleanImmediateReturnFlag();

@@ -10,11 +10,12 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import com.hx.crawler.util.Constants;
-import com.hx.crawler.xpathParser.interf.EndPoint;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
+import com.hx.crawler.util.Constants;
+import com.hx.crawler.xpathParser.interf.EndPoint;
+import com.hx.crawler.xpathParser.interf.IndexString;
 
 // 索引字符串 : 用于查找指定的结果
 //[
@@ -29,7 +30,7 @@ import net.sf.json.JSONObject;
 //    ]
 //}
 //]
-public class IndexString {
+public final class XpathIndexString extends IndexString {
 
 //	模板规则
 //	索引字符串 中可能的键为name, xpath, attribute, values
@@ -48,13 +49,14 @@ public class IndexString {
 	// valuesStack 表示当前遍历到的"attribute" 或者"values"
 	// root 表示根节点, 其连接着子endpoint
 	private JSONArray idxArr;
-	private Deque<Iterator<JSONObject>> stack;
+	private Deque<Iterator<?>> stack;
 	private Deque<EndPoint> valuesStack;
 	private EndPoint root;
 	
 	// 初始化
 	// 创建root 结点, 并解析
-	public IndexString(String idxStr) {
+	public XpathIndexString(String idxStr) {
+		super(idxStr);
 		idxArr = JSONArray.fromObject(idxStr );
 		stack = new LinkedList<>();
 		valuesStack = new LinkedList<>();
@@ -63,6 +65,11 @@ public class IndexString {
 		valuesStack.push(root);
 		
 		parse();
+	}
+	
+	// 获取root结点
+	public EndPoint getRoot() {
+		return root;
 	}
 	
 	// 解析indexString, 键数据接口和root结点连接起来
@@ -77,11 +84,11 @@ public class IndexString {
 	// ... 之前没有详细的注释, 这次回来看看  还把我看了好久。。		--2015.10.02
 	private EndPoint nextEndPoint() {
 		EndPoint res = null;
-		Iterator<JSONObject> it = null;
+		Iterator<?> it = null;
 		while(!stack.isEmpty() ) {
 			it = stack.peek();
 			if(it.hasNext() ) {
-				JSONObject current = it.next();
+				JSONObject current = (JSONObject) it.next();
 				if(current.containsKey(EndPoint.VALUES) ) {
 					JSONArray values = current.getJSONArray(EndPoint.VALUES);
 					res = new Values(current.getString(Constants.NAME), current.getString(Constants.XPATH),
@@ -121,11 +128,6 @@ public class IndexString {
 		}
 		
 		return false;
-	}
-	
-	// 获取root结点
-	public EndPoint getRoot() {
-		return root;
 	}
 	
 	// for debug ...

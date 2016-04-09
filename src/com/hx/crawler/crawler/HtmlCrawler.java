@@ -10,16 +10,20 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
 import com.hx.crawler.crawler.interf.Crawler;
+import com.hx.crawler.crawler.interf.CrawlerConfig;
+import com.hx.crawler.crawler.interf.Page;
 import com.hx.crawler.util.Tools;
 
 // HtmlCrawler
-public class HtmlCrawler extends Crawler {
+public class HtmlCrawler extends Crawler<HttpResponse, Header, String, NameValuePair, String, String> {
 
 	// getInstance 获取到的唯一实例
 	private static HtmlCrawler instance;
@@ -41,46 +45,46 @@ public class HtmlCrawler extends Crawler {
 	}
 	
 	// getPage
-	public Page getPage(String url) throws IOException {
-		return getPage(url, new CrawlerConfig());
+	public Page<HttpResponse> getPage(String url) throws IOException {
+		return getPage(url, new HtmlCrawlerConfig());
 	}
-	public Page getPage(String url, CrawlerConfig config) throws IOException {
+	public Page<HttpResponse> getPage(String url, CrawlerConfig<Header, String, NameValuePair, String, String> config) throws IOException {
 		Request req = Request.Get(url);
 		req.connectTimeout(config.getTimeout() );
 		setHeadersAndCookies(req, config);
 		
 		Response resp = req.execute();
-		return new Page(resp);
+		return new HtmlPage(resp);
 	}
 	
 	// postPage
-	public Page postPage(String url) throws IOException {
-		return postPage(url, new CrawlerConfig());
+	public Page<HttpResponse> postPage(String url) throws IOException {
+		return postPage(url, new HtmlCrawlerConfig());
 	}
-	public Page postPage(String url, CrawlerConfig config) throws IOException {
+	public Page<HttpResponse> postPage(String url, CrawlerConfig<Header, String, NameValuePair, String, String> config) throws IOException {
 		Request req = Request.Post(url);
 		config(req, config);
 		
 		Response resp = req.execute();
-		return new Page(resp);
+		return new HtmlPage(resp);
 	}
-	public Page postPage(String url, CrawlerConfig config, String bodyData, ContentType contentType) throws IOException {
+	public Page<HttpResponse> postPage(String url, CrawlerConfig<Header, String, NameValuePair, String, String> config, String bodyData, ContentType contentType) throws IOException {
 		Request req = Request.Post(url);
 		config(req, config);
 		req.bodyString(bodyData, contentType);
 		
 		Response resp = req.execute();
-		return new Page(resp);
+		return new HtmlPage(resp);
 	}
 	
 	// 使用crawlerConfig 配置request
-	private static void config(Request req, CrawlerConfig config) {
+	private static void config(Request req, CrawlerConfig<Header, String, NameValuePair, String, String> config) {
 		setHeadersAndCookies(req, config);
 		req.bodyForm(config.getData() );
 	}
 	
 	// 为request设置请求头 & cookies
-	private static void setHeadersAndCookies(Request req, CrawlerConfig config) {
+	private static void setHeadersAndCookies(Request req, CrawlerConfig<Header, String, NameValuePair, String, String> config) {
 		Iterator<Header> it = config.getHeaders().iterator();
 		boolean existCookiesInHeader = false;
 		

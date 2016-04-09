@@ -9,7 +9,7 @@ package com.hx.crawler.crawler.interf;
 import java.util.Map;
 
 // 脚本的参数
-public abstract class ScriptParameter {
+public abstract class ScriptParameter<ResponseType, HeaderType, HeaderValType, DataType, DataValType, CookieValType> {
 	
 	// taskGroupId, taskId
 	// 请求的url, 参数, crawler
@@ -17,7 +17,7 @@ public abstract class ScriptParameter {
 	protected int taskId;
 	protected String url;
 	protected Map<String, Object> param;
-	protected Crawler crawler;
+	protected Crawler<ResponseType, HeaderType, HeaderValType, DataType, DataValType, CookieValType> crawler;
 	
 	// setter & getter
 	public int getTaskGroupId() {
@@ -41,7 +41,7 @@ public abstract class ScriptParameter {
 	public void setParam(String key, Object value) {
 		this.param.put(key, value);
 	}
-	public void setCrawler(Crawler crawler) {
+	public void setCrawler(Crawler<ResponseType, HeaderType, HeaderValType, DataType, DataValType, CookieValType> crawler) {
 		this.crawler = crawler;
 	}
 	public String getUrl() {
@@ -50,7 +50,7 @@ public abstract class ScriptParameter {
 	public Map<String, Object> getParam() {
 		return param;
 	}
-	public Crawler getCrawler() {
+	public Crawler<ResponseType, HeaderType, HeaderValType, DataType, DataValType, CookieValType> getCrawler() {
 		return crawler;
 	}
 	public Object getParam(String key) {

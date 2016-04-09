@@ -7,7 +7,6 @@
 package com.hx.crawler.attrHandler;
 
 import com.hx.crawler.attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
-import com.hx.crawler.attrHandler.adapter.interf.OneStringArgsAttrHandler;
 import com.hx.crawler.util.Constants;
 
 // 获取给定的字符串的长度的handler

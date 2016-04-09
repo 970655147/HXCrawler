@@ -10,9 +10,7 @@ import net.sf.json.JSONObject;
 
 import com.hx.crawler.attrHandler.ConstantsAttrHandler;
 import com.hx.crawler.attrHandler.adapter.interf.OneBooleanArgsAttrHandler;
-import com.hx.crawler.attrHandler.adapter.interf.OneStringArgsAttrHandler;
 import com.hx.crawler.attrHandler.interf.AttrHandler;
-import com.hx.crawler.util.Constants;
 
 // 构造一个boolean参数的AttrHandler的Handler适配器
 // map(trim)

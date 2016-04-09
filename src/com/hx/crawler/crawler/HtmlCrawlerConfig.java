@@ -17,8 +17,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.hx.crawler.crawler.interf.CrawlerConfig;
+
 // CrawlerConfig
-public class CrawlerConfig {
+public class HtmlCrawlerConfig implements CrawlerConfig<Header, String, NameValuePair, String, String> {
 	
 	// 请求头信息, cookies信息, postData信息
 	// 超时配置
@@ -39,7 +41,7 @@ public class CrawlerConfig {
 	}
 	
 	// 初始化 添加默认的请求头
-	public CrawlerConfig() {
+	public HtmlCrawlerConfig() {
 		headers = new ArrayList<>();
 		cookies = new HashMap<>();
 		data = new ArrayList<>();
@@ -49,18 +51,15 @@ public class CrawlerConfig {
 			headers.add(new BasicHeader(header.getKey(), header.getValue()) );
 		}
 	}
-	public CrawlerConfig(CrawlerConfig config) {
+	public HtmlCrawlerConfig(HtmlCrawlerConfig config) {
 		this();
 		addHeaders(config.getHeaders() );
-		addDatas(config.getData() );
+		addData(config.getData() );
 		addCookies(config.getCookies() );
 		this.timeout = config.getTimeout();
 	}
 	
 	// getter & setter
-	public List<Header> getHeaders() {
-		return headers;
-	}
 	public void setHeaders(List<Header> headers) {
 		this.headers = headers;
 	}
@@ -71,6 +70,12 @@ public class CrawlerConfig {
 		}
 		this.headers = headersTmp;
 	}
+	public void setCookies(Map<String, String> cookies) {
+		this.cookies = cookies;
+	}
+	public void setData(List<NameValuePair> data) {
+		this.data = data;
+	}
 	public void setData(Map<String, String> data) {
 		List<NameValuePair> dataTmp = new ArrayList<>(data.size() );
 		for(Map.Entry<String, String> entry : data.entrySet() ) {
@@ -78,19 +83,23 @@ public class CrawlerConfig {
 		}
 		this.data = dataTmp;
 	}
+	public int getTimeout() {
+		return timeout;
+	}
+	public List<Header> getHeaders() {
+		return headers;
+	}
 	public Map<String, String> getCookies() {
 		return cookies;
-	}
-	public void setCookies(Map<String, String> cookies) {
-		this.cookies = cookies;
 	}
 	public List<NameValuePair> getData() {
 		return data;
 	}
-	public void setData(List<NameValuePair> data) {
-		this.data = data;
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
 	}
-	public CrawlerConfig addHeader(String key, String value) {
+
+	public HtmlCrawlerConfig addHeader(String key, String value) {
 		int idx = indexOfHeader(key);
 		if(idx >= 0) {
 			headers.remove(idx);
@@ -99,11 +108,25 @@ public class CrawlerConfig {
 		
 		return this;
 	}
-	public CrawlerConfig addCookie(String key, String value) {
+	public HtmlCrawlerConfig addHeaders(List<Header> headers) {
+		for(Header header : headers ) {
+			addHeader(header.getName(), header.getValue() );
+		}
+		
+		return this;
+	}
+	public HtmlCrawlerConfig addCookie(String key, String value) {
 		cookies.put(key, value);
 		return this;
 	}
-	public CrawlerConfig addData(String key, String value) {
+	public HtmlCrawlerConfig addCookies(Map<String, String> headers) {
+		for(Entry<String, String> header : headers.entrySet() ) {
+			addCookie(header.getKey(), header.getValue() );
+		}
+		
+		return this;
+	}
+	public HtmlCrawlerConfig addData(String key, String value) {
 		int idx = indexOfData(key);
 		if(idx >= 0) {
 			data.remove(idx);
@@ -112,39 +135,19 @@ public class CrawlerConfig {
 		
 		return this;
 	}
-	public CrawlerConfig addHeaders(List<Header> headers) {
-		for(Header header : headers ) {
-			addHeader(header.getName(), header.getValue() );
-		}
-		
-		return this;
-	}
-	public CrawlerConfig addCookies(Map<String, String> headers) {
-		for(Entry<String, String> header : headers.entrySet() ) {
-			addCookie(header.getKey(), header.getValue() );
-		}
-		
-		return this;
-	}
-	public CrawlerConfig addDatas(List<NameValuePair> datas) {
+	public HtmlCrawlerConfig addData(List<NameValuePair> datas) {
 		for(NameValuePair data : datas ) {
 			addData(data.getName(), data.getValue() );
 		}
 		
 		return this;
 	}
-	public CrawlerConfig addDatas(Map<String, String> datas) {
+	public HtmlCrawlerConfig addData(Map<String, String> datas) {
 		for(Entry<String, String> data : datas.entrySet() ) {
 			addData(data.getKey(), data.getValue() );
 		}
 		
 		return this;
-	}
-	public int getTimeout() {
-		return timeout;
-	}
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
 	}
 	
 	// key 在headers, data中的索引

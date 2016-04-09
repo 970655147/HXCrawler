@@ -6,6 +6,12 @@
 
 package com.hx.crawler.util;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.image.RenderedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -43,6 +49,9 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.ccil.cowan.tagsoup.Parser;
 import org.ccil.cowan.tagsoup.XMLWriter;
 import org.xml.sax.InputSource;
@@ -59,6 +68,7 @@ import com.hx.crawler.crawler.SingleUrlTask;
 import com.hx.crawler.crawler.interf.Crawler;
 import com.hx.crawler.crawler.interf.ScriptParameter;
 import com.hx.crawler.test.Test01TestXpathParser;
+import com.hx.crawler.xpathParser.XPathParser;
 import com.hx.crawler.xpathParser.interf.ResultJudger;
 
 // 工具类
@@ -233,7 +243,7 @@ public class Tools {
 		} catch (NullPointerException e) {
 //			e.printStackTrace();
 			isException = true;
-			Log.err("NullPointer Exception ...");
+			Log.err("config file is not exist ...");
 		}
 		
 		if(! isException) {
@@ -728,9 +738,10 @@ public class Tools {
 		Tools.save(StringEscapeUtils.unescapeHtml(Tools.normalize(html) ), file);
 	}
 	
+	public final static com.hx.crawler.xpathParser.interf.Parser xpathParser = new XPathParser();
 	// 通过xpath 获取结果
 	public static JSONArray getResultByXPath(String html, String url, String xpath) throws Exception {
-		return com.hx.crawler.xpathParser.Parser.parse(Tools.normalize(html), url, xpath);
+		return xpathParser.parse(Tools.normalize(html), url, xpath);
 	}
 	public static JSONArray getResultByXPathes(String html, String url, String[] xpathes, ResultJudger judger) throws Exception {
 		for(int i=0; i<xpathes.length; i++) {			
@@ -782,7 +793,7 @@ public class Tools {
 	}
 	
 	// 创建一个ScriptParameter
-	public static SingleUrlTask newSingleTask(Crawler crawler, String url, Map<String, Object>param) {
+	public static SingleUrlTask newSingleUrlTask(Crawler<HttpResponse, Header, String, NameValuePair, String, String> crawler, String url, Map<String, Object>param) {
 		SingleUrlTask res = new SingleUrlTask();
 		res.setCrawler(crawler);
 		res.setUrl(url);
@@ -819,7 +830,7 @@ public class Tools {
 	public static void parse(String className, String url, Map<String, Object> params, String methodName, boolean isStaticMethod, Class[] methodParamTypes) throws Exception {
 		Class clazz = Class.forName(className);
 		Method method = clazz.getMethod(methodName, methodParamTypes);
-		SingleUrlTask singleUrlTask = newSingleTask(HtmlCrawler.newInstance(), url, params);
+		SingleUrlTask singleUrlTask = newSingleUrlTask(HtmlCrawler.newInstance(), url, params);
 		
 		if(isStaticMethod) {
 			method.invoke(null, singleUrlTask);
@@ -958,9 +969,9 @@ public class Tools {
 		}
 		
 		JSONArray names = obj.names();
-		Iterator<String> it = names.iterator();
+		Iterator<?> it = names.iterator();
 		while(it.hasNext()) {
-			String key = it.next();
+			String key = String.valueOf(it.next() );
 			Object val = obj.get(key );
 			if(val instanceof String) {
 				obj.put(key, trimSpacesAsOne((String) val));
@@ -1001,7 +1012,7 @@ public class Tools {
 			return ;
 		}
 		
-		Iterator<Object> it = arr.iterator();
+		Iterator<?> it = arr.iterator();
 		while(it.hasNext()) {
 			Object obj = it.next();
 			if(obj instanceof JSONObject) {
@@ -1030,9 +1041,9 @@ public class Tools {
 			return ;
 		}
 		
-		Iterator<String> it = obj.names().iterator();
+		Iterator<?> it = obj.names().iterator();
 		while(it.hasNext()) {
-			String key = it.next();
+			String key = String.valueOf(it.next() );
 			Object val = obj.get(key );
 			if(val instanceof String) {
 				if(isEmpty((String) val)) {
@@ -1067,7 +1078,7 @@ public class Tools {
 			return ;
 		}
 		
-		Iterator<Object> it = arr.iterator();
+		Iterator<?> it = arr.iterator();
 		while(it.hasNext() ) {
 			Object val = it.next();
 			if(val instanceof String) {
@@ -1103,9 +1114,9 @@ public class Tools {
 			return ;
 		}
 		
-		Iterator<JSONObject> it = spec.iterator();
+		Iterator<?> it = spec.iterator();
 		while(it.hasNext()) {
-			JSONObject val = it.next();
+			JSONObject val = (JSONObject) it.next();
 			String key = val.getString(name);
 			if(getInSpec.containsKey(key) ) {
 				product.put(getInSpec.get(key), val.get(value));
@@ -1150,7 +1161,7 @@ public class Tools {
 	}
 	
 	// 获取taskName
-	public static String getTaskName(ScriptParameter singleUrlTask) {
+	public static String getTaskName(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask) {
 		return " crawl " + singleUrlTask.getParam().get(Tools.TASK) + " from " + singleUrlTask.getParam().get(Tools.SITE) + "　";
 	}
 	
@@ -1373,7 +1384,7 @@ public class Tools {
 	
 	// ------------ 日志相关 --------------------
 	// 打印任务的日志信息
-	public static void logBeforeTask(ScriptParameter singleUrlTask, boolean debugEnable) {
+	public static void logBeforeTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, boolean debugEnable) {
 		if(debugEnable ) {
 			StringBuilder sb = new StringBuilder();
 		    Tools.appendCRLF(sb, "URL : " + singleUrlTask.getUrl() );
@@ -1381,7 +1392,7 @@ public class Tools {
 		    Log.log(sb.toString() );
 		}
 	}
-	public static void logAfterTask(ScriptParameter singleUrlTask, String fetchedResult, String spent, boolean debugEnable) {
+	public static void logAfterTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, String fetchedResult, String spent, boolean debugEnable) {
 		if(debugEnable ) {
 			StringBuilder sb = new StringBuilder();
 		    Tools.appendCRLF(sb, "fetched result : " + fetchedResult);
@@ -1390,7 +1401,7 @@ public class Tools {
 		    Log.log(sb.toString() );
 		}
 	}
-	public static void logErrorMsg(ScriptParameter singleUrlTask, Exception e) {
+	public static void logErrorMsg(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, Exception e) {
 		Log.err(e.getClass().getName() + " while fetch : " + Tools.getTaskName(singleUrlTask) + ", url : " + singleUrlTask.getUrl() );
 	}
 	
@@ -1656,7 +1667,7 @@ public class Tools {
 	}
 	public static OperationAttrHandler lastWorkedHandler(OperationAttrHandler attrHandler) {
 		if(attrHandler instanceof CompositeOperationAttrHandler) {
-			CompositeOperationAttrHandler<OperationAttrHandler> compositeHandler = ((CompositeOperationAttrHandler<OperationAttrHandler>) attrHandler);
+			CompositeOperationAttrHandler<?> compositeHandler = ((CompositeOperationAttrHandler<?>) attrHandler);
 			return lastWorkedHandler(compositeHandler.handler(compositeHandler.handlers().size() ) );
 		}
 		
@@ -1676,6 +1687,76 @@ public class Tools {
 //		
 //		return null;
 //	}
+	
+	// ------------ 将数据复制到剪切板 ------- 2016.04.07 -------------
+	public static void copyStringToClipBoard(String str) {
+//		Clipboard clipboard = System.getToolkit().getSystemClipboard();
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection ss = new StringSelection(str);
+		clipboard.setContents(ss, null);
+	}
+	public static void copyImgToClipBoard(RenderedImage img) {
+      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard(); //得到系统剪贴板
+      ImageTransferable selection = new ImageTransferable(img);  //图像通道
+      clipboard.setContents(selection, null);
+    }
+	public static void copyFilesToClipBoard(List<File> files) {
+      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard(); 
+      FileTransferable selection = new FileTransferable(files );  
+      clipboard.setContents(selection, null);
+    }	
+	// 获取剪切板中的数据
+	public static String getStringFromClipBoard(){
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		DataFlavor flavor = DataFlavor.stringFlavor;
+		String res = Tools.EMPTY_STR;
+		
+		if(clipboard.isDataFlavorAvailable(flavor)){//是否符合剪贴板的数据类型
+			try {
+				res = clipboard.getData(flavor).toString();
+			} catch (UnsupportedFlavorException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return res;
+	}
+	public static RenderedImage getImgFromClipBoard() {
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		DataFlavor flavor = DataFlavor.imageFlavor;  
+		RenderedImage img = null;
+		      
+		if (clipboard.isDataFlavorAvailable(flavor)) {
+		   try {
+		  	 img = (RenderedImage) clipboard.getData(flavor);
+		   } catch (UnsupportedFlavorException e) {
+		  	 e.printStackTrace();
+		   } catch (IOException e) {
+		      e.printStackTrace();
+		   }
+		}
+	  
+		return img;
+   }
+   public static List<File> getFilesFromClipBoard() {
+      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      DataFlavor flavor = DataFlavor.javaFileListFlavor;  
+      List<File> files = null;
+      
+      if (clipboard.isDataFlavorAvailable(flavor)) {
+         try {
+        	 files = (List<File>) clipboard.getData(flavor);
+         } catch (UnsupportedFlavorException e) {
+        	 e.printStackTrace();
+         } catch (IOException e) {
+            e.printStackTrace();
+         }
+      }
+      
+      return files;
+   }
 	
 	// ------------ 待续 --------------------
 

@@ -6,7 +6,6 @@
 
 package com.hx.crawler.attrHandler.interf;
 
-import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
 import com.hx.crawler.util.Tools;
 
 // handler相关的超类

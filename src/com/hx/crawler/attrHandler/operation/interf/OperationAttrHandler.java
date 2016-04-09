@@ -13,17 +13,22 @@ import com.hx.crawler.util.Tools;
 
 // 操作AttrHandler[map, filter, ..]
 public abstract class OperationAttrHandler extends AttrHandler {
-	// 当前AttrHandler的操作
+	// 当前AttrHandler的操作, 返回值, beFiltered assertFalse的标志位, 需要返回的消息
 	protected String operationType;
 	protected Types operationReturn;
-	protected boolean beFiltered;
-	protected boolean assertTrue;
+	protected int returnFlag;
 	protected String returnMsg;
+	
+	// 被filter掉[第1位为1] 或者assert判定失败[第2位为1]的标志位
+	// ..0001,	..0010
+	public final static int BE_FILTERED = 1;
+	public final static int ASSERT_FALSE = BE_FILTERED << 1;
 	
 	// 初始化
 	public OperationAttrHandler() {
-		beFiltered(false);
-		assertTrue(true);
+//		beFiltered(false);
+//		assertFalse(false);
+		cleanImmediateReturnFlag();
 	}
 	
 	// sett & getter
@@ -40,16 +45,28 @@ public abstract class OperationAttrHandler extends AttrHandler {
 		this.operationReturn = operationReturn;
 	}
 	public boolean beFiltered() {
-		return beFiltered;
+		return (this.returnFlag & BE_FILTERED) != 0;
 	}
 	public void beFiltered(boolean beFiltered) {
-		this.beFiltered = beFiltered;
+		// set 'BE_FILTERED' as true
+		if(beFiltered) {
+			this.returnFlag |= BE_FILTERED;
+		// set 'BE_FILTERED' as false
+		} else {
+			this.returnFlag &= (~ BE_FILTERED);
+		}
 	}
-	public boolean assertTrue() {
-		return assertTrue;
+	public boolean assertFalse() {
+		return (this.returnFlag & ASSERT_FALSE) != 0;
 	}
-	public void assertTrue(boolean assertTrue) {
-		this.assertTrue = assertTrue;
+	public void assertFalse(boolean assertFalse) {
+		// set 'ASSERT_FALSE' as true
+		if(assertFalse) {
+			this.returnFlag |= ASSERT_FALSE;
+		} else {
+		// set 'ASSERT_FALSE' as false
+			this.returnFlag &= (~ ASSERT_FALSE);
+		}
 	}
 	protected void returnMsg(String returnMsg) {
 		this.returnMsg = returnMsg;
@@ -60,26 +77,23 @@ public abstract class OperationAttrHandler extends AttrHandler {
 	
 	// 判断是否需要即时返回
 	public boolean immediateReturn() {
-		return beFiltered() || (! assertTrue());
+//		return beFiltered() || assertFalse();
+		return returnFlag != 0;
 	}
 	public void cleanImmediateReturnFlag() {
-		if(beFiltered() ) {
-			beFiltered(false );
-		} else if(! assertTrue() ) {
-			assertTrue(true );
-		}
+		returnFlag = 0;
 	}
 	protected void updateImmediateReturnFlag(OperationAttrHandler operationHandler) {
 		if(operationHandler.beFiltered() ) {
 			beFiltered(operationHandler.beFiltered() );
-		} else if(! operationHandler.assertTrue() ) {
-			assertTrue(operationHandler.assertTrue() );
+		} else if(operationHandler.assertFalse() ) {
+			assertFalse(operationHandler.assertFalse() );
 		}
 	}
 	public void handleImmediateReturn() {
 		if(beFiltered() ) {
 			Log.log(returnMsg);
-		} else if(! assertTrue() ) {
+		} else if(assertFalse() ) {
 			Tools.assert0(returnMsg);
 		}
 	}

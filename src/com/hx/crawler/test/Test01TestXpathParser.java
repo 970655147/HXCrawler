@@ -12,7 +12,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import com.hx.crawler.util.Log;
-import com.hx.crawler.xpathParser.Parser;
+import com.hx.crawler.util.Tools;
+import com.hx.crawler.xpathParser.XPathParser;
 
 // Main 
 public class Test01TestXpathParser {
@@ -65,7 +66,7 @@ public class Test01TestXpathParser {
 		
 		SAXReader saxReader = new SAXReader();
 		Element root = saxReader.read(test01Product).getRootElement();
-		JSONArray fetchedData = Parser.parse(root, "http://www.baidu.com/", xpath);
+		JSONArray fetchedData = Tools.xpathParser.parse(root, "http://www.baidu.com/", xpath);
 		Log.log(fetchedData.toString() );
 		
 	}

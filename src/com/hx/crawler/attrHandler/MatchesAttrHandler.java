@@ -9,7 +9,6 @@ package com.hx.crawler.attrHandler;
 import java.util.regex.Pattern;
 
 import com.hx.crawler.attrHandler.adapter.interf.OneOrTwoStringArgsAttrHandler;
-import com.hx.crawler.attrHandler.adapter.interf.TwoStringArgsAttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Tools;
 

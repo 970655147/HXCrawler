@@ -7,7 +7,6 @@
 package com.hx.crawler.test;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import com.hx.crawler.util.Log;

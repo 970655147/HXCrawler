@@ -6,8 +6,6 @@
 
 package com.hx.crawler.attrHandler.adapter.interf;
 
-import net.sf.json.JSONObject;
-
 import com.hx.crawler.attrHandler.interf.AttrHandler;
 
 

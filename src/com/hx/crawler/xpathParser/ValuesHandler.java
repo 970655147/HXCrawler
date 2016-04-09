@@ -8,7 +8,6 @@ package com.hx.crawler.xpathParser;
 
 import java.util.List;
 
-import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -27,10 +26,10 @@ public class ValuesHandler extends EndPointHandler {
 			throw new RuntimeException("the valuesNode : " + child.getName() + ", xpath : " + child.getXPath() + " is not compatible with current version of HXCrawler !");
 		}
 		JSONArray curArr = new JSONArray();
-		List<Element> eles = Parser.getResultByXPath(root, currentEle, child.getXPath() );
+		List<Element> eles = XPathParser.getResultByXPath(root, currentEle, child.getXPath() );
 		int idx2 = 0;
 		for(Element ele : eles) {
-			Parser.parse0(root, ele, url, child, curArr, idx2 ++);
+			XPathParser.parse0(root, ele, url, child, curArr, idx2 ++);
 		}
 		
 		curObj.element(child.getName(), curArr);

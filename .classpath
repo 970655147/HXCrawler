@@ -18,7 +18,7 @@
 	<classpathentry kind="lib" path="D:/Assist/jar/json/ezmorph-1.0.6.jar"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/json/json.jar"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/json/json-lib-2.2.3-jdk15.jar"/>
-	<classpathentry kind="lib" path="D:/Assist/jar/xml/dom4j.jar"/>
+	<classpathentry kind="lib" path="D:/Assist/jar/xml/dom4j.jar" sourcepath="D:/Assist/src/xml/dom4j/dom4j-code.zip"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/xml/jaxen.jar"/>
 	<classpathentry kind="lib" path="D:/Assist/jar/xml/tagsoup-1.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>

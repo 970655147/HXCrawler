@@ -19,10 +19,11 @@ import org.apache.http.client.fluent.Response;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import com.hx.crawler.crawler.interf.Page;
 import com.hx.crawler.util.Tools;
 
 // Page
-public class Page {
+public class HtmlPage implements Page<HttpResponse> {
 
 	// Response
 	private String content;
@@ -31,10 +32,10 @@ public class Page {
 	private String charset = Tools.DEFAULT_CHARSET;
 	
 	// 初始化
-	public Page() {
+	public HtmlPage() {
 		super();
 	}
-	public Page(Response resp) {
+	public HtmlPage(Response resp) {
 		super();
 		try {
 			this.httpResp = resp.returnResponse();
@@ -57,8 +58,30 @@ public class Page {
 		nonCookieKeys.add(getStdForString("domain") );
 	}
 	
+	// setter & getter
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+	public HttpResponse getResponse() {
+		return httpResp;
+	}
+	public String getCharset() {
+		return charset;
+	}
+	public Map<String, String> getCookies() {
+		return cookies;
+	}
+	// 获取Page的内容
+	public String getContent() {
+			String srcHtml = content;
+//			String srcHtml = new String(resp.returnContent().asString().getBytes("iso8859-1"), "gbk");
+//			String dstHtml = Jsoup.parseBodyFragment(srcHtml).outerHtml();
+			String dstHtml = srcHtml;
+			return dstHtml;
+	}
+	
 	// 解析响应消息 [cookie, charset等等]
-	public void parseResponse(HttpResponse resp) {
+	private void parseResponse(HttpResponse resp) {
 		Header[] headers = resp.getAllHeaders();
 
 		for(int i=0; i<headers.length; i++) {
@@ -80,29 +103,7 @@ public class Page {
 				}
 			}
 		}
-		
 	}
-	
-	// setter & getter
-	public HttpResponse getResponse() {
-		return httpResp;
-	}
-	public String getCharset() {
-		return charset;
-	}
-	public Map<String, String> getCookies() {
-		return cookies;
-	}
-	
-	// 获取Page的内容
-	public String getContent() {
-			String srcHtml = content;
-//			String srcHtml = new String(resp.returnContent().asString().getBytes("iso8859-1"), "gbk");
-//			String dstHtml = Jsoup.parseBodyFragment(srcHtml).outerHtml();
-			String dstHtml = srcHtml;
-			return dstHtml;
-	}
-	
 	// 获取响应头中的"Set-Cookie" 中对应的cookie
 	// 以; 分割kv对, =分割key 和value
 	private NameValuePair[] getCookie(String value, Set<String>nonCookieKeys) {
@@ -137,11 +138,9 @@ public class Page {
 		
 		return cookie;
 	}
-	
 	// 获取统一的大写 或者小写
 	private static String getStdForString(String str) {
 		return str.toUpperCase();
 	}
-	
 	
 }

@@ -59,8 +59,10 @@ public abstract class MultiArgsOperationAttrHandler<T extends OperationAttrHandl
 	@Override
 	public void cleanImmediateReturnFlag() {
 		super.cleanImmediateReturnFlag();
-		for(OperationAttrHandler handler : handlers) {
-			handler.cleanImmediateReturnFlag();
+		if(handlers != null) {
+			for(OperationAttrHandler handler : handlers) {
+				handler.cleanImmediateReturnFlag();
+			}
 		}
 	}
 	

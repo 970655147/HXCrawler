@@ -29,10 +29,9 @@ public class AssertOperationAttrHandler extends OperationAttrHandler {
 	@Override
 	protected String handle0(String result) {
 		boolean bool = Boolean.parseBoolean(handler.handle(result) );
-		assertTrue(bool);
-		if(! assertTrue() ) {
+		assertFalse(! bool);
+		if(assertFalse() ) {
 			returnMsg("assertedFalse while handle : '" + result + "', assertHandler : " + handler.toString() );
-			return "assertFalse";
 		}
 		return result;
 	}
