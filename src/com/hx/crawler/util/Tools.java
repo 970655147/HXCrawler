@@ -17,7 +17,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +27,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +36,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -56,10 +55,8 @@ import org.ccil.cowan.tagsoup.Parser;
 import org.ccil.cowan.tagsoup.XMLWriter;
 import org.xml.sax.InputSource;
 
-import com.hx.crawler.attrHandler.CompositeAttrHandler;
 import com.hx.crawler.attrHandler.StandardHandlerParser;
 import com.hx.crawler.attrHandler.StandardHandlerParser.Types;
-import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.attrHandler.interf.HandlerParser;
 import com.hx.crawler.attrHandler.operation.CompositeOperationAttrHandler;
 import com.hx.crawler.attrHandler.operation.interf.OperationAttrHandler;
@@ -67,7 +64,8 @@ import com.hx.crawler.crawler.HtmlCrawler;
 import com.hx.crawler.crawler.SingleUrlTask;
 import com.hx.crawler.crawler.interf.Crawler;
 import com.hx.crawler.crawler.interf.ScriptParameter;
-import com.hx.crawler.test.Test01TestXpathParser;
+import com.hx.crawler.util.LogPattern.LogPatternChain;
+import com.hx.crawler.util.LogPattern.LogPatternType;
 import com.hx.crawler.xpathParser.XPathParser;
 import com.hx.crawler.xpathParser.interf.ResultJudger;
 
@@ -75,8 +73,7 @@ import com.hx.crawler.xpathParser.interf.ResultJudger;
 public class Tools {
 	
 	// 常量
-	public static final String EMPTY_STR = "";
-	public static final String NULL = "null";
+	public static final Random ran = new Random();
 	public static final Character SLASH = '\\';
 	public static final Character INV_SLASH = '/';
 	public static final Character DOT = '.';
@@ -89,9 +86,11 @@ public class Tools {
 	public static final Character QUESTION = '?';
 	public static final Character QUOTE = '\"';
 	public static final Character SINGLE_QUOTE = '\'';
-	public static final String CRLF = "\r\n";
-	public static final Random ran = new Random();
-	public static String DEFAULT_CHARSET = "utf-8";
+	public static final String CRLF = Constants.CRLF;
+	public static final String EMPTY_STR = Constants.EMPTY_STR;
+	public static final String NULL = Constants.NULL;
+	public static final String TRUE = Constants.TRUE;
+	public static final String FALSE = Constants.FALSE;
 	
 	// 业务相关常量
 	public static final String TASK = "task";
@@ -146,31 +145,14 @@ public class Tools {
 	public static final boolean IS_PARSE_METHOD_STATIC = true;
 	public static final Class[] PARSE_METHOD_PARAMTYPES = new Class[]{ScriptParameter.class };
 	
-	// 默认的相关配置变量
-	private final static String DEFAULT_TMP_NAME = "tmp";
-	private final static String DEFAULT_TMP_DIR = "C:\\Users\\970655147\\Desktop\\tmp";
-	private final static int DEFAULT_BUFF_SIZE_ON_TRANS_STREAM = 2048;
-	private final static String DEFAULT_SUFFIX = ".html";
-	private final static int DEFAULT_CHECK_INTERVAL = 3 * 1000;
-	private final static int DEFAULT_N_THREADS = 10;
-	
-	// 线程池相关
-	public static int CHECK_INTERVAL = DEFAULT_CHECK_INTERVAL;
-	public static int N_THREADS = DEFAULT_N_THREADS;
-	public static ThreadPoolExecutor threadPool = null;
-	
-	// 临时文件相关
-	public static String TMP_NAME = DEFAULT_TMP_NAME;
-	public static String TMP_DIR = DEFAULT_TMP_DIR;
-	public static AtomicInteger TMP_IDX = new AtomicInteger();
-	public static String SUFFIX = DEFAULT_SUFFIX;
-	public static int BUFF_SIZE_ON_TRANS_STREAM = DEFAULT_BUFF_SIZE_ON_TRANS_STREAM;
-	
 	// 后缀相关
 	public final static String HTML = ".html";
 	public final static String JAVA = ".java";
+	public final static String SCALA = ".scala";
+	public final static String PYTHON = ".py";
 	public final static String TXT = ".txt";
 	public final static String PNG = ".png";
+	public final static String JPG = ".jpg";
 	public final static String JPEG = ".jpeg";
 	public final static String JS = ".js";
 	public final static String MAP = ".map";
@@ -182,6 +164,15 @@ public class Tools {
 	public final static String RMVB = ".rmvb";
 	public final static String RM = ".rm";
 	public final static String AVI = ".avi";
+	public final static String LOG = ".log";
+	
+	// 编码相关		add at 2016.04.16
+	public final static String ASCII = "ascii";
+	public final static String ISO_8859_1 = "iso-8859-1";
+	public final static String UTF_8 = "utf-8";
+	public final static String UTF_16 = "utf-16";
+	public final static String GBK = "gbk";
+	public final static String GB2312 = "gb2312";
 	
 	// 字节的表示相关
 	public final static String BYTE = "byte";
@@ -207,72 +198,34 @@ public class Tools {
 	public final static long LOG_ON_NONE = ~LOG_ON_ALL;
 	public static long LOG_ON_MINE_CONF = LOG_ON_ALL;
 	
+	// --------------------------- 可配置变量 --------------------------------------
+	// 线程池相关
+	public static int CHECK_INTERVAL = Constants.CHECK_INTERVAL;
+	public static int N_THREADS = Constants.N_THREADS;
+	public static ThreadPoolExecutor threadPool = Constants.threadPool;
+	
+	// 临时文件相关
+	public static String TMP_NAME = Constants.TMP_NAME;
+	public static String TMP_DIR = Constants.TMP_DIR;
+	public static AtomicInteger TMP_IDX = Constants.TMP_IDX;
+	public static String SUFFIX = Constants.SUFFIX;
+	public static int BUFF_SIZE_ON_TRANS_STREAM = Constants.BUFF_SIZE_ON_TRANS_STREAM;
+	public static String DEFAULT_CHARSET = Constants.DEFAULT_CHARSET;
+	public static boolean WRITE_ASYNC = Constants.WRITE_ASYNC;
+	
 	// 文件名后面可能出现的其他符号
-	static Set<Character> mayBeFileNameSeps = new HashSet<>();
-	static {
-		mayBeFileNameSeps.add(QUESTION);
-	}
-	
+	static Set<Character> mayBeFileNameSeps = Constants.mayBeFileNameSeps;
 	// 如果字符串为一下字符串, 将其视为空字符串
-	static Set<String> emptyStrCondition = new HashSet<>();
-	static {
-		emptyStrCondition.add(EMPTY_STR);
-	}
-	
-	// 静态块, 初始化 可配置的数据
-	// tmpName, tmpDir, buffSize, suffix, checkInterval, nThreads
-	// emptyCondition, mayBeFileNameSeps
-	static {
-		boolean isException = false;
-		Properties props = new Properties();
-		try {
-//			InputStream config = new FileInputStream(new File("./src/config.conf") );
-			// 前者为true, 后者为false
-//			Log.log(Main.class.getClass().getClassLoader() == null);
-//			Log.log(new Main().getClass().getClassLoader() == null);
-			InputStream config = new Test01TestXpathParser().getClass().getClassLoader().getResourceAsStream("config.conf");
-			props.load(config);
-		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-			isException = true;
-			Log.err("config file is not exist ...");
-		} catch (IOException e) {
-//			e.printStackTrace();
-			isException = true;
-			Log.err("IO Exception ...");
-		} catch (NullPointerException e) {
-//			e.printStackTrace();
-			isException = true;
-			Log.err("config file is not exist ...");
-		}
-		
-		if(! isException) {
-			TMP_NAME = props.getProperty("tmpName", DEFAULT_TMP_NAME);
-			TMP_DIR = props.getProperty("tmpDir", DEFAULT_TMP_DIR);
-			BUFF_SIZE_ON_TRANS_STREAM = Integer.parseInt(props.getProperty("buffSizeOnTransStream", String.valueOf(BUFF_SIZE_ON_TRANS_STREAM)) );
-			SUFFIX = props.getProperty("suffix", DEFAULT_SUFFIX);
-			CHECK_INTERVAL = Integer.parseInt(props.getProperty("checkInterval", String.valueOf(DEFAULT_CHECK_INTERVAL)) );
-			N_THREADS = Integer.parseInt(props.getProperty("nThreads", String.valueOf(DEFAULT_N_THREADS)) );
-			
-			String[] emptyConds = props.getProperty("emptyStrCondition", EMPTY_STR).split(";");
-			for(String emptyCon : emptyConds) {
-				emptyStrCondition.add(emptyCon.trim() );
-			}
-			String[] fileNameSeps = props.getProperty("mayBeFileNameSeps", EMPTY_STR).split(";");
-			for(String sep : fileNameSeps) {
-				if(! Tools.isEmpty(sep)) {
-					mayBeFileNameSeps.add(sep.charAt(0) );
-				}
-			}
-		}
-		newFixedThreadPool(N_THREADS);
-		
-	}
+	static Set<String> emptyStrCondition = Constants.emptyStrCondition;
+	// --------------------------- 置于最后 ----------------------------------------
 	// ----------------- 属性结束 -----------------------
 	
+	// 初始化
+	static {
+		threadPool = Tools.newFixedThreadPool(N_THREADS);
+	}
 	
-	// ---------------临时文件相关---------------
-	// 获取临时路径的下一个路径[返回文件路径]
+	// --------------------------- 配置可配置变量的接口 ----------------------------------------
 	public static void setTmpIdx(int idx) {
 		TMP_IDX.set(idx);
 	}
@@ -285,6 +238,33 @@ public class Tools {
 	public static void setSuffix(String suffix) {
 		SUFFIX = suffix;
 	}
+	// 配置defaultCharSet
+	public static void setDefaultCharSet(String defaultCharSet) {
+		DEFAULT_CHARSET = defaultCharSet;
+	}
+	public static void setLogOnMine(long logOnMine) {
+		LOG_ON_MINE_CONF = logOnMine;
+	}
+	public static void setBuffSize(int buffSize) {
+		BUFF_SIZE_ON_TRANS_STREAM = buffSize;
+	}
+    // 配置checkInterval
+    public static void setCheckInterval(int checkInterval) {
+    	CHECK_INTERVAL = checkInterval;
+    }
+    // 配置线程池中线程的个数
+    public static void setNThread(int nThread) {
+    	if(isThreadPoolRunning(threadPool) ) {
+    		Log.err("the threadPool is running NOW, please try again later !");
+    		return ;
+    	}
+    	
+    	N_THREADS = nThread;
+    	threadPool = newFixedThreadPool(N_THREADS);
+    }
+    
+	// ---------------临时文件相关---------------
+	// 获取临时路径的下一个路径[返回文件路径]
 	public static String getNextTmpPath() {
 		return TMP_DIR + "\\" + getNextTmpName() + SUFFIX;
 	}
@@ -322,82 +302,151 @@ public class Tools {
 	}
 	
 	// ----------------- 文件操作相关方法 -----------------------
-	// 配置defaultCharSet
-	public static void setDefaultCharSet(String defaultCharSet) {
-		DEFAULT_CHARSET = defaultCharSet;
-	}
-	public static void setLogOnMine(long logOnMine) {
-		LOG_ON_MINE_CONF = logOnMine;
-	}
 	// 判断是否需要打印日志
 	public static boolean isLog(long logFlags, long logMask) {
 		return ((logFlags & logMask) != 0);
 	}
 	// 将html字符串保存到指定的文件中
-	public static void save(String html, String nextTmpName, long logFlags) throws IOException {
-		save(html, nextTmpName, DEFAULT_CHARSET, logFlags);
-	}
-	public static void save(String html, String nextTmpName, String charset, long logFlags) throws IOException {
-		save(html, new File(nextTmpName), charset, logFlags);
-	}
-	public static void save(String html, File nextTmpFile, String charset, long logFlags) throws IOException {
-		write0(html, nextTmpFile, charset, false);
-		if(isLog(logFlags, LOG_ON_SAVE) ) {
-			Log.log("save content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
-		}
-	}
-	public static void save(String html, File nextTmpFile, long logFlags) throws IOException {
-		save(html, nextTmpFile, DEFAULT_CHARSET, logFlags);
-	}	
-	public static void append(String html, String nextTmpName, long logFlags) throws IOException {
-		append(html, nextTmpName, DEFAULT_CHARSET, logFlags );
-	}
-	public static void append(String html, String nextTmpName, String charset, long logFlags) throws IOException {
-		append(html, new File(nextTmpName), charset, logFlags );
-	}
-	public static void append(String html, File nextTmpFile, long logFlags) throws IOException {
-		append(html, nextTmpFile, DEFAULT_CHARSET, logFlags);
-	}
-	public static void append(String html, File nextTmpFile, String charset, long logFlags) throws IOException {
-		write0(html, nextTmpFile, charset, true);
+	// add 'isAsync' at 2016.04.16
+	public static void save(String html, File nextTmpFile, String charset, boolean isAsync, long logFlags) throws IOException {
+		write(html, nextTmpFile, charset, isAsync, false);
 		if(isLog(logFlags, LOG_ON_APPEND) ) {
 			Log.log("append content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
 		}
 	}
+	public static void save(String html, String nextTmpName, String charset, boolean isAsync, long logFlags) throws IOException {
+		save(html, new File(nextTmpName), charset, isAsync, logFlags );
+	}
+	public static void save(String html, String nextTmpName, boolean isAsync, long logFlags) throws IOException {
+		save(html, new File(nextTmpName), isAsync, logFlags );
+	}
+	public static void save(String html, File nextTmpFile, boolean isAsync, long logFlags) throws IOException {
+		save(html, nextTmpFile, DEFAULT_CHARSET, isAsync, logFlags);
+	}
+	public static void save(String html, String nextTmpName, long logFlags) throws IOException {
+		save(html, new File(nextTmpName), logFlags );
+	}
+	public static void save(String html, File nextTmpFile, long logFlags) throws IOException {
+		save(html, nextTmpFile, DEFAULT_CHARSET, WRITE_ASYNC, logFlags);
+	}
+	public static void save(String html, String nextTmpName, String charset, long logFlags) throws IOException {
+		save(html, new File(nextTmpName), charset, logFlags );
+	}
+	public static void save(String html, File nextTmpFile, String charset, long logFlags) throws IOException {
+		save(html, nextTmpFile, charset, WRITE_ASYNC, logFlags );
+	}
+	
+	public static void append(String html, File nextTmpFile, String charset, boolean isAsync, long logFlags) throws IOException {
+		write(html, nextTmpFile, charset, isAsync, true);
+		if(isLog(logFlags, LOG_ON_APPEND) ) {
+			Log.log("append content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
+		}
+	}
+	public static void append(String html, String nextTmpName, String charset, boolean isAsync, long logFlags) throws IOException {
+		append(html, new File(nextTmpName), charset, isAsync, logFlags );
+	}
+	public static void append(String html, String nextTmpName, boolean isAsync, long logFlags) throws IOException {
+		append(html, new File(nextTmpName), isAsync, logFlags );
+	}
+	public static void append(String html, File nextTmpFile, boolean isAsync, long logFlags) throws IOException {
+		append(html, nextTmpFile, DEFAULT_CHARSET, isAsync, logFlags);
+	}
+	public static void append(String html, String nextTmpName, long logFlags) throws IOException {
+		append(html, new File(nextTmpName), logFlags );
+	}
+	public static void append(String html, File nextTmpFile, long logFlags) throws IOException {
+		append(html, nextTmpFile, DEFAULT_CHARSET, WRITE_ASYNC, logFlags);
+	}
+	public static void append(String html, String nextTmpName, String charset, long logFlags) throws IOException {
+		append(html, new File(nextTmpName), charset, logFlags );
+	}
+	public static void append(String html, File nextTmpFile, String charset, long logFlags) throws IOException {
+		append(html, nextTmpFile, charset, WRITE_ASYNC, logFlags );
+	}
+	
+	public static void save(String html, String nextTmpName, boolean isAsync) throws IOException {
+		save(html, nextTmpName, isAsync, LOG_ON_MINE_CONF);
+	}
+	public static void save(String html, String nextTmpName, String charset, boolean isAsync) throws IOException {
+		save(html, nextTmpName, charset, isAsync, LOG_ON_MINE_CONF );
+	}
+	public static void save(String html, File nextTmpFile, boolean isAsync) throws IOException {
+		save(html, nextTmpFile, isAsync, LOG_ON_MINE_CONF);
+	}
+	public static void save(String html, File nextTmpFile, String charset, boolean isAsync) throws IOException {
+		save(html, nextTmpFile, charset, isAsync, LOG_ON_MINE_CONF);
+	}
 	public static void save(String html, String nextTmpName) throws IOException {
-		save(html, nextTmpName, LOG_ON_MINE_CONF );
+		save(html, nextTmpName, WRITE_ASYNC );
 	}
 	public static void save(String html, String nextTmpName, String charset) throws IOException {
-		save(html, nextTmpName, charset, LOG_ON_MINE_CONF );
+		save(html, nextTmpName, charset, WRITE_ASYNC );
 	}
 	public static void save(String html, File nextTmpFile) throws IOException {
-		save(html, nextTmpFile, LOG_ON_MINE_CONF);
+		save(html, nextTmpFile, WRITE_ASYNC);
 	}
 	public static void save(String html, File nextTmpFile, String charset) throws IOException {
-		save(html, nextTmpFile, charset, LOG_ON_MINE_CONF);
+		save(html, nextTmpFile, charset, WRITE_ASYNC);
+	}
+	
+	public static void append(String html, String nextTmpName, boolean isAsync) throws IOException {
+		append(html, nextTmpName, isAsync, LOG_ON_MINE_CONF);
+	}
+	public static void append(String html, String nextTmpName, String charset, boolean isAsync) throws IOException {
+		append(html, nextTmpName, charset, isAsync, LOG_ON_MINE_CONF );
+	}
+	public static void append(String html, File nextTmpFile, boolean isAsync) throws IOException {
+		append(html, nextTmpFile, isAsync, LOG_ON_MINE_CONF);
+	}
+	public static void append(String html, File nextTmpFile, String charset, boolean isAsync) throws IOException {
+		append(html, nextTmpFile, charset, isAsync, LOG_ON_MINE_CONF);
 	}
 	public static void append(String html, String nextTmpName) throws IOException {
-		append(html, nextTmpName, LOG_ON_MINE_CONF );
+		append(html, nextTmpName, WRITE_ASYNC );
 	}
 	public static void append(String html, String nextTmpName, String charset) throws IOException {
-		append(html, nextTmpName, charset, LOG_ON_MINE_CONF );
+		append(html, nextTmpName, charset, WRITE_ASYNC );
 	}
 	public static void append(String html, File nextTmpFile) throws IOException {
-		append(html, nextTmpFile, LOG_ON_MINE_CONF);
+		append(html, nextTmpFile, WRITE_ASYNC);
 	}
 	public static void append(String html, File nextTmpFile, String charset) throws IOException {
-		append(html, nextTmpFile, charset, LOG_ON_MINE_CONF);
+		append(html, nextTmpFile, charset, WRITE_ASYNC);
 	}
-	private static void write0(String html, File nextTmpFile, String charset, boolean isAppend) throws IOException {
-		BufferedOutputStream bos = null;
-		try {
-			bos = new BufferedOutputStream(new FileOutputStream(nextTmpFile, isAppend) );
-			bos.write(html.getBytes(charset) );
-		} finally {
-			if(bos != null) {
-				bos.close();
+	
+	// 1. could use 'tryWithResource' replace 'tryFinally'
+	// 2. update 'BufferedOutputStream' with 'FileOutputStream' cause there need not 'Buffer'
+	// at 2016.04.16
+	public static void write(final String html, final File nextTmpFile, final String charset,  boolean isAsync, final boolean isAppend) throws IOException {
+		Runnable writeTask = (new Runnable() {
+			@Override
+			public void run() {
+				FileOutputStream fos = null;
+				try {
+					fos = new FileOutputStream(nextTmpFile, isAppend);
+					fos.write(html.getBytes(charset) );
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					if(fos != null) {
+						try {
+							fos.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			}
+		});
+		
+		if(! isAsync) {
+			writeTask.run();
+		} else {
+			execute(writeTask);
 		}
+	}
+	public static void write(final String html, final File nextTmpFile, final String charset, final boolean isAppend) throws IOException {
+		write(html, nextTmpFile, charset, isAppend, WRITE_ASYNC);
 	}
 	
 	// 移除指定的文件
@@ -603,7 +652,6 @@ public class Tools {
 		
 		return str;
 	}
-	// 如果给定的字符串以endsWith, 则移除endsWith
 	public static String removeIfEndsWith(String str, String endsWith) {
 		if(str.endsWith(endsWith) ) {
 			return str.substring(0, str.length() - endsWith.length());
@@ -611,7 +659,6 @@ public class Tools {
 		
 		return str;
 	}
-	// 如果不是给定的字符串以startsWith, 则添加startsWith
 	public static String addIfNotStartsWith(String str, String startsWith) {
 		if(! str.startsWith(startsWith) ) {
 			return startsWith + str;
@@ -649,6 +696,9 @@ public class Tools {
 	// 判断字符串是否为空[null, "", "null"]
 	public static boolean isEmpty(String str) {
 		return (str == null) || emptyStrCondition.contains(str.trim());
+	}
+	public static <T> boolean isEmpty(Collection<T> arr) {
+		return (arr == null) || (arr.size() == 0);
 	}
 	
 	// 获取str中以start 和end之间的字符串
@@ -712,6 +762,7 @@ public class Tools {
 		
 		return Tools.EMPTY_STR;
 	}
+	
 	// 整合这三类方法, 之前的实现有点冗余			--2015.12.17
 //	public static String getStrInRange(String str, String start, String end) {
 ////		int startIdx = str.indexOf(start);
@@ -806,22 +857,33 @@ public class Tools {
 	}
 	
 	// 通过xpath获取真实的xpath
-	// 可以改写为JSONArray.toString() 实现
+	// 可以改写为JSONArray.toString() 实现 [思路来自'duncen'[newEgg同事] ]
 	public static String getRealXPathByXPathObj(String xpath) {
-		return "[" + xpath + "]";
+		return new JSONArray().element(xpath).toString();
 	}
 	public static String getRealXPathByXPathObj(String... xpathes) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("[");
-		sb.append(xpathes[0]);
-		for(int i=1; i<xpathes.length; i++) {
-			sb.append(", \r\n");
-			sb.append(xpathes[i]);
+		JSONArray res = new JSONArray();
+		for(String xpath : xpathes) {
+			res.add(xpath);
 		}
-		sb.append("]");
 		
-		return sb.toString();
+		return res.toString();
 	}
+//	public static String getRealXPathByXPathObj(String xpath) {
+//		return "[" + xpath + "]";
+//	}
+//	public static String getRealXPathByXPathObj(String... xpathes) {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("[");
+//		sb.append(xpathes[0]);
+//		for(int i=1; i<xpathes.length; i++) {
+//			sb.append(", \r\n");
+//			sb.append(xpathes[i]);
+//		}
+//		sb.append("]");
+//		
+//		return sb.toString();
+//	}
 	
 	// 利用反射调用指定的class的methodName方法
 	public static void parse(String className, String url, Map<String, Object> params) throws Exception {
@@ -842,7 +904,7 @@ public class Tools {
 		parseAsync(className, url, params, PARSE_METHOD_NAME, IS_PARSE_METHOD_STATIC, PARSE_METHOD_PARAMTYPES);
 	}
 	public static void parseAsync(final String className, final String url, final Map<String, Object> params, final String methodName, final boolean isStaticMethod, final Class[] methodParamTypes) throws Exception {
-		threadPool.execute(new Runnable() {
+		execute(new Runnable() {
 			public void run() {
 				try {
 					parse(className, url, params, methodName, isStaticMethod, methodParamTypes);
@@ -852,6 +914,9 @@ public class Tools {
 			}
 		});
 	}	
+	public static void execute(Runnable runnable) {
+		threadPool.execute(runnable);
+	}
 	
 	// 为nextStageParams添加category
 	public static void addNameUrlSite(JSONObject category, JSONObject nextStageParams) {
@@ -911,23 +976,21 @@ public class Tools {
 			return sb.substring(start, end);
 		}
 	}
-	public static String trimAllSpaces(String str) {
-		if(str == null) {
-			return null;
+	public static String[] trimSpacesAsOne(String[] arr) {
+		for(int i=0; i<arr.length; i++) {
+			arr[i] = trimSpacesAsOne(arr[i]);
 		}
 		
-		StringBuilder sb = new StringBuilder();
-		for(int i=0; i<str.length(); i++) {
-			if(spaces.contains(str.charAt(i)) ) {
-				int nextI = i+1;
-				while((nextI < str.length() ) && spaces.contains(str.charAt(nextI)) ) nextI++ ;
-				i = nextI - 1;
-				continue ;
-			}
-			sb.append(str.charAt(i) );
-		}
-		return sb.toString();
+		return arr;
 	}
+	public static List<String> trimSpacesAsOne(List<String> arr) {
+		for(int i=0; i<arr.size(); i++) {
+			arr.set(i, trimSpacesAsOne(arr.get(i)) );
+		}
+		
+		return arr;
+	}
+
 	public static String trimAllSpaces(String str, Map<Character, Character> escapeMap) {
 		if(str == null) {
 			return null;
@@ -936,7 +999,7 @@ public class Tools {
 		StringBuilder sb = new StringBuilder();
 		for(int i=0; i<str.length(); i++) {
 			Character ch = str.charAt(i);
-			if(escapeMap.containsKey(ch) ) {
+			if((escapeMap != null ) && escapeMap.containsKey(ch) ) {
 				int prevI = i;
 				i = str.indexOf(escapeMap.get(ch), i+1);
 				if(i >= 0) {
@@ -957,7 +1020,30 @@ public class Tools {
 		}
 		return sb.toString();
 	}
-
+	public static String trimAllSpaces(String str) {
+		return trimAllSpaces(str, null);
+	}
+	public static String[] trimAllSpaces(String[] arr, Map<Character, Character> escapeMap) {
+		for(int i=0; i<arr.length; i++) {
+			arr[i] = trimAllSpaces(arr[i], escapeMap);
+		}
+		
+		return arr;
+	}
+	public static String[] trimAllSpaces(String[] arr) {
+		return trimAllSpaces(arr, null);
+	}
+	public static List<String> trimAllSpaces(List<String> arr, Map<Character, Character> escapeMap) {
+		for(int i=0; i<arr.size(); i++) {
+			arr.set(i, trimAllSpaces(arr.get(i), escapeMap) );
+		}
+		
+		return arr;
+	}
+	public static List<String> trimAllSpaces(List<String> arr) {
+		return trimAllSpaces(arr, null);
+	}
+	
 	// 去掉掉obj中所有的字符串类的值的相邻的多个空格
 	// 思路 : 如果obj是空对象  则直接返回
 	// 否则 遍历各个kv数据, 如果值为String  则去掉其多余的空格, 然后在更新obj中对应key的值
@@ -1162,7 +1248,7 @@ public class Tools {
 	
 	// 获取taskName
 	public static String getTaskName(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask) {
-		return " crawl " + singleUrlTask.getParam().get(Tools.TASK) + " from " + singleUrlTask.getParam().get(Tools.SITE) + "　";
+		return "crawl " + singleUrlTask.getParam().get(Tools.TASK) + " from " + singleUrlTask.getParam().get(Tools.SITE);
 	}
 	
 	// 获取键值对类型的数据对, 添加到headers中
@@ -1188,6 +1274,7 @@ public class Tools {
 				if(nextCh == 'u') {
 					boolean isUnicode = true;
 					for(int j=0; j<4; j++) {
+						// '+2' escape '\\u'
 						if(! isHexChar(str.charAt(i + j + 2)) ) {
 							isUnicode = false;
 							break ;
@@ -1209,7 +1296,6 @@ public class Tools {
 		
 		return sb.toString();
 	}
-	
 	// 判断给定的字符是否可表示十六进制[0-9, a-f, A-F]
 	public static boolean isHexChar(char ch) {
 		return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
@@ -1231,9 +1317,6 @@ public class Tools {
 	}
 	
 	// 将输入流中的数据 复制到输出流
-	public static void setBuffSize(int buffSize) {
-		BUFF_SIZE_ON_TRANS_STREAM = buffSize;
-	}
 	public static void copy(InputStream is, OutputStream os, boolean isCloseStream) {
 		BufferedInputStream bis = null;
 		BufferedOutputStream bos = null;
@@ -1284,7 +1367,6 @@ public class Tools {
 			return path.substring(start);
 		}
 	}
-	
 	// 获取文件名后面的可能出现的符合的最近的索引
 	private static int getSymAfterFileName(String path, int start) {
 		int min = -1;
@@ -1313,27 +1395,16 @@ public class Tools {
 		threadPool.execute(run);
 	}
     // 新建一个线程池
-    public static void newFixedThreadPool(int nThread) {
-    	threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThread);
-    }
-    // 配置checkInterval
-    public static void setCheckInterval(int checkInterval) {
-    	CHECK_INTERVAL = checkInterval;
-    }
-    // 配置线程池中线程的个数
-    public static void setNThread(int nThread) {
-    	if(isThreadPoolRunning(threadPool) ) {
-    		Log.err("the threadPool is running NOW, please try again later !");
-    		return ;
-    	}
-    	
-    	N_THREADS = nThread;
-    	newFixedThreadPool(N_THREADS);
+    public static ThreadPoolExecutor newFixedThreadPool(int nThread) {
+    	return (ThreadPoolExecutor) Executors.newFixedThreadPool(nThread);
     }
     
 	// shutdown 线程池
 	public static void awaitShutdown(ThreadPoolExecutor threadPool, int checkInterval, long logFlags) {
 		awaitTasksEnd(threadPool, checkInterval, true, logFlags);
+	}
+	public static void awaitShutdown(ThreadPoolExecutor threadPool, int checkInterval) {
+		awaitTasksEnd(threadPool, checkInterval, true, LOG_ON_MINE_CONF);
 	}
 	public static void awaitShutdown() {
 		awaitShutdown(threadPool, CHECK_INTERVAL, LOG_ON_MINE_CONF);
@@ -1342,6 +1413,9 @@ public class Tools {
     // 等待 线程池中任务结束 [并不关闭线程池]
     public static void awaitTasksEnd(ThreadPoolExecutor threadPool, int checkInterval, long logFlags) {
     	awaitTasksEnd(threadPool, checkInterval, false, logFlags);
+    }
+    public static void awaitTasksEnd(ThreadPoolExecutor threadPool, int checkInterval) {
+    	awaitTasksEnd(threadPool, checkInterval, false, LOG_ON_MINE_CONF);
     }
     public static void awaitTasksEnd() {
     	awaitTasksEnd(threadPool, CHECK_INTERVAL, false, LOG_ON_MINE_CONF);
@@ -1366,6 +1440,9 @@ public class Tools {
             }
         }
     }
+    public static void awaitTasksEnd(ThreadPoolExecutor threadPool, int checkInterval, boolean isShutdown) {
+    	awaitTasksEnd(threadPool, checkInterval, isShutdown, LOG_ON_MINE_CONF);
+    }
     // 判断给定的线程池是否还有任务在运行
     public static boolean isThreadPoolRunning(ThreadPoolExecutor threadPool) {
     	int taskInQueue = threadPool.getQueue().size();
@@ -1383,34 +1460,50 @@ public class Tools {
 	}
 	
 	// ------------ 日志相关 --------------------
+	// 相关的logPattern
+	public static LogPatternChain taskBeforeLogPatternChain = Constants.taskBeforeLogPatternChain;
+	public static LogPatternChain taskAfterLogPatternChain = Constants.taskAfterLogPatternChain;
+	public static LogPatternChain taskExceptionLogPatternChain = Constants.taskExceptionLogPatternChain;
 	// 打印任务的日志信息
 	public static void logBeforeTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, boolean debugEnable) {
 		if(debugEnable ) {
-			StringBuilder sb = new StringBuilder();
-		    Tools.appendCRLF(sb, "URL : " + singleUrlTask.getUrl() );
-		    Tools.appendCRLF(sb, "--------------------- [" + Tools.getTaskName(singleUrlTask) + "start ...] --------------------------");
-		    Log.log(sb.toString() );
+			String info = Constants.formatLogInfo(taskBeforeLogPatternChain, new JSONObject()
+			.element(LogPatternType.URL.typeKey(), singleUrlTask.getUrl()).element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
+			.element(LogPatternType.MODE.typeKey(), Constants.MODE_LOG)
+			);
+			Log.log(info );
 		}
 	}
 	public static void logAfterTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, String fetchedResult, String spent, boolean debugEnable) {
 		if(debugEnable ) {
-			StringBuilder sb = new StringBuilder();
-		    Tools.appendCRLF(sb, "fetched result : " + fetchedResult);
-		    Tools.appendCRLF(sb, "--------------------- [crawl" + Tools.getTaskName(singleUrlTask) + "end ...] --------------------------");
-		    Tools.appendCRLF(sb, "spent " + spent + " ms ...");
-		    Log.log(sb.toString() );
+			String info = Constants.formatLogInfo(taskAfterLogPatternChain, new JSONObject()
+							.element(LogPatternType.RESULT.typeKey(), fetchedResult).element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
+							.element(LogPatternType.SPENT.typeKey(), spent).element(LogPatternType.MODE.typeKey(), Constants.MODE_LOG)
+							);
+		    Log.log(info );
 		}
 	}
 	public static void logErrorMsg(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, Exception e) {
-		Log.err(e.getClass().getName() + " while fetch : " + Tools.getTaskName(singleUrlTask) + ", url : " + singleUrlTask.getUrl() );
+		String info = Constants.formatLogInfo(taskExceptionLogPatternChain, new JSONObject()
+						.element(LogPatternType.EXCEPTION.typeKey(), e.getClass().getName() + " : " + e.getMessage() )
+						.element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
+						.element(LogPatternType.URL.typeKey(), singleUrlTask.getUrl()).element(LogPatternType.MODE.typeKey(), Constants.MODE_ERR)
+						);
+		Log.err(info );
 	}
 	
 	// 获取现在的毫秒数, 以及根据start获取开销的时间
 	public static long now() {
 		return System.currentTimeMillis();
 	}
+	public static String nowStr() {
+		return String.valueOf(now() );
+	}
 	public static long spent(long start) {
 		return now() - start;
+	}
+	public static String spentStr(long start) {
+		return String.valueOf(spent(start) );
 	}
 	
 	// ------------ 进制转换相关 --------------------
@@ -1470,19 +1563,20 @@ public class Tools {
 	static class BuffInfo {
 		// 输出路径, 刷出数据的阈值, 缓冲大小, StringBuffer
 		public String outputPath;
+		public String charset;
 		public int threshold;
 		public int buffSize;
 		public StringBuffer sb;
 		
 		// 初始化
-		public BuffInfo(String outputPath, int threshold, BuffSizeEstimator buffSizeEstimator) {
+		public BuffInfo(String outputPath, String charset, int threshold, BuffSizeEstimator buffSizeEstimator) {
 			this.outputPath = outputPath;
+			this.charset = charset;
 			this.threshold = threshold;
 			this.buffSize = buffSizeEstimator.getBuffSize(threshold);
 			this.sb = new StringBuffer(buffSize);
 		}
 	}
-	
 	// 根据buff阈值获取buffSize的接口
 	static interface BuffSizeEstimator {
 		public int getBuffSize(int threshold);
@@ -1499,23 +1593,29 @@ public class Tools {
 	};
 	
 	// 创建一个缓冲区
-	public static void createAnBuffer(String bufName, String outputPath, BuffSizeEstimator buffSizeEstimator, int threshold) {
+	public static void createAnBuffer(String bufName, String outputPath, String charset, BuffSizeEstimator buffSizeEstimator, int threshold) {
 		if(bufExists(bufName) ) {
 			throw new RuntimeException("the buffInfo with key : " + bufName + " is already exists !");
 		}
 		
-		BuffInfo buffInfo = new BuffInfo(outputPath, threshold, buffSizeEstimator);
+		BuffInfo buffInfo = new BuffInfo(outputPath, charset, threshold, buffSizeEstimator);
 		bufferToBuffInfo.put(bufName, buffInfo);
 	}
+	public static void createAnBuffer(String bufName, String outputPath, String charset) {
+		createAnBuffer(bufName, outputPath, charset, defaultBuffSizeEstimator, defaultBuffThreshold);
+	}
 	public static void createAnBuffer(String bufName, String outputPath) {
-		createAnBuffer(bufName, outputPath, defaultBuffSizeEstimator, defaultBuffThreshold);
+		createAnBuffer(bufName, outputPath, DEFAULT_CHARSET);
 	}
 	public static void closeAnBuffer(String bufName) throws IOException {
 		flushBuffer(bufName, true);
 	}
 	// 判断给定的bufName的buffer是否存在
 	public static boolean bufExists(String buffName) {
-		return bufferToBuffInfo.get(buffName) != null;
+		return getBuffInfo(buffName) != null;
+	}
+	public static BuffInfo getBuffInfo(String buffName) {
+		return bufferToBuffInfo.get(buffName);
 	}
 	
 	// 向给定的缓冲区中添加数据 并检测buffer中的数据是否超过了阈值
@@ -1526,9 +1626,11 @@ public class Tools {
 		
 		BuffInfo buffInfo = bufferToBuffInfo.get(bufName);
 		buffInfo.sb.append(content);
-		synchronized(buffInfo.sb) {
-			if(buffInfo.sb.length() > buffInfo.threshold) {
-				flushBuffer(buffInfo.sb, buffInfo.outputPath, logFlags);
+		if(buffInfo.sb.length() > buffInfo.threshold) {
+			synchronized(buffInfo.sb) {
+				if(buffInfo.sb.length() > buffInfo.threshold) {
+					flushBuffer(buffInfo.sb, buffInfo.outputPath, buffInfo.charset, logFlags);
+				}
 			}
 		}
 	}
@@ -1549,9 +1651,16 @@ public class Tools {
 		}
 		
 		BuffInfo buffInfo = bufferToBuffInfo.get(bufName);
-		synchronized (buffInfo.sb) {
-			if(buffInfo.sb.length() > 0) {
-				flushBuffer(buffInfo.sb, buffInfo.outputPath, logFlags);
+		if(buffInfo.sb.length() > 0) {
+			synchronized (buffInfo.sb) {
+				if(buffInfo.sb.length() > 0) {
+					// judge if 'buf' exists in case of 'MultiThreadConcurrent'
+					if(bufExists(bufName) ) {
+						flushBuffer(buffInfo.sb, buffInfo.outputPath, buffInfo.charset, logFlags);
+					} else {
+						Log.log("the buffer : '" + bufName + "' already be removed !");
+					}
+				}
 			}
 		}
 		if(isLastBatch) {
@@ -1567,16 +1676,28 @@ public class Tools {
 	public static void flushBuffer(String bufName) throws IOException {
 		flushBuffer(bufName, LOG_ON_MINE_CONF);
 	}
-	public static void flushBuffer(StringBuffer sb, String path, long logFlags) throws IOException {
-	  Tools.append(sb.toString(), path);
-	  long kbLength = getKBytesByBytes(sb.length() );
-	  sb.setLength(0);
-	  if(isLog(logFlags, LOG_ON_FLUSH_BUFFER) ) {
-		  Log.log("flush buffer at : " + new Date().toString() + ", size : " + kbLength + " kb" );
-	  }
+	// update the step 'flushDataToPath' into 'threadPoolExecutor'		at 2016.04.16
+	public static void flushBuffer(final StringBuffer sb, final String path, final String charset, long logFlags) throws IOException {
+		// move 'nextThree' a head incase of 'buff.sb.length > buff.threshold', got an circle, but can't clear 'buff.sb'		at 2016.04.23
+		long kbLength = getKBytesByBytes(sb.length() );
+		String content = sb.toString();
+		sb.setLength(0);
+		
+		if(! threadPool.isShutdown() ) {
+			Tools.append(content, path, charset, true);
+		} else {
+			Tools.append(content, path, charset, false);
+		}
+		  
+		if(isLog(logFlags, LOG_ON_FLUSH_BUFFER) ) {
+			Log.log("flush buffer at : " + new Date().toString() + ", size : " + kbLength + " kb" );
+		}
+	}
+	public static void flushBuffer(StringBuffer sb, String path, String charset) throws IOException {
+		flushBuffer(sb, path, charset, LOG_ON_MINE_CONF);
 	}
 	public static void flushBuffer(StringBuffer sb, String path) throws IOException {
-		flushBuffer(sb, path, LOG_ON_MINE_CONF);
+		flushBuffer(sb, path, DEFAULT_CHARSET);
 	}
 	
 	// ------------ assert相关 ------- 2016.03.22 -------------
@@ -1655,24 +1776,23 @@ public class Tools {
 //			return new CuttingOutOrAttrHandler<AttrHandler>(Arrays.asList(mainHandler, attachHander) );
 //		}
 //	}
-
 	// 获取给定的attrHander中最后一个有效的AttrHandler[非Composite]
-	public static AttrHandler lastWorkedHandler(AttrHandler attrHandler) {
-		if(attrHandler instanceof CompositeAttrHandler) {
-			CompositeAttrHandler compositeHandler = ((CompositeAttrHandler) attrHandler);
-			return lastWorkedHandler(compositeHandler.handler(compositeHandler.handlers().size() ) );
-		}
-		
-		return attrHandler;
-	}
-	public static OperationAttrHandler lastWorkedHandler(OperationAttrHandler attrHandler) {
-		if(attrHandler instanceof CompositeOperationAttrHandler) {
-			CompositeOperationAttrHandler<?> compositeHandler = ((CompositeOperationAttrHandler<?>) attrHandler);
-			return lastWorkedHandler(compositeHandler.handler(compositeHandler.handlers().size() ) );
-		}
-		
-		return attrHandler;
-	}
+//	public static AttrHandler lastWorkedHandler(AttrHandler attrHandler) {
+//		if(attrHandler instanceof CompositeAttrHandler) {
+//			CompositeAttrHandler compositeHandler = ((CompositeAttrHandler) attrHandler);
+//			return lastWorkedHandler(compositeHandler.handler(compositeHandler.handlers().size() ) );
+//		}
+//		
+//		return attrHandler;
+//	}
+//	public static OperationAttrHandler lastWorkedHandler(OperationAttrHandler attrHandler) {
+//		if(attrHandler instanceof CompositeOperationAttrHandler) {
+//			CompositeOperationAttrHandler<?> compositeHandler = ((CompositeOperationAttrHandler<?>) attrHandler);
+//			return lastWorkedHandler(compositeHandler.handler(compositeHandler.handlers().size() ) );
+//		}
+//		
+//		return attrHandler;
+//	}
 //	public static AttrHandler removeIfLastWorkedHandlerIsFilter(OperationAttrHandler attrHandler) {
 //		if(attrHandler instanceof CompositeOperationAttrHandler) {
 //			CompositeOperationAttrHandler<OperationAttrHandler> compositeHandler = ((CompositeOperationAttrHandler<OperationAttrHandler>) attrHandler);
@@ -1689,6 +1809,7 @@ public class Tools {
 //	}
 	
 	// ------------ 将数据复制到剪切板 ------- 2016.04.07 -------------
+	// windows剪切板 和内存交互数据
 	public static void copyStringToClipBoard(String str) {
 //		Clipboard clipboard = System.getToolkit().getSystemClipboard();
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -1705,7 +1826,6 @@ public class Tools {
       FileTransferable selection = new FileTransferable(files );  
       clipboard.setContents(selection, null);
     }	
-	// 获取剪切板中的数据
 	public static String getStringFromClipBoard(){
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		DataFlavor flavor = DataFlavor.stringFlavor;
@@ -1760,6 +1880,5 @@ public class Tools {
 	
 	// ------------ 待续 --------------------
 
-	
 	
 }

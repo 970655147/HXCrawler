@@ -56,6 +56,8 @@ public class TwoStringResultHandlerArgsAttrHandler extends AttrHandler {
 	
 	@Override
 	public String toString() {
-		return new JSONObject().element("handler", handler.toString() ).element("arg01", arg01.toString() ).element("arg02", arg02.toString() ).toString();
+		return new JSONObject()
+				.element("handler", handler.toString() ).element("arg01", arg01.toString() ).element("arg02", arg02.toString() )
+				.toString();
 	}
 }

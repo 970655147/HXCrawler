@@ -39,6 +39,8 @@ public abstract class NoneOrOneStringArgsAttrHandler extends OneStringArgsAttrHa
 	
 	@Override
 	public String toString() {
-		return new JSONObject().element("name", name() ).element("operands", arg.toString() ).toString();
+		return new JSONObject()
+				.element("name", name() ).element("operands", arg.toString() )
+				.toString();
 	}
 }

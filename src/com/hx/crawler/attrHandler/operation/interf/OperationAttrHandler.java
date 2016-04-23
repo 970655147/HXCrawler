@@ -92,7 +92,7 @@ public abstract class OperationAttrHandler extends AttrHandler {
 	}
 	public void handleImmediateReturn() {
 		if(beFiltered() ) {
-			Log.log(returnMsg);
+			System.out.println(returnMsg);
 		} else if(assertFalse() ) {
 			Tools.assert0(returnMsg);
 		}

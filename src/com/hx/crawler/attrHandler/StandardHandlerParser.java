@@ -161,7 +161,7 @@ public class StandardHandlerParser extends HandlerParser {
 		String lastOperationType = null;
 		List<String> suppertedOperations = Constants.handlerTypeToHandleOperations.get(handlerType);
 		
-		WordsSeprator sep = new WordsSeprator(handlerStr, newSepToPos(), Constants.escapeMap, true);
+		WordsSeprator sep = new WordsSeprator(handlerStr, Constants.handlerParserSeps, Constants.escapeMap, true);
 		while(sep.hasNext() ) {
 			if(lastOperationReturn != null) {
 				if(lastOperationReturn.isFinal ) {
@@ -950,14 +950,14 @@ public class StandardHandlerParser extends HandlerParser {
 		return (flag & mask) != 0; 
 	}
 	// 获取一个sepToPos
-	private Map<String, Integer> newSepToPos() {
-		Map<String, Integer> sepToPos = new HashMap<>();
-		Iterator<String> it = Constants.handlerParserSeps.iterator();
-		while(it.hasNext() ) {
-			sepToPos.put(it.next(), 0);
-		}
-		return sepToPos;
-	}
+//	private Map<String, Integer> newSepToPos() {
+//		Map<String, Integer> sepToPos = new HashMap<>();
+//		Iterator<String> it = Constants.handlerParserSeps.iterator();
+//		while(it.hasNext() ) {
+//			sepToPos.put(it.next(), 0);
+//		}
+//		return sepToPos;
+//	}
 	
 	// -------------------- business Types ----------------------------------
 	// 操作数[可能为复合的符号]

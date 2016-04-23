@@ -6,9 +6,11 @@
 
 package com.hx.crawler.util;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 // ·Ö¸î×Ö·û´®
 public class WordsSeprator implements Iterator<String> {
@@ -30,13 +32,21 @@ public class WordsSeprator implements Iterator<String> {
 		private String lastSep;
 	
 	// ³õÊ¼»¯
-	public WordsSeprator(String str, Map<String, Integer> sepToPos, Map<String, String> escapeMap, boolean gotSep) {
+	public WordsSeprator(String str, Set<String> seps, Map<String, String> escapeMap, boolean gotSep) {
 		this.str = str;
-		this.sepToPos = sepToPos;
 		this.escapeMap = escapeMap;
 		this.gotSep = gotSep;
 		this.nowSep = false;
 		this.lastSep = null;
+		// update at 2016.04.21
+		// update 'Map<String, Integer> sepToPos' => 'Set<String> seps', construct 'sepToPos' by this Constructor
+			// incase of 'str' startsWith 'sep'
+		this.sepToPos = new HashMap<>();
+		for(String sep : seps) {
+			sepToPos.put(sep, -1);
+		}
+		
+		// freshAll, got every 'sep''s right position!
 		freshAll();
 	}
 
@@ -73,7 +83,9 @@ public class WordsSeprator implements Iterator<String> {
 			idx = pos + sep.length();
 			lastSep = sep;
 		}
-		if(Tools.isEmpty(res) ) {
+		// because 'Constants' denpend on 'WordsSeprator', and 'Tools' denpend on 'Constants'
+		// so use 'Constants.isEmpty' instead of 'Tools.isEmpty'[cause circle denpency] in case of 'InitException'
+		if(Constants.isEmpty0(res) ) {
 			return hasNext();
 		}
 		next = res;
@@ -98,6 +110,9 @@ public class WordsSeprator implements Iterator<String> {
 	}
 	public int lastNextPos() {
 		return lastNextIdx;
+	}
+	public int length() {
+		return str.length();
 	}
 	public String seek() {
 		if(! hasNext() ) {
@@ -134,23 +149,23 @@ public class WordsSeprator implements Iterator<String> {
 	private void fresh(String sep) {
 		Integer pos = sepToPos.get(sep);
 		if(pos != null ) {
-			if(pos >= 0) {
-				sepToPos.put(sep, indexOf(str, sep, pos+1) );
-			}
+			sepToPos.put(sep, indexOf(str, sep, pos+1) );
 		}
 	}
 	private Integer indexOf(String str, String sep, int start) {
 		int idx = start;
 		whileLoop:
 		while(idx < str.length() ) {
-			for(Entry<String, String> entry : escapeMap.entrySet() ) {
-				if(str.startsWith(entry.getKey(), idx) ) {
-					idx = str.indexOf(entry.getValue(), idx+entry.getKey().length() );
-					if(idx < 0) {
-						break whileLoop;
+			if(escapeMap != null) {
+				for(Entry<String, String> entry : escapeMap.entrySet() ) {
+					if(str.startsWith(entry.getKey(), idx) ) {
+						idx = str.indexOf(entry.getValue(), idx+entry.getKey().length() );
+						if(idx < 0) {
+							break whileLoop;
+						}
+						idx += entry.getValue().length();
+						continue whileLoop;
 					}
-					idx += entry.getValue().length();
-					continue whileLoop;
 				}
 			}
 			if(str.startsWith(sep, idx) ) {

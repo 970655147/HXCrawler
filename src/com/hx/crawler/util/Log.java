@@ -6,56 +6,155 @@
 
 package com.hx.crawler.util;
 
-import java.io.PrintStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import net.sf.json.JSONObject;
+
+import com.hx.crawler.util.LogPattern.LogPatternChain;
+import com.hx.crawler.util.LogPattern.LogPatternType;
 
 // 打印数据相关的类
 public class Log {
 	
-	// 可配置的常量
+	// --------------------------- 可配置变量 --------------------------------------
 	// 以及输出流, 错误流, 以及默认是否换行
-	public static String HORIZON_LINES = "-----------------------------------";
-	public static String HORIZON_STARTS = "-----------------------------------";
-	public static String GOT_THERE = "get there...";
+	public static String HORIZON_LINES = Constants.HORIZON_LINES;
+	public static String HORIZON_STARTS = Constants.HORIZON_STARTS;
+	public static String GOT_THERE = Constants.GOT_THERE;
 	
-	public static PrintStream outStream = System.out;
-	public static PrintStream errStream = System.err;
-	public static String DEFAULT_SEP_WHILE_CRLF = " ";
-	public static String DEFAULT_SEP_WHILE_NO_CRLF = ", ";
-	public static String DEFAULT_SEP_WHILE_TWO_DIMEN = " ";
-	public static boolean OUTPUT_APPEND_CRLF = true;
-	public static boolean ERRPUT_APPEND_CRLF = true;
-	public static boolean OUTPUT_APPEND_CRLF_FOR_CONTAINER = false;
-	public static boolean ERRPUT_APPEND_CRLF_FOR_CONTAINER = false;
+	public static OutputStream outStream = Constants.outStream;
+	public static OutputStream errStream = Constants.errStream;
+	private static boolean outToLogFile = Constants.outToLogFile;
+	private static boolean errToLogFile = Constants.errToLogFile;
+	public final static String logBufName = Constants.logBufName;
+	private static String logFile = Constants.logFile;
+	public static LogPatternChain logPatternChain = Constants.logPatternChain;
 	
+	public static String DEFAULT_SEP_WHILE_CRLF = Constants.DEFAULT_SEP_WHILE_CRLF;
+	public static String DEFAULT_SEP_WHILE_NO_CRLF = Constants.DEFAULT_SEP_WHILE_NO_CRLF;
+	public static String DEFAULT_SEP_WHILE_TWO_DIMEN = Constants.DEFAULT_SEP_WHILE_TWO_DIMEN;
+	public static String DEFAULT_MAP_KV_SEP = Constants.DEFAULT_MAP_KV_SEP;
+	
+	public static boolean OUTPUT_APPEND_CRLF = Constants.OUTPUT_APPEND_CRLF;
+	public static boolean ERRPUT_APPEND_CRLF = Constants.ERRPUT_APPEND_CRLF;
+	public static boolean OUTPUT_APPEND_CRLF_FOR_CONTAINER = Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER;
+	public static boolean ERRPUT_APPEND_CRLF_FOR_CONTAINER = Constants.ERRPUT_APPEND_CRLF_FOR_CONTAINER;
+	// --------------------------- 置于最后 ----------------------------------------
+	
+	// 初始化
+	static {
+		try {
+			if(isLogToFile() ) {
+				setLogFile(logFile);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// --------------------------- 配置可配置变量的接口 ----------------------------------------
+	public static void setLogFile(String logFile) throws IOException {
+		if(Log.logFile != null ) {
+			setLogFile0(logFile);
+		} else {
+			Log.log("Log.logFile is null, maybe not support out log to 'logFile', use 'setOutToLogFile / setErrToLogFile' insted !");
+		}
+	}
+	private static void setLogFile0(String logFile) throws IOException {
+		if(logFile == null) {
+			if(Tools.bufExists(logBufName) ) {
+				Tools.closeAnBuffer(logBufName);
+			}
+			outToLogFile = false;
+			errToLogFile = false;
+			Log.logFile = null;
+			return ;
+		}
+		
+		if((Log.logFile != null) && (! Log.logFile.equals(logFile)) ) {
+			if(Tools.bufExists(logBufName) ) {
+				Tools.flushBuffer(logBufName, true);
+			}
+			Tools.createAnBuffer(logBufName, logFile);
+		} else {
+			if(! Tools.bufExists(logBufName) ) {
+				Tools.createAnBuffer(logBufName, logFile);	
+			} else {
+				Log.log("specified : 'logFile' is current 'Log.logFile', ignore !");
+			}
+		}
+		Log.logFile = logFile;
+	}
+	public static void setOutToLogFile(boolean outToLogFile, String logFile) throws IOException {
+		Log.outToLogFile = outToLogFile;
+		setToLogFile0(outToLogFile, logFile);
+	}
+	public static void setOutToLogFile(boolean outToLogFile) throws IOException {
+		setOutToLogFile(outToLogFile, logFile);
+	}
+	public static void setErrToLogFile(boolean errToLogFile, String logFile) throws IOException {
+		Log.errToLogFile = errToLogFile;
+		setToLogFile0(errToLogFile, logFile);
+	}
+	public static void setErrToLogFile(boolean errToLogFile) throws IOException {
+		setErrToLogFile(errToLogFile, logFile);
+	}
+	private static void setToLogFile0(boolean toLogFile, String logFile) throws IOException {
+		if(toLogFile) {
+			setLogFile0(logFile);
+		}
+	}
+	public static boolean isLogToFile() {
+		return outToLogFile || errToLogFile;
+	}
+	
+	// --------------------------- 业务方法 ----------------------------------------
 	// 标准输出
 	public static void log(boolean appendCRLF) {
 		log(GOT_THERE, appendCRLF);
 	}
 	public static void log() {
-		log(GOT_THERE, OUTPUT_APPEND_CRLF);
+		log(GOT_THERE, Constants.OUTPUT_APPEND_CRLF);
 	}
-	public static void log(String obj, boolean appendCRLF) {
-		outStream.print(obj);
-		if(appendCRLF) {
-			outStream.println();
+	public static void log(String str, boolean appendCRLF) {
+		try {
+			StringBuilder sb = new StringBuilder(str.length() + 4);
+			sb.append(Constants.formatLogInfo(logPatternChain, new JSONObject().element(LogPatternType.MSG.typeKey(), str).element(LogPatternType.MODE.typeKey(), Constants.MODE_LOG)) );
+			if(appendCRLF) {
+				sb.append(Constants.CRLF );
+			}
+			
+			String line = sb.toString();
+			if(outStream != null) {
+				outStream.write(line.getBytes(Tools.DEFAULT_CHARSET) );
+			}
+			if(outToLogFile) {
+				Tools.appendBuffer(logBufName, line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	public static void log(String obj) {
-		log(obj, OUTPUT_APPEND_CRLF);
+		log(obj, Constants.OUTPUT_APPEND_CRLF);
 	}
 	public static void log(Object obj, boolean appendCRLF) {
 		log(obj.toString(), appendCRLF );
 	}
 	public static void log(Object obj) {
-		log(obj.toString(), OUTPUT_APPEND_CRLF );
+		log(obj.toString(), Constants.OUTPUT_APPEND_CRLF );
 	}
 	public static void logf(String pattern, Object[] args, boolean appendCRLF) {
 		log(String.format(pattern, args), appendCRLF);
 	}
 	public static void logf(String pattern, Object... args) {
-		logf(pattern, args, OUTPUT_APPEND_CRLF);
+		logf(pattern, args, Constants.OUTPUT_APPEND_CRLF);
 	}
 	
 	// 错误输出
@@ -65,10 +164,23 @@ public class Log {
 	public static void err() {
 		err(GOT_THERE, ERRPUT_APPEND_CRLF);
 	}
-	public static void err(String obj, boolean appendCRLF) {
-		errStream.print(obj);
-		if(appendCRLF) {
-			errStream.println();
+	public static void err(String str, boolean appendCRLF) {
+		try {
+			StringBuilder sb = new StringBuilder(str.length() + 4);
+			sb.append(Constants.formatLogInfo(logPatternChain, new JSONObject().element(LogPatternType.MSG.typeKey(), str).element(LogPatternType.MODE.typeKey(), Constants.MODE_ERR)) );
+			if(appendCRLF) {
+				sb.append(Constants.CRLF );
+			}
+			
+			String line = sb.toString();
+			if(errStream != null) {
+				errStream.write(line.getBytes(Tools.DEFAULT_CHARSET) );
+			}
+			if(errToLogFile) {
+				Tools.appendBuffer(logBufName, line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	public static void err(String obj) {
@@ -84,7 +196,7 @@ public class Log {
 		err(String.format(pattern, args), appendCRLF);
 	}
 	public static void errf(String pattern, Object... args) {
-		errf(pattern, args, OUTPUT_APPEND_CRLF);
+		errf(pattern, args, Constants.OUTPUT_APPEND_CRLF);
 	}
 	
 	// 打印迭代器中的元素
@@ -122,10 +234,10 @@ public class Log {
 		}
 	}
 	public static <T> void log(Iterator<T> it) {
-		log(it, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(it, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static <T> void log(Iterator<T> it, String sep) {
-		log(it, sep, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(it, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static <T> void err(Iterator<T> it, String sep, boolean appendCRLF) {
@@ -153,10 +265,10 @@ public class Log {
 		log(ls.iterator(), appendCRLF);
 	}
 	public static <T> void log(List<T> ls) {
-		log(ls.iterator(), OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls.iterator(), Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static <T> void log(List<T> ls, String sep) {
-		log(ls.iterator(), sep, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls.iterator(), sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static <T> void err(List<T> ls, String sep, boolean appendCRLF) {
@@ -170,6 +282,106 @@ public class Log {
 	}
 	public static <T> void err(List<T> ls, String sep) {
 		err(ls.iterator(), sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	
+	// 打印Set
+	public static <T> void log(Set<T> ls, String sep, boolean appendCRLF) {
+		log(ls.iterator(), sep, appendCRLF);
+	}
+	public static <T> void log(Set<T> ls, boolean appendCRLF) {
+		log(ls.iterator(), appendCRLF);
+	}
+	public static <T> void log(Set<T> ls) {
+		log(ls.iterator(), Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	public static <T> void log(Set<T> ls, String sep) {
+		log(ls.iterator(), sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	
+	public static <T> void err(Set<T> ls, String sep, boolean appendCRLF) {
+		err(ls.iterator(), sep, appendCRLF);
+	}
+	public static <T> void err(Set<T> ls, boolean appendCRLF) {
+		err(ls.iterator(), appendCRLF);
+	}
+	public static <T> void err(Set<T> ls) {
+		err(ls.iterator(), ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	public static <T> void err(Set<T> ls, String sep) {
+		err(ls.iterator(), sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	
+	// 打印Map
+	public static <K, V> void log(Map<K, V> ls, String kvSep, String sep, boolean isOutStream, boolean appendCRLF) {
+		StringBuilder sb = new StringBuilder();
+		if(appendCRLF) {
+			for(Entry<K, V> entry : ls.entrySet() ) {
+				Tools.appendCRLF(sb, entry.getKey() + kvSep + entry.getValue() + sep );
+			}
+		} else {
+			for(Entry<K, V> entry : ls.entrySet() ) {
+				Tools.append(sb, entry.getKey() + " -> " + entry.getValue() + sep );
+			}
+		}
+		// incase of 'it.hasNext == false'
+		if(sb.length() > sep.length() ) {
+			sb.delete(sb.length()-sep.length(), sb.length() );
+		}
+		
+		if(isOutStream) {
+			log(sb.toString() );
+		} else {
+			err(sb.toString() );
+		}
+	}
+	public static <K, V> void log(Map<K, V> ls, String sep, boolean isOutStream, boolean appendCRLF) {
+		log(ls, DEFAULT_MAP_KV_SEP, sep, isOutStream, appendCRLF);
+	}
+	
+	public static <K, V> void log(Map<K, V> ls, String kvSep, String sep, boolean appendCRLF) {
+		log(ls, kvSep, sep, true, appendCRLF);
+	}
+	public static <K, V> void log(Map<K, V> ls, String kvSep, String sep) {
+		log(ls, kvSep, sep, true);
+	}
+	public static <K, V> void log(Map<K, V> ls, String sep, boolean appendCRLF) {
+		log(ls, DEFAULT_MAP_KV_SEP, sep, true, appendCRLF);
+	}
+	public static <K, V> void log(Map<K, V> ls, boolean appendCRLF) {
+		if(appendCRLF) {
+			log(ls, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+		} else {
+			log(ls, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+		}
+	}
+	public static <K, V> void log(Map<K, V> ls) {
+		log(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	public static <K, V> void log(Map<K, V> ls, String sep) {
+		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	
+	public static <K, V> void err(Map<K, V> ls, String kvSep, String sep, boolean appendCRLF) {
+		log(ls, kvSep, sep, false, appendCRLF);
+	}
+	public static <K, V> void err(Map<K, V> ls, String kvSep, String sep) {
+		err(ls, kvSep, sep, true);
+	}
+	public static <K, V> void err(Map<K, V> ls, String sep, boolean appendCRLF) {
+		log(ls, DEFAULT_MAP_KV_SEP, sep, false, appendCRLF);
+	}
+	public static <K, V> void err(Map<K, V> ls, boolean appendCRLF) {
+		if(appendCRLF) {
+			err(ls, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+		} else {
+			err(ls, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+		}
+	}
+	public static <K, V> void err(Map<K, V> ls) {
+		err(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	public static <K, V> void err(Map<K, V> ls, String sep) {
+		err(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	// 打印int[], long[], double[], char[], boolean[], Object[]
@@ -207,10 +419,10 @@ public class Log {
 		}
 	}
 	public static void log(int[] ls) {
-		log(ls, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static void log(int[] ls, String sep) {
-		log(ls, sep, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static void err(int[] ls, String sep, boolean appendCRLF) {
@@ -264,10 +476,10 @@ public class Log {
 		}
 	}
 	public static void log(long[] ls) {
-		log(ls, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static void log(long[] ls, String sep) {
-		log(ls, sep, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static void err(long[] ls, String sep, boolean appendCRLF) {
@@ -321,10 +533,10 @@ public class Log {
 		}
 	}
 	public static void log(double[] ls) {
-		log(ls, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static void log(double[] ls, String sep) {
-		log(ls, sep, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static void err(double[] ls, String sep, boolean appendCRLF) {
@@ -378,10 +590,10 @@ public class Log {
 		}
 	}
 	public static void log(char[] ls) {
-		log(ls, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static void log(char[] ls, String sep) {
-		log(ls, sep, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static void err(char[] ls, String sep, boolean appendCRLF) {
@@ -435,10 +647,10 @@ public class Log {
 		}
 	}
 	public static void log(boolean[] ls) {
-		log(ls, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static void log(boolean[] ls, String sep) {
-		log(ls, sep, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static void err(boolean[] ls, String sep, boolean appendCRLF) {
@@ -492,10 +704,10 @@ public class Log {
 		}
 	}
 	public static <T> void log(T[] ls) {
-		log(ls, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static <T> void log(T[] ls, String sep) {
-		log(ls, sep, OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static <T> void err(T[] ls, String sep, boolean appendCRLF) {
@@ -650,6 +862,9 @@ public class Log {
 		StringBuilder sb = new StringBuilder(n * (HORIZON_LINES.length() + 2) );
 		for(int i=0; i<n; i++) {
 			Tools.appendCRLF(sb, HORIZON_LINES);
+		}
+		if(sb.length() > Tools.CRLF.length() ) {
+			sb.delete(sb.length()-Tools.CRLF.length(), sb.length() );
 		}
 		
 		if(isOutStream) {
@@ -896,8 +1111,33 @@ public class Log {
 	public static void logForThemes(String theme) {
 		logFor(theme, "theme", HORIZON_STARTS, HORIZON_STARTS);
 	}
+	public static void logForPage(Object page) {
+		logFor(page.toString(), "page", HORIZON_LINES, HORIZON_LINES);
+	}
+	public static void logForThemes(Object theme) {
+		logFor(theme.toString(), "theme", HORIZON_STARTS, HORIZON_STARTS);
+	}
 	public static void logFor(String subject, String subjectKey, String before, String after) {
 		log(before + " [ " + subjectKey + " : " + subject + " ] " + after);
 	}
+	
+	// 刷出缓冲区的数据		add at 2016.04.15
+	public static void flush() {
+		try {
+			if(logFile != null) {
+				if(Tools.bufExists(logBufName) ) {
+					Tools.flushBuffer(logBufName);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+ 	
+	// ------------ 待续 --------------------
+	
+	
+	
+
 	
 }

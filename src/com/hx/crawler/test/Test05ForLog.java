@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.hx.crawler.util.Log;
+import com.hx.crawler.util.Tools;
 
 public class Test05ForLog {
 
@@ -59,6 +60,10 @@ public class Test05ForLog {
 		Log.err(twoDimenBooArr );
 		Log.err(twoDimenBooArr, "--");
 		
+		Log.enter();
+		Log.flush();
+		
+		Log.log(Tools.DEFAULT_CHARSET );
 		
 	}
 	

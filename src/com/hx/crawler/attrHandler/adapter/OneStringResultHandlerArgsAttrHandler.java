@@ -41,6 +41,8 @@ public class OneStringResultHandlerArgsAttrHandler extends AttrHandler {
 	
 	@Override
 	public String toString() {
-		return new JSONObject().element("handler", handler.toString() ).element("arg", arg.toString() ).toString();
+		return new JSONObject()
+				.element("handler", handler.toString() ).element("arg", arg.toString() )
+				.toString();
 	}
 }
