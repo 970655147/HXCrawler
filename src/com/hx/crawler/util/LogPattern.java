@@ -30,6 +30,7 @@ public interface LogPattern {
 		PATTERN_CHAIN(Constants.LOG_PATTERN_CHAIN),
 		DATE(Constants.LOG_PATTERN_DATE), CONSTANTS(Constants.LOG_PATTERN_CONSTANTS), MODE(Constants.LOG_PATTERN_MODE), 
 			MSG(Constants.LOG_PATTERN_MSG), INC_IDX(Constants.LOG_PATTERN_IDX), HANDLER(Constants.LOG_PATTERN_HANDLER),
+			THREAD(Constants.LOG_PATTERN_THREAD), STACK_TRACE(Constants.LOG_PATTERN_STACK_TRACE),
 		URL(Constants.LOG_PATTERN_URL), TASK_NAME(Constants.LOG_PATTERN_TASK_NAME), RESULT(Constants.LOG_PATTERN_RESULT), 
 			SPENT(Constants.LOG_PATTERN_SPENT), EXCEPTION(Constants.LOG_PATTERN_EXCEPTION);
 		
@@ -94,8 +95,8 @@ public interface LogPattern {
 	// date, constants, mode, msg, idx, handler Ïà¹ØµÄLogPattern
 	static class DateLogPattern implements LogPattern {
 		private DateFormat dateFormat;
-		public DateLogPattern(String dateFormat) {
-			this.dateFormat = new SimpleDateFormat(dateFormat);
+		public DateLogPattern(DateFormat dateFormat) {
+			this.dateFormat = dateFormat;
 		}
 		public String pattern() {
 			return dateFormat.format(new Date() );
@@ -164,6 +165,35 @@ public interface LogPattern {
 		}
 		public LogPatternType type() {
 			return LogPatternType.HANDLER;
+		}
+	}
+	static class ThreadLogPattern implements LogPattern {
+		public String pattern() {
+			return Thread.currentThread().getName();
+		}
+		public LogPatternType type() {
+			return LogPatternType.THREAD;
+		}
+	}
+	static class StackTraceLogPattern implements LogPattern {
+		public String pattern() {
+			StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+			int idx = 0;
+			for(int i=stackTraceElements.length-1; i>=0; i--) {
+				StackTraceElement stackTraceElement = stackTraceElements[i];
+				if(stackTraceElement.getClassName().equals(Log.class.getName()) ) {
+					idx = i + 1;
+					break ;
+				}
+			}
+			
+			String className = stackTraceElements[idx].getClassName();
+			int lastIdxOfDot = className.lastIndexOf(".");
+			String trimedClassName = (lastIdxOfDot > 0) ? className.substring(className.lastIndexOf(".") + 1) : className;
+			return trimedClassName + "." + stackTraceElements[idx].getMethodName();
+		}
+		public LogPatternType type() {
+			return LogPatternType.STACK_TRACE;
 		}
 	}
 	

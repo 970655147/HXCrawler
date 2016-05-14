@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import com.hx.crawler.attrHandler.DoNothingAttrHandler;
@@ -42,7 +45,9 @@ import com.hx.crawler.util.LogPattern.MsgLogPattern;
 import com.hx.crawler.util.LogPattern.OneStringVariableLogPattern;
 import com.hx.crawler.util.LogPattern.ResultLogPattern;
 import com.hx.crawler.util.LogPattern.SpentLogPattern;
+import com.hx.crawler.util.LogPattern.StackTraceLogPattern;
 import com.hx.crawler.util.LogPattern.TaskNameLogPattern;
+import com.hx.crawler.util.LogPattern.ThreadLogPattern;
 import com.hx.crawler.util.LogPattern.UrlLogPattern;
 import com.hx.crawler.xpathParser.AttributeHandler;
 import com.hx.crawler.xpathParser.ValuesHandler;
@@ -89,6 +94,15 @@ public class Constants {
 	public final static Character SLASH = '\\';
 	public final static Character INV_SLASH = '/';
 	public static final Character QUESTION = '?';
+	public static final Character DOT = '.';
+	public static final Character COMMA = ',';
+	public static final Character COLON = ':';	
+	public static final Character SPACE = ' ';
+	public static final Character TAB = '\t';
+	public static final Character CR = '\r';
+	public static final Character LF = '\n';
+	public static final Character QUOTE = '\"';
+	public static final Character SINGLE_QUOTE = '\'';
 	
 	// 'rootNode' int result of 'XpathIndexString'
 	public final static String ROOT = "#root";
@@ -135,7 +149,7 @@ public class Constants {
 	
 	public final static String PARAM_SEP = ",";
 	public final static String SUB_HANDLER_CALL = ".";
-	public final static String QUOTE = "'";
+//	public final static String QUOTE = "'";
 	public final static String QUOTED_STRING = "quotedString";
 	public final static String TRUE = Boolean.TRUE.toString();
 	public final static String FALSE = Boolean.FALSE.toString();
@@ -248,19 +262,31 @@ public class Constants {
 	public final static String DEFAULT_HORIZON_LINES = "-----------------------------------";
 	public final static String DEFAULT_HORIZON_STARTS = "***********************************";
 	public final static String DEFAULT_GOT_THERE = "get there...";	
+	public final static String DEFAULT_GOT_NOTHING = "got nothing ~";	
 	
-	public final static OutputStream defaultOutStream = System.out;
-	public final static OutputStream defaultErrStream = System.err;
-	public final static boolean defaultOutToLogFile = false;
-	public final static boolean defaultErrToLogFile = false;
+	public final static OutputStream[] defaultOutStreams = new OutputStream[] {
+																System.out,
+																System.err		
+															};
+	public final static boolean[] defaultOutToLogFile = new boolean[] {
+																false,
+																false
+															};
+	public final static String[] defaultLogBufNames = new String[] {
+																"_Log.log",
+																"_Log.err"
+															};
+	public final static String[] defaultLogFiles = new String[] {
+																"C:\\Users\\970655147\\Desktop\\tmp\\out.log",
+																"C:\\Users\\970655147\\Desktop\\tmp\\out.log"
+															};
 	public final static OutputStream nullOutputStream = new NullOutputStream();
-	public final static String defaultLogBufName = "_Log.log";
-	public final static String defaultLogFile = "C:\\Users\\970655147\\Desktop\\tmp\\out.log";
-	public final static String defaultDateFormat = "yyyy-MM-dd hh:mm:sss";
+	public final static String defaultDateFormat = "yyyy-MM-dd hh:mm:ss:SSS";
 	public final static String defaultLogPattern = ">>>> [${idx }] [${date }] - [${mode }] => `${msg }`  >>>>";
 	public final static String defaultTaskBeforeLogPattern = "URL : '${url }' \r\n --------------------- [ '${taskName }' start ... ] --------------------------";
 	public final static String defaultTaskAfterLogPattern = "FetchedResult : '${result }' \r\n --------------------- [ '${taskName }' end ... ] -------------------------- \r\n spent '${spent }' ms ... ";
 	public final static String defaultTaskExceptionLogPattern = "Exception : '${exception }' \r\n while fetch : '${taskName }', url : '${url }' ";
+	public final static LogPatternChain justPrintMsgLogPattern = new LogPatternChain().addLogPattern(new MsgLogPattern(Constants.DEFAULT_VALUE) );
 	
 	public final static String _DEFAULT_SEP_WHILE_CRLF = " ";
 	public final static String _DEFAULT_SEP_WHILE_NO_CRLF = ", ";
@@ -275,17 +301,27 @@ public class Constants {
 	static String HORIZON_LINES = Constants.DEFAULT_HORIZON_LINES;
 	static String HORIZON_STARTS = Constants.DEFAULT_HORIZON_STARTS;
 	static String GOT_THERE = Constants.DEFAULT_GOT_THERE;
+	static String GOT_NOTHING = Constants.DEFAULT_GOT_NOTHING;
 	
-	static OutputStream outStream = Constants.defaultOutStream;
-	static OutputStream errStream = Constants.defaultErrStream;
-	static boolean outToLogFile = Constants.defaultOutToLogFile;
-	static boolean errToLogFile = Constants.defaultErrToLogFile;
-	static String logBufName = Constants.defaultLogBufName;
-	static String logFile = Constants.defaultLogFile;
-	static String dateFormat = Constants.defaultDateFormat;
+	// 增加一个输出模式[fatal] : 1. 增加索引, LOG_MODES_STR, LOG_MODES
+	// 						2. 增加outStreams, outToLogFiles, logBuffNames, logFIles
+	//						3. 增加Log.fatal()系列方法
+	//						4. 更新Log.dispath
+	//						5. 测试
+	public static final int OUT_IDX = 0;
+	public static final int ERR_IDX = OUT_IDX + 1;
+	static final JSONArray LOG_MODES_STR = new JSONArray()
+											.element("Constants.OUT_IDX").element("Constants.ERR_IDX");
+	public final static String[] LOG_MODES = {"LOG", "ERROR" };
+	// updated at 2015.05.05
+	static OutputStream[] outStreams = Arrays.copyOf(defaultOutStreams, defaultOutStreams.length);
+	static boolean[] outToLogFile = Arrays.copyOf(defaultOutToLogFile, defaultOutToLogFile.length);
+	static String[] logBufNames = Arrays.copyOf(defaultLogBufNames, defaultLogBufNames.length);
+	static String[] logFiles = Arrays.copyOf(defaultLogFiles, defaultLogFiles.length);
+	public static DateFormat dateFormat = new SimpleDateFormat(Constants.defaultDateFormat );
 	static boolean usePattern = Boolean.parseBoolean(Constants.DEFAULT_USE_PATTERN);
-	static String logPattern = Constants.defaultLogPattern;
-	static LogPatternChain logPatternChain = new LogPatternChain().addLogPattern(new MsgLogPattern(Constants.DEFAULT_VALUE) );	
+	static String logPattern = Constants.defaultLogPattern;	
+	static LogPatternChain logPatternChain = justPrintMsgLogPattern;	
 	
 	static String DEFAULT_SEP_WHILE_CRLF = Constants._DEFAULT_SEP_WHILE_CRLF;
 	static String DEFAULT_SEP_WHILE_NO_CRLF = Constants._DEFAULT_SEP_WHILE_NO_CRLF;
@@ -304,16 +340,22 @@ public class Constants {
 	public final static String RBRACKET = ")";
 	
 	// fixed pattern
+	// add at 2016.04.21
 	public final static String LOG_PATTERN_CHAIN = "logPatternChain";
 	public final static String LOG_PATTERN_CONSTANTS = CONSTANTS;
 	public final static String LOG_PATTERN_DATE = "date";
 	public final static String LOG_PATTERN_IDX = "idx";
 	
 	// controllable [variable]
+	// add at 2016.04.22
 	public final static String LOG_PATTERN_MODE = "mode";
 	public final static String LOG_PATTERN_MSG = "msg";
 	public final static String LOG_PATTERN_HANDLER = HANDLER;
+	// add at 2016.04.29
+	public final static String LOG_PATTERN_THREAD = "thread";
+	public final static String LOG_PATTERN_STACK_TRACE = "stackTrace";
 	
+	// add at 2016.04.23
 	public final static String LOG_PATTERN_TASK_NAME = "taskName";
 	public final static String LOG_PATTERN_URL = "url";
 	public final static String LOG_PATTERN_RESULT = "result";
@@ -322,8 +364,6 @@ public class Constants {
 	
 	// default 'VariableValue'[${var }], and supported two 'mode'
 	public final static String DEFAULT_VAR_VALUE = "varNotFound";
-	public final static String MODE_LOG = "LOG";
-	public final static String MODE_ERR = "ERROR";
 	
 	// Log.formatLogInfo(LogPatternChain, String[]) ->  Log.formatLogInfo(LogPatternChain, Map<String, String>)
 //	// not concern 'ConreteValue', just ensure '*_idx' unique
@@ -423,11 +463,12 @@ public class Constants {
 			initToolsByConfigFile(props);
 			initLogByConfigFile(props);
 		}
-		taskBeforeLogPatternChain = initLogPattern(taskBeforeLogPattern, props);
-		taskAfterLogPatternChain = initLogPattern(taskAfterLogPattern, props);
-		taskExceptionLogPatternChain = initLogPattern(taskExceptionLogPattern, props);
+		JSONObject newProps = JSONObject.fromObject(props);
+		taskBeforeLogPatternChain = initLogPattern(taskBeforeLogPattern, newProps);
+		taskAfterLogPatternChain = initLogPattern(taskAfterLogPattern, newProps);
+		taskExceptionLogPatternChain = initLogPattern(taskExceptionLogPattern, newProps);
 		if(usePattern) {
-			logPatternChain = initLogPattern(logPattern, props);
+			logPatternChain = initLogPattern(logPattern, newProps);
 		}
 		
 		props = null;
@@ -469,28 +510,26 @@ public class Constants {
 	
 	// 使用properties初始化log相关的常量配置
 		// 使用配置文件进行初始化		add at 2016.04.15
-		//	static {
-		//		initByConfigFile(Tools.props);
-		//		Tools.props = null;		// 'Tools.props'[staticField] will not use anyMore, so free it!
-		//	}
 	private static void initLogByConfigFile(Properties props) {
 		if(props != null) {
 			HORIZON_LINES = props.getProperty("horizonLines", DEFAULT_HORIZON_LINES);
 			HORIZON_STARTS = props.getProperty("horizonStars", DEFAULT_HORIZON_STARTS);
 			GOT_THERE = props.getProperty("gotThere", DEFAULT_GOT_THERE);
+			GOT_NOTHING = props.getProperty("gotNothing", DEFAULT_GOT_NOTHING);
 			
 			String outToConsole = props.getProperty("outToConsole", Constants.TRUE);
 			if(! outToConsole.equals(Constants.TRUE) ) {
-				outStream = null;
+				outStreams[OUT_IDX] = null;
 			}
 			String errToConsole = props.getProperty("errToConsole", Constants.TRUE);
 			if(! errToConsole.equals(Constants.TRUE) ) {
-				errStream = null;
+				outStreams[ERR_IDX] = null;
 			}
-			outToLogFile = Boolean.parseBoolean(props.getProperty("outToLogFile", String.valueOf(outToLogFile)) );
-			errToLogFile = Boolean.parseBoolean(props.getProperty("errToLogFile", String.valueOf(errToLogFile)) );
-			logFile = props.getProperty("logFilePath", logFile);
-			dateFormat = props.getProperty("dateFormat", dateFormat);
+			outToLogFile[OUT_IDX] = Boolean.parseBoolean(props.getProperty("outToLogFile", String.valueOf(outToLogFile[OUT_IDX])) );
+			outToLogFile[ERR_IDX] = Boolean.parseBoolean(props.getProperty("errToLogFile", String.valueOf(outToLogFile[ERR_IDX])) );
+			logFiles[OUT_IDX] = props.getProperty("outLogFilePath", logFiles[OUT_IDX]); 
+			logFiles[ERR_IDX] = props.getProperty("errLogFilePath", logFiles[ERR_IDX]); 
+			dateFormat = new SimpleDateFormat(props.getProperty("dateFormat", Constants.defaultDateFormat) );
 			usePattern = Boolean.parseBoolean(props.getProperty("usePattern", Constants.TRUE) );
 			logPattern = props.getProperty("logPattern", logPattern);
 			
@@ -508,7 +547,7 @@ public class Constants {
 	
 	// ------------ 格式化日期相关 ------- 2016.04.21 -------------
 	// 根据给定的logPattern获取打印日志所需的LogPatternChain
-	public static LogPatternChain initLogPattern(String logPattern, Properties props) {
+	public static LogPatternChain initLogPattern(String logPattern, Map<String, String> props) {
 		LogPatternChain logPatternChain = new LogPatternChain();
 		WordsSeprator sep = new WordsSeprator(logPattern, Constants.logPatternSeps, null, true);
 		while(sep.hasNext() ) {
@@ -522,7 +561,7 @@ public class Constants {
 							logPatternChain.addLogPattern(new DateLogPattern(Constants.dateFormat) );
 							break;
 						case Constants.LOG_PATTERN_MODE:
-							logPatternChain.addLogPattern(new ModeLogPattern(Constants.MODE_LOG) );	
+							logPatternChain.addLogPattern(new ModeLogPattern(Constants.LOG_MODES[Constants.OUT_IDX]) );	
 							break;
 						case Constants.LOG_PATTERN_MSG:
 							logPatternChain.addLogPattern(new MsgLogPattern(Constants.DEFAULT_VAR_VALUE) );	
@@ -577,6 +616,12 @@ public class Constants {
 							OperationAttrHandler operationHandler = new StandardHandlerParser().handlerParse(handlerStr, Constants.HANDLER);
 							logPatternChain.addLogPattern(new HandlerLogPattern(operationHandler, Constants.DEFAULT_VAR_VALUE) );
 							break ;
+						case Constants.LOG_PATTERN_THREAD:
+							logPatternChain.addLogPattern(new ThreadLogPattern() );
+							break;
+						case Constants.LOG_PATTERN_STACK_TRACE:
+							logPatternChain.addLogPattern(new StackTraceLogPattern() );
+							break;
 						case Constants.LOG_PATTERN_TASK_NAME:
 							logPatternChain.addLogPattern(new TaskNameLogPattern(Constants.DEFAULT_VAR_VALUE) );	
 							break;
@@ -593,7 +638,8 @@ public class Constants {
 							logPatternChain.addLogPattern(new ExceptionLogPattern(Constants.DEFAULT_VAR_VALUE) );	
 							break;										
 						default:
-							logPatternChain.addLogPattern(new ConstantsLogPattern(props.getProperty(varName, Constants.DEFAULT_VAR_VALUE)) );
+							String constantsValue = (props == null) ? DEFAULT_VAR_VALUE : (props.get(varName) != null) ? props.get(varName) : DEFAULT_VAR_VALUE;
+							logPatternChain.addLogPattern(new ConstantsLogPattern(constantsValue) );
 							break;
 					}
 					Tools.assert0(Constants.VAR_END.equals(sep.next() ), "expect an '" + Constants.VAR_END + "', but got an '" + sep.seekLastNext() + "' ! ");
@@ -609,7 +655,7 @@ public class Constants {
 	// 格式化日期相关
 	public static String formatLogInfo(LogPatternChain logPatternChain, JSONObject argsMap) {
 		if(logPatternChain == null) {
-			return Constants.NULL;
+			return argsMap.optString(Constants.LOG_PATTERN_MSG );
 		}
 		
 		logPatternChain.setResult(null );

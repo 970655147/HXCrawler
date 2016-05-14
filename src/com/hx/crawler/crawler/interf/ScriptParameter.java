@@ -56,6 +56,8 @@ public abstract class ScriptParameter<ResponseType, HeaderType, HeaderValType, D
 	public Object getParam(String key) {
 		return param.get(key);
 	}
-	
+	public String getParamStr(String key) {
+		return String.valueOf(getParam(key) );
+	}
 	
 }

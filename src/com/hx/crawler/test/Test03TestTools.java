@@ -35,8 +35,11 @@ public class Test03TestTools {
 		Tools.logBeforeTask(singleUrlTask, true);
 		Tools.logAfterTask(singleUrlTask, fetchedResult, Tools.spentStr(start), true);
 		Tools.logErrorMsg(singleUrlTask, new RuntimeException("ac") );
+
+		Tools.assert0(new Exception("abc") );
 		
 		Tools.awaitShutdown();
+		
 	}
 	
 }

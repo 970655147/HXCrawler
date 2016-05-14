@@ -100,7 +100,7 @@ public class HtmlCrawlerConfig implements CrawlerConfig<Header, String, NameValu
 	}
 
 	public HtmlCrawlerConfig addHeader(String key, String value) {
-		int idx = indexOfHeader(key);
+		int idx = indexOfHeader(headers, key);
 		if(idx >= 0) {
 			headers.remove(idx);
 		}
@@ -127,7 +127,7 @@ public class HtmlCrawlerConfig implements CrawlerConfig<Header, String, NameValu
 		return this;
 	}
 	public HtmlCrawlerConfig addData(String key, String value) {
-		int idx = indexOfData(key);
+		int idx = indexOfData(data, key);
 		if(idx >= 0) {
 			data.remove(idx);
 		}
@@ -151,7 +151,7 @@ public class HtmlCrawlerConfig implements CrawlerConfig<Header, String, NameValu
 	}
 	
 	// key 在headers, data中的索引
-	private int indexOfHeader(String key) {
+	static int indexOfHeader(List<Header> headers, String key) {
 		for(int i=0; i<headers.size(); i++) {
 			if(headers.get(i).getName().equals(key) ) {
 				return i;
@@ -160,7 +160,7 @@ public class HtmlCrawlerConfig implements CrawlerConfig<Header, String, NameValu
 		
 		return -1;
 	}
-	private int indexOfData(String key) {
+	static int indexOfData(List<NameValuePair> data, String key) {
 		for(int i=0; i<data.size(); i++) {
 			if(data.get(i).getName().equals(key) ) {
 				return i;

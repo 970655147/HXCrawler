@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,6 +39,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,18 +77,18 @@ public class Tools {
 	
 	// 常量
 	public static final Random ran = new Random();
-	public static final Character SLASH = '\\';
-	public static final Character INV_SLASH = '/';
-	public static final Character DOT = '.';
-	public static final Character COMMA = ',';
-	public static final Character COLON = ':';	
-	public static final Character SPACE = ' ';
-	public static final Character TAB = '\t';
-	public static final Character CR = '\r';
-	public static final Character LF = '\n';
-	public static final Character QUESTION = '?';
-	public static final Character QUOTE = '\"';
-	public static final Character SINGLE_QUOTE = '\'';
+	public static final Character SLASH = Constants.SLASH;
+	public static final Character INV_SLASH = Constants.INV_SLASH;
+	public static final Character DOT = Constants.DOT;
+	public static final Character COMMA = Constants.COMMA;
+	public static final Character COLON = Constants.COLON;	
+	public static final Character SPACE = Constants.SPACE;
+	public static final Character TAB = Constants.TAB;
+	public static final Character CR = Constants.CR;
+	public static final Character LF = Constants.LF;
+	public static final Character QUESTION = Constants.QUESTION;
+	public static final Character QUOTE = Constants.QUOTE;
+	public static final Character SINGLE_QUOTE = Constants.SINGLE_QUOTE;
 	public static final String CRLF = Constants.CRLF;
 	public static final String EMPTY_STR = Constants.EMPTY_STR;
 	public static final String NULL = Constants.NULL;
@@ -150,6 +153,11 @@ public class Tools {
 	public final static String JAVA = ".java";
 	public final static String SCALA = ".scala";
 	public final static String PYTHON = ".py";
+	// add at 2016.05.13
+	public final static String C_HEADER = ".h";
+	public final static String C_SOURCE = ".c";
+	public final static String CPP = ".cpp";
+	public final static String PHP = ".php";
 	public final static String TXT = ".txt";
 	public final static String PNG = ".png";
 	public final static String JPG = ".jpg";
@@ -165,6 +173,14 @@ public class Tools {
 	public final static String RM = ".rm";
 	public final static String AVI = ".avi";
 	public final static String LOG = ".log";
+	// add at 2016.05.13
+	public final static String CLASS = ".class";
+	public final static String DOC = ".doc";
+	public final static String DOCX = ".docx";
+	public final static String XLS = ".xls";
+	public final static String XLSX = ".xlsx";
+	public final static String PPT = ".ppt";
+	public final static String PPTX = ".pptx";
 	
 	// 编码相关		add at 2016.04.16
 	public final static String ASCII = "ascii";
@@ -679,18 +695,33 @@ public class Tools {
 		return str01.toUpperCase().equals(str02.toUpperCase() );
 	}
 	
+	// cookie相关分隔符
+	public static String COOKIE_KV_SEP = "=";
+	public static String COOKIE_COOKIE_SEP = ";";
 	// 通过cookies获取cookie的字符串表示
 	public static String getCookieStr(Map<String, String> cookies) {
 		StringBuilder sb = new StringBuilder();
 		for(Entry<String, String> entry : cookies.entrySet()) {
-			sb.append(entry.getKey() );		sb.append("=");
-			sb.append(entry.getValue() );		sb.append(";");
+			sb.append(entry.getKey() );		sb.append(COOKIE_KV_SEP);
+			sb.append(entry.getValue() );		sb.append(COOKIE_COOKIE_SEP);
 		}
-		if(sb.length() != 0) {
+		if(sb.length() > 0) {
 			return sb.substring(0, sb.length()-1);
 		}
 		
 		return Tools.EMPTY_STR;
+	}
+	// 通过cookie格式的字符串 获取各个cookie
+	public static Map<String, String> getCookiesByCookieStr(String cookiesStr) {
+		String[] cookies = cookiesStr.split(COOKIE_COOKIE_SEP);
+		Map<String, String> res = new HashMap<>(cookies.length );
+		for(int i=0; i<cookies.length; i++) {
+			String[] kvPair = cookies[i].split(COOKIE_KV_SEP);
+			Tools.assert0(kvPair.length > 1, "error cookieString : '" + cookiesStr + "', around : '" + cookies[i] + "'");
+			res.put(kvPair[0], kvPair[1] );
+		}
+		
+		return res;
 	}
 	
 	// 判断字符串是否为空[null, "", "null"]
@@ -699,6 +730,9 @@ public class Tools {
 	}
 	public static <T> boolean isEmpty(Collection<T> arr) {
 		return (arr == null) || (arr.size() == 0);
+	}
+	public static <K, V> boolean isEmpty(Map<K, V> map) {
+		return (map == null) || (map.size() == 0);
 	}
 	
 	// 获取str中以start 和end之间的字符串
@@ -894,10 +928,14 @@ public class Tools {
 		Method method = clazz.getMethod(methodName, methodParamTypes);
 		SingleUrlTask singleUrlTask = newSingleUrlTask(HtmlCrawler.newInstance(), url, params);
 		
-		if(isStaticMethod) {
-			method.invoke(null, singleUrlTask);
-		} else {
-			method.invoke(clazz.newInstance(), singleUrlTask);
+		try {
+			if(isStaticMethod) {
+				method.invoke(null, singleUrlTask);
+			} else {
+				method.invoke(clazz.newInstance(), singleUrlTask);
+			}
+		} catch(Exception e) {
+			logErrorMsg(singleUrlTask, e);
 		}
 	}
 	public static void parseAsync(final String className, final String url, final Map<String, Object> params) throws Exception {
@@ -1469,25 +1507,31 @@ public class Tools {
 		if(debugEnable ) {
 			String info = Constants.formatLogInfo(taskBeforeLogPatternChain, new JSONObject()
 			.element(LogPatternType.URL.typeKey(), singleUrlTask.getUrl()).element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
-			.element(LogPatternType.MODE.typeKey(), Constants.MODE_LOG)
+			.element(LogPatternType.MODE.typeKey(), Constants.LOG_MODES[Constants.OUT_IDX])
 			);
 			Log.log(info );
 		}
+	}
+	public static void logBeforeTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, String debugEnable) {
+		logBeforeTask(singleUrlTask, Boolean.parseBoolean(debugEnable) );
 	}
 	public static void logAfterTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, String fetchedResult, String spent, boolean debugEnable) {
 		if(debugEnable ) {
 			String info = Constants.formatLogInfo(taskAfterLogPatternChain, new JSONObject()
 							.element(LogPatternType.RESULT.typeKey(), fetchedResult).element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
-							.element(LogPatternType.SPENT.typeKey(), spent).element(LogPatternType.MODE.typeKey(), Constants.MODE_LOG)
+							.element(LogPatternType.SPENT.typeKey(), spent).element(LogPatternType.MODE.typeKey(), Constants.LOG_MODES[Constants.OUT_IDX])
 							);
 		    Log.log(info );
 		}
+	}
+	public static void logAfterTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, String fetchedResult, String spent, String debugEnable) {
+		logAfterTask(singleUrlTask, fetchedResult, spent, Boolean.parseBoolean(debugEnable) );
 	}
 	public static void logErrorMsg(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, Exception e) {
 		String info = Constants.formatLogInfo(taskExceptionLogPatternChain, new JSONObject()
 						.element(LogPatternType.EXCEPTION.typeKey(), e.getClass().getName() + " : " + e.getMessage() )
 						.element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
-						.element(LogPatternType.URL.typeKey(), singleUrlTask.getUrl()).element(LogPatternType.MODE.typeKey(), Constants.MODE_ERR)
+						.element(LogPatternType.URL.typeKey(), singleUrlTask.getUrl()).element(LogPatternType.MODE.typeKey(), Constants.LOG_MODES[Constants.ERR_IDX])
 						);
 		Log.err(info );
 	}
@@ -1592,6 +1636,10 @@ public class Tools {
 		}
 	};
 	
+	// 获取所有的缓冲区的key的集合
+	public static Set<String> buffNames() {
+		return bufferToBuffInfo.keySet();
+	}
 	// 创建一个缓冲区
 	public static void createAnBuffer(String bufName, String outputPath, String charset, BuffSizeEstimator buffSizeEstimator, int threshold) {
 		if(bufExists(bufName) ) {
@@ -1606,6 +1654,18 @@ public class Tools {
 	}
 	public static void createAnBuffer(String bufName, String outputPath) {
 		createAnBuffer(bufName, outputPath, DEFAULT_CHARSET);
+	}
+	public static void createAnBufferIfNotExists(String bufName, String outputPath, String charset, BuffSizeEstimator buffSizeEstimator, int threshold) {
+		if(! bufExists(bufName) ) {
+			BuffInfo buffInfo = new BuffInfo(outputPath, charset, threshold, buffSizeEstimator);
+			bufferToBuffInfo.put(bufName, buffInfo);
+		}
+	}
+	public static void createAnBufferIfNotExists(String bufName, String outputPath, String charset) {
+		createAnBufferIfNotExists(bufName, outputPath, charset, defaultBuffSizeEstimator, defaultBuffThreshold);
+	}
+	public static void createAnBufferIfNotExists(String bufName, String outputPath) {
+		createAnBufferIfNotExists(bufName, outputPath, DEFAULT_CHARSET);
 	}
 	public static void closeAnBuffer(String bufName) throws IOException {
 		flushBuffer(bufName, true);
@@ -1709,6 +1769,15 @@ public class Tools {
 	public static void assert0(boolean boo, String msg) {
 		if(! boo) {
 			throw new RuntimeException("assert0Exception : " + msg);
+		}
+	}
+	// add at 2016.05.02
+	public static void assert0(Exception e) {
+		assert0(false, e);
+	}
+	public static void assert0(boolean boo, Exception e) {
+		if(! boo) {
+			throw new RuntimeException(e);
 		}
 	}
 	// 确保val 和expected相同, 否则 抛出异常
@@ -1878,7 +1947,205 @@ public class Tools {
       return files;
    }
 	
-	// ------------ 待续 --------------------
+	// ------------ asList / Set / Map ------- 2016.04.24 -------------
+   public static <T> List<T> asList(T... eles) {
+	   return new ArrayList0<>(eles);
+   }
+   public static <T> List<T> asLinkedList(T... eles) {
+	   return new LinkedList0<>(eles);
+   }
+   public static <T> void asList(List<T> ls, T... eles) {
+	   for(T ele : eles) {
+		   ls.add(ele);
+	   }
+   }
+   public static <T> Set<T> asSet(T... eles) {
+	   return new HashSet0<>(eles);
+   }
+   public static <T> Set<T> asSortedSet(T... eles) {
+	   return new TreeSet0<>(eles);
+   }
+   public static <T> void asSet(Set<T> set, T... eles) {
+	   for(T ele : eles) {
+		   set.add(ele);
+	   }
+   }
+   public static <K, V> Map<K, V> asMap(K[] keys, V[] vals) {
+	   return new HashMap0<>(keys, vals);
+   }
+   public static <K, V> Map<K, V> asSortedMap(K[] keys, V[] vals) {
+	   return new TreeMap0<>(keys, vals);
+   }
+   public static <K, V> void asMap(Map<K, V> map, K[] keys, V[] vals) {
+	   for(int i=0; i<keys.length; i++) {
+		   map.put(keys[i], vals[i]);
+	   }
+   }
+   
+   // 辅助数据结构
+   static class ArrayList0<E> extends ArrayList<E> {
+	   public ArrayList0(E[] array) {
+            if (array==null)
+                throw new NullPointerException();
+            for(E ele : array) {
+            	add(ele);
+            }
+	   }
+   }
+   static class LinkedList0<E> extends LinkedList<E> {
+	   public LinkedList0(E[] array) {
+            if (array==null)
+                throw new NullPointerException();
+            for(E ele : array) {
+            	add(ele);
+            }
+	   }
+   }
+   static class HashSet0<E> extends HashSet<E> {
+	   public HashSet0(E[] array) {
+            if (array==null)
+                throw new NullPointerException();
+            for(E ele : array) {
+            	add(ele);
+            }
+	   }
+   }
+   static class TreeSet0<E> extends TreeSet<E> {
+	   public TreeSet0(E[] array) {
+            if (array==null)
+                throw new NullPointerException();
+            for(E ele : array) {
+            	add(ele);
+            }
+	   }
+   }
+   static class HashMap0<K, V> extends HashMap<K, V> {
+	   public HashMap0(K[] keys, V[] vals) {
+            if ((keys == null) || (vals == null) ) {
+                throw new NullPointerException();
+            }
+            Tools.assert0(keys.length == vals.length, "keys's length must 'eq' vals's length !");
+            for(int i=0; i<keys.length; i++) {
+            	put(keys[i], vals[i]);
+            }
+	   }
+   }
+   static class TreeMap0<K, V> extends TreeMap<K, V> {
+	   public TreeMap0(K[] keys, V[] vals) {
+           if ((keys == null) || (vals == null) ) {
+               throw new NullPointerException();
+           }
+           Tools.assert0(keys.length == vals.length, "keys's length must 'eq' vals's length !");
+           for(int i=0; i<keys.length; i++) {
+        	   put(keys[i], vals[i]);
+           }
+	   }
+   }
+   
+   // add at 2016.05.07
+   // 默认的索引
+   public static int GET_INFO_FROM_JSON_DEFAULT_IDX = 0;
+   // 获取给定的JSONObject的给定的索引的数据
+   public static String getString(JSONObject obj, int idx, String[] idxes) {
+       return obj.getString(idxes[getIdx(idx, idxes)] );
+   }
+   public static String optString(JSONObject obj, int idx, String[] idxes) {
+       return obj.optString(idxes[getIdx(idx, idxes)] );
+   }
+   public static String optString(JSONObject obj, int idx, String[] idxes, String defaultValue) {
+       return obj.optString(idxes[getIdx(idx, idxes)], defaultValue);
+   }
+   public static long getLong(JSONObject obj, int idx, String[] idxes) {
+       return obj.getLong(idxes[getIdx(idx, idxes)] );
+   }
+   public static long optLong(JSONObject obj, int idx, String[] idxes) {
+       return obj.optLong(idxes[getIdx(idx, idxes)] );
+   }
+   public static long optLong(JSONObject obj, int idx, String[] idxes, long defaultValue) {
+       return obj.optLong(idxes[getIdx(idx, idxes)] , defaultValue);
+   }
+   public static int getInt(JSONObject obj, int idx, String[] idxes) {
+	   return obj.getInt(idxes[getIdx(idx, idxes)] );
+   }
+   public static int optInt(JSONObject obj, int idx, String[] idxes) {
+	   return obj.optInt(idxes[getIdx(idx, idxes)] );
+   }
+   public static int optInt(JSONObject obj, int idx, String[] idxes, int defaultValue) {
+	   return obj.optInt(idxes[getIdx(idx, idxes)] , defaultValue);
+   }
+   public static JSONObject getJSONObject(JSONObject obj, int idx, String[] idxes) {
+       return obj.getJSONObject(idxes[getIdx(idx, idxes)] );
+   }
+   public static JSONObject optJSONObject(JSONObject obj, int idx, String[] idxes) {
+       return obj.optJSONObject(idxes[getIdx(idx, idxes)] );
+   }
+   public static JSONArray getJSONOArray(JSONObject obj, int idx, String[] idxes) {
+	   return obj.getJSONArray(idxes[getIdx(idx, idxes)] );
+   }
+   public static JSONArray optJSONArray(JSONObject obj, int idx, String[] idxes) {
+	   return obj.optJSONArray(idxes[getIdx(idx, idxes)] );
+   }
+   
+   public static String getString(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.getString(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static String optString(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.optString(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static String optString(JSONObject obj, int idx, int defaultIdx, String[] idxes, String defaultValue) {
+	   return obj.optString(idxes[getIdx(idx, idxes, defaultIdx)], defaultValue);
+   }
+   public static long getLong(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.getLong(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static long optLong(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.optLong(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static long optLong(JSONObject obj, int idx, int defaultIdx, String[] idxes, long defaultValue) {
+	   return obj.optLong(idxes[getIdx(idx, idxes, defaultIdx)] , defaultValue);
+   }
+   public static int getInt(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.getInt(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static int optInt(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.optInt(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static int optInt(JSONObject obj, int idx, int defaultIdx, String[] idxes, int defaultValue) {
+	   return obj.optInt(idxes[getIdx(idx, idxes, defaultIdx)] , defaultValue);
+   }
+   public static JSONObject getJSONObject(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.getJSONObject(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static JSONObject optJSONObject(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.optJSONObject(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static JSONArray getJSONOArray(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.getJSONArray(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   public static JSONArray optJSONArray(JSONObject obj, int idx, int defaultIdx, String[] idxes) {
+	   return obj.optJSONArray(idxes[getIdx(idx, idxes, defaultIdx)] );
+   }
+   
+   public static int getIdx(int idx, String[] idxes) {
+	   return getIdx(idx, idxes.length);
+   }
+   public static int getIdx(int idx, Collection<String> idxes) {
+	   return getIdx(idx, idxes.size());
+   }
+   public static int getIdx(int idx, int maxSize) {
+	   return getIdx(idx, maxSize, GET_INFO_FROM_JSON_DEFAULT_IDX);
+   }
+   public static int getIdx(int idx, String[] idxes, int defaultIdx) {
+	   return getIdx(idx, idxes.length, defaultIdx);
+   }
+   public static int getIdx(int idx, Collection<String> idxes, int defaultIdx) {
+	   return getIdx(idx, idxes.size(), defaultIdx);
+   }
+   public static int getIdx(int idx, int maxSize, int defaultIdx) {
+	   return (idx >= maxSize) ? defaultIdx : idx;
+   }
+   
+   // ------------ 待续 --------------------
 
 	
 }

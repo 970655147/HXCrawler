@@ -6,16 +6,18 @@
 
 package com.hx.crawler.test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Log;
 import com.hx.crawler.util.Tools;
 
 public class Test05ForLog {
 
 	// ≤‚ ‘log ‰≥ˆ
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 		String str = "Hello World !";
 		List<String> ls = Arrays.asList("sdf", "hel", "sdf");
@@ -60,11 +62,32 @@ public class Test05ForLog {
 		Log.err(twoDimenBooArr );
 		Log.err(twoDimenBooArr, "--");
 		
-		Log.enter();
+		Log.logEnter();
 		Log.flush();
 		
 		Log.log(Tools.DEFAULT_CHARSET );
 		
+		test();
+		
+//		Log.setOutLogFile(Tools.getTmpPath(222, Tools.TXT) );
+		new Thread(new Runnable() {
+			public void run() {
+				Log.logHorizon();
+			}
+		}, "testThread").start();
+		
+		
+		Tools.awaitShutdown();
+		Log.flush();
+		
+//		Log.log("abc", true, Constants.ERR_IDX);
+		Log.log("abc", true, 6);
+		
+	}
+	
+	// ≤‚ ‘${stackTrace }
+	public static void test() {
+		Log.log("test ${stackTrace } ");
 	}
 	
 }

@@ -86,20 +86,23 @@ public class HtmlCrawler extends Crawler<HttpResponse, Header, String, NameValue
 	// 为request设置请求头 & cookies
 	private static void setHeadersAndCookies(Request req, CrawlerConfig<Header, String, NameValuePair, String, String> config) {
 		Iterator<Header> it = config.getHeaders().iterator();
-		boolean existCookiesInHeader = false;
+//		boolean existCookiesInHeader = false;
 		
 		while(it.hasNext() ) {
 			Header header = it.next();
 			if(Tools.equalsIgnoreCase(header.getName(), Tools.COOKIE_STR) ) {
-				header = new BasicHeader(header.getName(), Tools.removeIfEndsWith(header.getValue(), ";") + ";" + Tools.getCookieStr(config.getCookies()) );
-				existCookiesInHeader = true;
+//				header = new BasicHeader(header.getName(), Tools.removeIfEndsWith(header.getValue(), ";") + ";" + Tools.getCookieStr(config.getCookies()) );
+//				existCookiesInHeader = true;
+				config.addCookies(Tools.getCookiesByCookieStr(header.getValue()) );
+				continue ;
 			}
 			
 			req.addHeader(header );
 		}
 		
 		// add "&& ((config.getCookies().size() > 0))" incase of have no cookie		add at 2016.04.07
-		if((! existCookiesInHeader) && ((config.getCookies().size() > 0)) ) {
+		// update incase of exists 'COOKIE' in header [can't add 'config.getCookies''s 'Cookie' ]		add at 2016.05.02
+		if((config.getCookies().size() > 0) ) {
 			req.addHeader(Tools.COOKIE_STR, Tools.getCookieStr(config.getCookies()) );
 		}
 	}
