@@ -233,7 +233,6 @@ public class Tools {
 	static Set<Character> mayBeFileNameSeps = Constants.mayBeFileNameSeps;
 	// 如果字符串为一下字符串, 将其视为空字符串
 	static Set<String> emptyStrCondition = Constants.emptyStrCondition;
-	// --------------------------- 置于最后 ----------------------------------------
 	// ----------------- 属性结束 -----------------------
 	
 	// 初始化
@@ -246,30 +245,37 @@ public class Tools {
 		TMP_IDX.set(idx);
 	}
 	public static void setTmpDir(String tmpDir) {
+    	Tools.assert0(tmpDir != null, "'tmpDir' can't be null ");
 		TMP_DIR = tmpDir;
 	}
 	public static void setTmpName(String tmpName) {
+    	Tools.assert0(tmpName != null, "'tmpName' can't be null ");
 		TMP_NAME = tmpName;
 	}
 	public static void setSuffix(String suffix) {
+    	Tools.assert0(suffix != null, "'suffix' can't be null ");
 		SUFFIX = suffix;
 	}
 	// 配置defaultCharSet
 	public static void setDefaultCharSet(String defaultCharSet) {
+    	Tools.assert0(defaultCharSet != null, "'defaultCharSet' can't be null ");
 		DEFAULT_CHARSET = defaultCharSet;
 	}
 	public static void setLogOnMine(long logOnMine) {
 		LOG_ON_MINE_CONF = logOnMine;
 	}
 	public static void setBuffSize(int buffSize) {
+    	Tools.assert0(buffSize > 0, "buffSize must > 0 ");
 		BUFF_SIZE_ON_TRANS_STREAM = buffSize;
 	}
     // 配置checkInterval
     public static void setCheckInterval(int checkInterval) {
+    	Tools.assert0(checkInterval > 0, "checkInterval must > 0 ");
     	CHECK_INTERVAL = checkInterval;
     }
     // 配置线程池中线程的个数
     public static void setNThread(int nThread) {
+    	Tools.assert0(nThread > 0, "nThread must > 0 ");
     	if(isThreadPoolRunning(threadPool) ) {
     		Log.err("the threadPool is running NOW, please try again later !");
     		return ;
@@ -309,6 +315,8 @@ public class Tools {
 		return TMP_DIR + "\\" + name;
 	}
 	public static String getFilePath(String dir, String file) {
+		Tools.assert0(dir != null, "'dir' can't be null ");
+		Tools.assert0(file != null, "'file' can't be null ");
 		return Tools.removeIfEndsWith(dir, "/") + Tools.addIfNotStartsWith(file, "/");
 	}
 	
@@ -324,10 +332,14 @@ public class Tools {
 	}
 	// 将html字符串保存到指定的文件中
 	// add 'isAsync' at 2016.04.16
-	public static void save(String html, File nextTmpFile, String charset, boolean isAsync, long logFlags) throws IOException {
-		write(html, nextTmpFile, charset, isAsync, false);
+	public static void save(String html, File targetFile, String charset, boolean isAsync, long logFlags) throws IOException {
+		Tools.assert0(html != null, "'html' can't be null ");
+		Tools.assert0(targetFile != null, "'targetFile' can't be null ");
+		Tools.assert0(targetFile != null, "'targetFile' can't be null ");
+		
+		write(html, targetFile, charset, isAsync, false);
 		if(isLog(logFlags, LOG_ON_APPEND) ) {
-			Log.log("append content to \" " + nextTmpFile.getAbsolutePath() + " \" success ...");
+			Log.log("append content to \" " + targetFile.getAbsolutePath() + " \" success ...");
 		}
 	}
 	public static void save(String html, String nextTmpName, String charset, boolean isAsync, long logFlags) throws IOException {
@@ -467,6 +479,8 @@ public class Tools {
 	
 	// 移除指定的文件
 	public static void delete(String path, long logFlags) {
+		Tools.assert0(path != null, "'path' can't be null ");
+		
 		File file = new File(path);
 		if(file.exists() ) {
 			boolean isSucc = file.delete();
@@ -489,6 +503,9 @@ public class Tools {
 	
     // 复制指定的文件
     public static void copy(String src, String dst, long logFlags) throws IOException {
+    	Tools.assert0(src != null, "'src' can't be null ");
+    	Tools.assert0(dst != null, "'dst' can't be null ");
+    	
         File srcFile = new File(src);
         File dstFile = new File(dst);
         if(srcFile.isDirectory() ) {
@@ -523,6 +540,9 @@ public class Tools {
 
 	// 获取给定的输入流中的字符内容
 	public static String getContent(InputStream is, String charset) throws IOException {
+		Tools.assert0(is != null, "'inputStream' can't be null ");
+		Tools.assert0(charset != null, "'charset' can't be null ");
+		
 		StringBuilder sb = new StringBuilder(is.available() );
 		BufferedReader br = null;
 
@@ -559,9 +579,11 @@ public class Tools {
 	
 	// 获取文件的所有的行, 存储在一个结果的List, 文件过大, 慎用此方法
 	public static List<String> getContentWithList(File file, String charset) throws IOException {
+		Tools.assert0(file != null, "'file' can't be null ");
+		Tools.assert0(charset != null, "'charset' can't be null ");
+		
 		List<String> lines = new LinkedList<>();
 		BufferedReader br = null;
-		
 		try {
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset) );
 			String line = null;
@@ -641,6 +663,7 @@ public class Tools {
 	// 获取站点的首页url
 	// http://www.baidu.com/tieba/java/page01.jsp  =>  http://www.baidu.com/
 	public static String getSiteUrl(String url) {
+		Tools.assert0(! isEmpty(url), "'url' can't be null ");
 		Matcher matcher = siteUrlPattern.matcher(url);
 		if(matcher.matches()) {
 			return matcher.group(1);
@@ -650,18 +673,24 @@ public class Tools {
 	
 	// 将绝对/ 相对的url转换为绝对的url
 	// 转换 /path & ./path
-	public static String transformUrl(String url, String res) {
-		if(res.startsWith("/") ) {
-			return getSiteUrl(url) + removeIfStartsWith(res, "/");
-		} else if (res.startsWith("./") ) {
-			return url.substring(0, url.lastIndexOf("/")+1 ) + Tools.removeIfStartsWith(res, "./");
+	public static String transformUrl(String siteUrl, String relativePath) {
+		Tools.assert0(! isEmpty(siteUrl), "'siteUrl' can't be null ");
+		Tools.assert0(! isEmpty(relativePath), "'relativePath' can't be null ");
+		
+		if(relativePath.startsWith("/") ) {
+			return getSiteUrl(siteUrl) + removeIfStartsWith(relativePath, "/");
+		} else if (relativePath.startsWith("./") ) {
+			return siteUrl.substring(0, siteUrl.lastIndexOf("/")+1 ) + Tools.removeIfStartsWith(relativePath, "./");
 		} else {
-			return res;
+			return relativePath;
 		}
 	}
 
 	// 如果给定的字符串以startsWith, 则移除startsWith
 	public static String removeIfStartsWith(String str, String startsWith) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		Tools.assert0(startsWith != null, "'startsWith' can't be null ");
+		
 		if(str.startsWith(startsWith) ) {
 			return str.substring(startsWith.length() );
 		}
@@ -669,6 +698,9 @@ public class Tools {
 		return str;
 	}
 	public static String removeIfEndsWith(String str, String endsWith) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		Tools.assert0(endsWith != null, "'endsWith' can't be null ");
+		
 		if(str.endsWith(endsWith) ) {
 			return str.substring(0, str.length() - endsWith.length());
 		}
@@ -676,6 +708,9 @@ public class Tools {
 		return str;
 	}
 	public static String addIfNotStartsWith(String str, String startsWith) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		Tools.assert0(startsWith != null, "'startsWith' can't be null ");
+		
 		if(! str.startsWith(startsWith) ) {
 			return startsWith + str;
 		}
@@ -683,45 +718,14 @@ public class Tools {
 		return str;
 	}
 	public static String addIfNotEndsWith(String str, String endsWith) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		Tools.assert0(endsWith != null, "'endsWith' can't be null ");
+		
 		if(! str.endsWith(endsWith) ) {
 			return str + endsWith;
 		}
 		
 		return str;
-	}
-	
-	// 判断str01 和str02是否相同[忽略大小写]
-	public static boolean equalsIgnoreCase(String str01, String str02) {
-		return str01.toUpperCase().equals(str02.toUpperCase() );
-	}
-	
-	// cookie相关分隔符
-	public static String COOKIE_KV_SEP = "=";
-	public static String COOKIE_COOKIE_SEP = ";";
-	// 通过cookies获取cookie的字符串表示
-	public static String getCookieStr(Map<String, String> cookies) {
-		StringBuilder sb = new StringBuilder();
-		for(Entry<String, String> entry : cookies.entrySet()) {
-			sb.append(entry.getKey() );		sb.append(COOKIE_KV_SEP);
-			sb.append(entry.getValue() );		sb.append(COOKIE_COOKIE_SEP);
-		}
-		if(sb.length() > 0) {
-			return sb.substring(0, sb.length()-1);
-		}
-		
-		return Tools.EMPTY_STR;
-	}
-	// 通过cookie格式的字符串 获取各个cookie
-	public static Map<String, String> getCookiesByCookieStr(String cookiesStr) {
-		String[] cookies = cookiesStr.split(COOKIE_COOKIE_SEP);
-		Map<String, String> res = new HashMap<>(cookies.length );
-		for(int i=0; i<cookies.length; i++) {
-			String[] kvPair = cookies[i].split(COOKIE_KV_SEP);
-			Tools.assert0(kvPair.length > 1, "error cookieString : '" + cookiesStr + "', around : '" + cookies[i] + "'");
-			res.put(kvPair[0], kvPair[1] );
-		}
-		
-		return res;
 	}
 	
 	// 判断字符串是否为空[null, "", "null"]
@@ -755,6 +759,10 @@ public class Tools {
 		return getStrInRangeWithEnd(str, end, true);
 	}
 	public static String getStrInRange(String str, String start, String end, boolean includeStart, boolean includeEnd) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		Tools.assert0(start != null, "'start' can't be null ");
+		Tools.assert0(end != null, "'end' can't be null ");
+		
 		int startIdx = str.indexOf(start);
 		if(startIdx == -1) {
 			return Tools.EMPTY_STR;
@@ -775,6 +783,9 @@ public class Tools {
 		return str.substring(startIdx, endIdx);
 	}
 	public static String getStrInRangeWithStart(String str, String start, boolean include) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		Tools.assert0(start != null, "'start' can't be null ");
+		
 		int idx = str.indexOf(start);
 		if(idx != -1) {
 			if(! include) {
@@ -786,6 +797,9 @@ public class Tools {
 		return Tools.EMPTY_STR;
 	}
 	public static String getStrInRangeWithEnd(String str, String end, boolean include) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		Tools.assert0(end != null, "'end' can't be null ");
+		
 		int idx = str.indexOf(end);
 		if(idx != -1) {
 			if(include) {
@@ -816,19 +830,28 @@ public class Tools {
 	// ----------------- crawler 处理相关 -----------------------
 	// 获取处理过之后的文档
 	public static void getPreparedDoc(String url, String file) throws Exception {
+		Tools.assert0(url != null, "'url' can't be null ");
 		String html = HtmlCrawler.newInstance().getPage(url).getContent();
 		getPreparedDoc(url, html, file);
 	}
 	public static void getPreparedDoc(String url, String html, String file) throws Exception {
+		Tools.assert0(html != null, "'html' can't be null ");
+		Tools.assert0(file != null, "'file' can't be null ");
 		Tools.save(StringEscapeUtils.unescapeHtml(Tools.normalize(html) ), file);
 	}
 	
 	public final static com.hx.crawler.xpathParser.interf.Parser xpathParser = new XPathParser();
 	// 通过xpath 获取结果
 	public static JSONArray getResultByXPath(String html, String url, String xpath) throws Exception {
+		Tools.assert0(html != null, "'html' can't be null ");
+		Tools.assert0(xpath != null, "'xpath' can't be null ");
 		return xpathParser.parse(Tools.normalize(html), url, xpath);
 	}
 	public static JSONArray getResultByXPathes(String html, String url, String[] xpathes, ResultJudger judger) throws Exception {
+		Tools.assert0(html != null, "'html' can't be null ");
+		Tools.assert0(xpathes != null, "'xpathes' can't be null ");
+		Tools.assert0(judger != null, "'judger' can't be null ");
+		
 		for(int i=0; i<xpathes.length; i++) {			
 			JSONArray res = getResultByXPath(html, url, xpathes[i]);
 			if(! judger.isResultNull(i, res)) {
@@ -844,6 +867,7 @@ public class Tools {
 		// 注意 : 需要重定向ContentHandler的输出
 		// 需要去掉xml声明, 需要去掉html标签的xmlns的属性
 	public static String normalize(String html) throws Exception {
+		Tools.assert0(html != null, "'html' can't be null ");
 //		StringReader xmlReader = new StringReader("");
 		StringReader sr = new StringReader(html);
 		Parser parser = new Parser();		//实例化Parse
@@ -893,6 +917,7 @@ public class Tools {
 	// 通过xpath获取真实的xpath
 	// 可以改写为JSONArray.toString() 实现 [思路来自'duncen'[newEgg同事] ]
 	public static String getRealXPathByXPathObj(String xpath) {
+		Tools.assert0(xpath != null, "'xpath' can't be null ");
 		return new JSONArray().element(xpath).toString();
 	}
 	public static String getRealXPathByXPathObj(String... xpathes) {
@@ -924,6 +949,10 @@ public class Tools {
 		parse(className, url, params, PARSE_METHOD_NAME, IS_PARSE_METHOD_STATIC, PARSE_METHOD_PARAMTYPES);
 	}
 	public static void parse(String className, String url, Map<String, Object> params, String methodName, boolean isStaticMethod, Class[] methodParamTypes) throws Exception {
+		Tools.assert0(className != null, "'className' can't be null ");
+		Tools.assert0(url != null, "'url' can't be null ");
+		Tools.assert0(methodName != null, "'methodName' can't be null ");
+		
 		Class clazz = Class.forName(className);
 		Method method = clazz.getMethod(methodName, methodParamTypes);
 		SingleUrlTask singleUrlTask = newSingleUrlTask(HtmlCrawler.newInstance(), url, params);
@@ -958,6 +987,7 @@ public class Tools {
 	
 	// 为nextStageParams添加category
 	public static void addNameUrlSite(JSONObject category, JSONObject nextStageParams) {
+		Tools.assert0(! isEmpty(category), "'category' can't be null ");
 		nextStageParams.put(Tools.NAME, category.getString(NAME) );
 		nextStageParams.put(Tools.URL, category.getString(URL) );
 		nextStageParams.put(Tools.SITE, nextStageParams.getString(SITE) + "." + category.getString(NAME) );
@@ -984,8 +1014,8 @@ public class Tools {
 	// 否则  去掉前后的空格, 返回之间的子字符串
 	// 可以直接使用正则进行处理		// str.replaceAll("\\s+", " ");
 	public static String trimSpacesAsOne(String str) {
-		if(str == null) {
-			return null;
+		if(isEmpty(str) ) {
+			return EMPTY_STR;
 		}
 		
 		StringBuilder sb = new StringBuilder();
@@ -1015,6 +1045,7 @@ public class Tools {
 		}
 	}
 	public static String[] trimSpacesAsOne(String[] arr) {
+		Tools.assert0(arr != null, "'arr' can't be null ");
 		for(int i=0; i<arr.length; i++) {
 			arr[i] = trimSpacesAsOne(arr[i]);
 		}
@@ -1022,6 +1053,7 @@ public class Tools {
 		return arr;
 	}
 	public static List<String> trimSpacesAsOne(List<String> arr) {
+		Tools.assert0(arr != null, "'arr' can't be null ");
 		for(int i=0; i<arr.size(); i++) {
 			arr.set(i, trimSpacesAsOne(arr.get(i)) );
 		}
@@ -1030,8 +1062,8 @@ public class Tools {
 	}
 
 	public static String trimAllSpaces(String str, Map<Character, Character> escapeMap) {
-		if(str == null) {
-			return null;
+		if(isEmpty(str) ) {
+			return EMPTY_STR;
 		}
 		
 		StringBuilder sb = new StringBuilder();
@@ -1062,6 +1094,7 @@ public class Tools {
 		return trimAllSpaces(str, null);
 	}
 	public static String[] trimAllSpaces(String[] arr, Map<Character, Character> escapeMap) {
+		Tools.assert0(arr != null, "'arr' can't be null ");
 		for(int i=0; i<arr.length; i++) {
 			arr[i] = trimAllSpaces(arr[i], escapeMap);
 		}
@@ -1072,6 +1105,7 @@ public class Tools {
 		return trimAllSpaces(arr, null);
 	}
 	public static List<String> trimAllSpaces(List<String> arr, Map<Character, Character> escapeMap) {
+		Tools.assert0(arr != null, "'arr' can't be null ");
 		for(int i=0; i<arr.size(); i++) {
 			arr.set(i, trimAllSpaces(arr.get(i), escapeMap) );
 		}
@@ -1088,7 +1122,7 @@ public class Tools {
 		// 否则如果 值为JSONObject, 递归
 		// 否则如果 值为JSONArray, trimSpaces(JSONArray )
 	public static void trimSpaces(JSONObject obj) {
-		if(obj == null || obj.isNullObject() || obj.isEmpty()) {
+		if(isEmpty(obj) ) {
 			return ;
 		}
 		
@@ -1113,7 +1147,7 @@ public class Tools {
 		// 否则如果 值为JSONObject, trimSpaces(JSONObject )
 		// 否则如果 值为JSONArray, 递归
 	public static void trimSpaces(JSONArray arr) {
-		if(arr == null || arr.isEmpty()) {
+		if(isEmpty(arr) ) {
 			return ;
 		}
 		
@@ -1132,7 +1166,7 @@ public class Tools {
 	// 确保arr中的每一个JSONObject都存在指定的key, 否则  则删除该条目
 	// val.toString可以确保值为null的情形
 	public static void removeIfNull(JSONArray arr, String key) {
-		if(arr == null || arr.isEmpty()) {
+		if(isEmpty(arr) ) {
 			return ;
 		}
 		
@@ -1161,7 +1195,7 @@ public class Tools {
 		// 否则如果 值为JSONObject, 递归,  如果该方法之后, val为空, 则移除val对应的条目
 		// 否则如果 值为JSONArray, removeIfNull(JSONArray ),  如果该方法之后, val为空, 则移除val对应的条目
 	public static void removeIfNull(JSONObject obj) {
-		if(obj == null || obj.isNullObject() || obj.isEmpty()) {
+		if(isEmpty(obj) ) {
 			return ;
 		}
 		
@@ -1198,7 +1232,7 @@ public class Tools {
 		// 否则如果 值为JSONObject, removeIfNull(JSONObject ), 如果该方法之后, val为空, 则移除val对应的条目
 	// 注意 : 因为这里对JSONArray进行了删除操作, 所以这里使用了Iterator
 	public static void removeIfNull(JSONArray arr) {
-		if(arr == null || arr.isEmpty()) {
+		if(isEmpty(arr) ) {
 			return ;
 		}
 		
@@ -1234,7 +1268,7 @@ public class Tools {
 //	...	
 //	]
 	public static void getNeededFrom(JSONArray spec, JSONObject product, String name, String value, Map<String, String> getInSpec) {
-		if((spec == null) || (product == null) ) {
+		if((isEmpty(spec)) || (isEmpty(product)) || isEmpty(getInSpec) ) {
 			return ;
 		}
 		
@@ -1250,7 +1284,7 @@ public class Tools {
 
 	// 过滤掉不需要的字符
 	public static String filter(String str, Set<Character> needBeFiltered) {
-		if((str == null) || (needBeFiltered == null) ) {
+		if(isEmpty(str) || isEmpty(needBeFiltered) ) {
 			return null;
 		}
 		
@@ -1263,9 +1297,20 @@ public class Tools {
 		
 		return trimSpacesAsOne(sb.toString() );
 	}
+	public static JSONObject filter(JSONObject obj, Set<String> needBeFiltered) {
+		if(isEmpty(obj) || isEmpty(needBeFiltered) ) {
+			return null;
+		}
+		
+		for(String filter : needBeFiltered) {
+			obj.remove(filter);
+		}
+		return obj;
+	}
 	
 	// 向sb中添加str
 	public static void append(StringBuilder sb, String str, boolean isClean) {
+		Tools.assert0(sb != null, "'sb' can't be null ");
 		if(isClean) {
 			sb.setLength(0);
 		}
@@ -1275,6 +1320,7 @@ public class Tools {
 		append(sb, str, false);
 	}
 	public static void appendCRLF(StringBuilder sb, String str, boolean isClean) {
+		Tools.assert0(sb != null, "'sb' can't be null ");
 		if(isClean) {
 			sb.setLength(0);
 		}
@@ -1286,11 +1332,16 @@ public class Tools {
 	
 	// 获取taskName
 	public static String getTaskName(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask) {
+		Tools.assert0(singleUrlTask != null, "'singleUrlTask' can't be null ");
 		return "crawl " + singleUrlTask.getParam().get(Tools.TASK) + " from " + singleUrlTask.getParam().get(Tools.SITE);
 	}
 	
 	// 获取键值对类型的数据对, 添加到headers中
 	public static void addHeaders(File configFile, Map<String, String> headers, String sep) throws IOException {
+		Tools.assert0(configFile != null, "'configFile' can't be null ");
+		Tools.assert0(headers != null, "'headers' can't be null ");
+		Tools.assert0(sep != null, "'sep' can't be null ");
+		
 		List<String> lines = Tools.getContentWithList(configFile);
 		for(String line : lines) {
 			int idx = line.indexOf(sep);
@@ -1304,6 +1355,8 @@ public class Tools {
 	// 遍历一次字符串, 寻找出匹配"\\uxxxx"的字符串, 然后将其解码为字符[unicode -> char]
 	// 对于其他的字符不作处理
 	public static String unicodeDecode(String str) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		
 		StringBuilder sb = new StringBuilder(str.length() );
 		for(int i=0; i<str.length(); i++) {
 			char ch = str.charAt(i);
@@ -1341,6 +1394,9 @@ public class Tools {
 	
 	// 从指定的url上面下载图片  保存到指定的路径下面 [也适用于下载其他的二进制数据]
 	public static void downloadFrom(String urlStr, String path, long logFlags) throws IOException {
+		Tools.assert0(urlStr != null, "'urlStr' can't be null ");
+		Tools.assert0(path != null, "'path' can't be null ");
+		
 		URL url = new URL(urlStr);
 		InputStream is = url.openStream();
 		OutputStream os = new FileOutputStream(new File(path));
@@ -1356,9 +1412,11 @@ public class Tools {
 	
 	// 将输入流中的数据 复制到输出流
 	public static void copy(InputStream is, OutputStream os, boolean isCloseStream) {
+		Tools.assert0(is != null, "'inputStream' can't be null ");
+		Tools.assert0(os != null, "'outputStream' can't be null ");
+		
 		BufferedInputStream bis = null;
 		BufferedOutputStream bos = null;
-		
 		try {
 			bis = new BufferedInputStream(is);
 			bos = new BufferedOutputStream(os);
@@ -1395,6 +1453,7 @@ public class Tools {
 	// 获取指定路径的文件的文件, 通过sep分割的文件名     获取文件名
 	// 解析? 的位置, 是为了防止一下情况
 	public static String getFileName(String path, char sep) {
+		Tools.assert0(path != null, "'path' can't be null ");
 		int start = path.lastIndexOf(sep) + 1;
 		
 //		http://webd.home.news.cn/1.gif?z=1&_wdxid=01002005057000300000000001110
@@ -1434,6 +1493,7 @@ public class Tools {
 	}
     // 新建一个线程池
     public static ThreadPoolExecutor newFixedThreadPool(int nThread) {
+    	Tools.assert0(nThread > 0, "nThread must > 0 ");
     	return (ThreadPoolExecutor) Executors.newFixedThreadPool(nThread);
     }
     
@@ -1459,6 +1519,9 @@ public class Tools {
     	awaitTasksEnd(threadPool, CHECK_INTERVAL, false, LOG_ON_MINE_CONF);
     }
     public static void awaitTasksEnd(ThreadPoolExecutor threadPool, int checkInterval, boolean isShutdown, long logFlags) {
+    	Tools.assert0(threadPool != null, "'threadPool' can't be null ");
+    	Tools.assert0(checkInterval > 0, "'checkInterval' must > 0 ");
+    	
         while (! threadPool.isShutdown() ) {
         	int taskInQueue = threadPool.getQueue().size();
         	int activeTaskCount = threadPool.getActiveCount();
@@ -1483,6 +1546,7 @@ public class Tools {
     }
     // 判断给定的线程池是否还有任务在运行
     public static boolean isThreadPoolRunning(ThreadPoolExecutor threadPool) {
+    	Tools.assert0(threadPool != null, "'threadPool' can't be null ");
     	int taskInQueue = threadPool.getQueue().size();
     	int activeTaskCount = threadPool.getActiveCount();
     	return ((taskInQueue != 0) || (activeTaskCount != 0) );
@@ -1504,6 +1568,7 @@ public class Tools {
 	public static LogPatternChain taskExceptionLogPatternChain = Constants.taskExceptionLogPatternChain;
 	// 打印任务的日志信息
 	public static void logBeforeTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, boolean debugEnable) {
+		Tools.assert0(singleUrlTask != null, "'singleUrlTask' can't be null ");
 		if(debugEnable ) {
 			String info = Constants.formatLogInfo(taskBeforeLogPatternChain, new JSONObject()
 			.element(LogPatternType.URL.typeKey(), singleUrlTask.getUrl()).element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
@@ -1516,6 +1581,7 @@ public class Tools {
 		logBeforeTask(singleUrlTask, Boolean.parseBoolean(debugEnable) );
 	}
 	public static void logAfterTask(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, String fetchedResult, String spent, boolean debugEnable) {
+		Tools.assert0(singleUrlTask != null, "'singleUrlTask' can't be null ");
 		if(debugEnable ) {
 			String info = Constants.formatLogInfo(taskAfterLogPatternChain, new JSONObject()
 							.element(LogPatternType.RESULT.typeKey(), fetchedResult).element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
@@ -1528,6 +1594,7 @@ public class Tools {
 		logAfterTask(singleUrlTask, fetchedResult, spent, Boolean.parseBoolean(debugEnable) );
 	}
 	public static void logErrorMsg(ScriptParameter<?, ?, ?, ?, ?, ?> singleUrlTask, Exception e) {
+		Tools.assert0(singleUrlTask != null, "'singleUrlTask' can't be null ");
 		String info = Constants.formatLogInfo(taskExceptionLogPatternChain, new JSONObject()
 						.element(LogPatternType.EXCEPTION.typeKey(), e.getClass().getName() + " : " + e.getMessage() )
 						.element(LogPatternType.TASK_NAME.typeKey(), Tools.getTaskName(singleUrlTask))
@@ -1642,6 +1709,12 @@ public class Tools {
 	}
 	// 创建一个缓冲区
 	public static void createAnBuffer(String bufName, String outputPath, String charset, BuffSizeEstimator buffSizeEstimator, int threshold) {
+		Tools.assert0(bufName != null, "'bufName' can't be null ");
+		Tools.assert0(outputPath != null, "'outputPath' can't be null ");
+		Tools.assert0(charset != null, "'charset' can't be null ");
+		Tools.assert0(buffSizeEstimator != null, "'buffSizeEstimator' can't be null ");
+		Tools.assert0(threshold > 0, "'threshold' must > 0 ");
+		
 		if(bufExists(bufName) ) {
 			throw new RuntimeException("the buffInfo with key : " + bufName + " is already exists !");
 		}
@@ -1680,6 +1753,7 @@ public class Tools {
 	
 	// 向给定的缓冲区中添加数据 并检测buffer中的数据是否超过了阈值
 	public static void appendBuffer(String bufName, String content, long logFlags) throws IOException {
+		Tools.assert0(bufName != null, "'bufName' can't be null ");
 		if(! bufExists(bufName)) {
 			throw new RuntimeException("have no buffInfo with key : " + bufName + ", please createAnBuffer first !");
 		}
@@ -1706,6 +1780,7 @@ public class Tools {
 	
 	// 刷出缓存的数据
 	public static void flushBuffer(String bufName, boolean isLastBatch, long logFlags) throws IOException {
+		Tools.assert0(bufName != null, "'bufName' can't be null ");
 		if(! bufExists(bufName)) {
 			throw new RuntimeException("have no buffInfo with key : " + bufName + ", please createAnBuffer first !");
 		}
@@ -1738,6 +1813,10 @@ public class Tools {
 	}
 	// update the step 'flushDataToPath' into 'threadPoolExecutor'		at 2016.04.16
 	public static void flushBuffer(final StringBuffer sb, final String path, final String charset, long logFlags) throws IOException {
+		Tools.assert0(sb != null, "'sb' can't be null ");
+		Tools.assert0(path != null, "'path' can't be null ");
+		Tools.assert0(charset != null, "'charset' can't be null ");
+		
 		// move 'nextThree' a head incase of 'buff.sb.length > buff.threshold', got an circle, but can't clear 'buff.sb'		at 2016.04.23
 		long kbLength = getKBytesByBytes(sb.length() );
 		String content = sb.toString();
@@ -1767,6 +1846,10 @@ public class Tools {
 		assert0(false, msg);
 	}
 	public static void assert0(boolean boo, String msg) {
+		if(msg == null) {
+			Log.err("'msg' can't be null ");
+			return ;
+		}
 		if(! boo) {
 			throw new RuntimeException("assert0Exception : " + msg);
 		}
@@ -1776,6 +1859,7 @@ public class Tools {
 		assert0(false, e);
 	}
 	public static void assert0(boolean boo, Exception e) {
+		Tools.assert0(e != null, "'e' can't be null ");
 		if(! boo) {
 			throw new RuntimeException(e);
 		}
@@ -1821,6 +1905,8 @@ public class Tools {
 	
 	// 将给定的字符串解析为AttrHandler
 	public static OperationAttrHandler handlerParse(String handlerStr, String handlerType, Types lastOperationReturn) {
+		Tools.assert0(handlerStr != null, "'handlerStr' can't be null ");
+		Tools.assert0(handlerType != null, "'handlerType' can't be null ");
 		return handlerParser.handlerParse(handlerStr, handlerType, lastOperationReturn);
 	}
 	public static OperationAttrHandler handlerParse(String handlerStr, String handlerType) {
@@ -1829,6 +1915,9 @@ public class Tools {
 	
 	// 合并两个Handler
 	public static OperationAttrHandler combineHandler(OperationAttrHandler mainHandler, OperationAttrHandler attachHander) {
+		Tools.assert0(mainHandler != null, "'mainHandler' can't be null ");
+		Tools.assert0(attachHander != null, "'attachHander' can't be null ");
+		
 		Tools.assert0(! mainHandler.operationReturn().isFinal, "the first handler's returnType is final, can't concate 'AttrHandler' anymore ! please check it ! ");
 		CompositeOperationAttrHandler<OperationAttrHandler> attrHandler = new CompositeOperationAttrHandler<>();
 		attrHandler.addHandler(mainHandler);
@@ -1985,8 +2074,7 @@ public class Tools {
    // 辅助数据结构
    static class ArrayList0<E> extends ArrayList<E> {
 	   public ArrayList0(E[] array) {
-            if (array==null)
-                throw new NullPointerException();
+           if (array == null)	return ;
             for(E ele : array) {
             	add(ele);
             }
@@ -1994,8 +2082,7 @@ public class Tools {
    }
    static class LinkedList0<E> extends LinkedList<E> {
 	   public LinkedList0(E[] array) {
-            if (array==null)
-                throw new NullPointerException();
+            if (array == null)	return ;
             for(E ele : array) {
             	add(ele);
             }
@@ -2003,8 +2090,7 @@ public class Tools {
    }
    static class HashSet0<E> extends HashSet<E> {
 	   public HashSet0(E[] array) {
-            if (array==null)
-                throw new NullPointerException();
+           if (array == null)	return ;
             for(E ele : array) {
             	add(ele);
             }
@@ -2012,8 +2098,7 @@ public class Tools {
    }
    static class TreeSet0<E> extends TreeSet<E> {
 	   public TreeSet0(E[] array) {
-            if (array==null)
-                throw new NullPointerException();
+           if (array == null)	return ;
             for(E ele : array) {
             	add(ele);
             }
@@ -2021,9 +2106,7 @@ public class Tools {
    }
    static class HashMap0<K, V> extends HashMap<K, V> {
 	   public HashMap0(K[] keys, V[] vals) {
-            if ((keys == null) || (vals == null) ) {
-                throw new NullPointerException();
-            }
+            if ((keys == null) || (vals == null) )	return ;
             Tools.assert0(keys.length == vals.length, "keys's length must 'eq' vals's length !");
             for(int i=0; i<keys.length; i++) {
             	put(keys[i], vals[i]);
@@ -2032,9 +2115,7 @@ public class Tools {
    }
    static class TreeMap0<K, V> extends TreeMap<K, V> {
 	   public TreeMap0(K[] keys, V[] vals) {
-           if ((keys == null) || (vals == null) ) {
-               throw new NullPointerException();
-           }
+           if ((keys == null) || (vals == null) )	return ;
            Tools.assert0(keys.length == vals.length, "keys's length must 'eq' vals's length !");
            for(int i=0; i<keys.length; i++) {
         	   put(keys[i], vals[i]);
@@ -2145,6 +2226,97 @@ public class Tools {
 	   return (idx >= maxSize) ? defaultIdx : idx;
    }
    
+   // add at 2016.05.17
+   // 查询字符串的分隔符
+   static String PARAM_KV_SEP = "=";
+   static String PARAM_PARAM_SEP = "&";
+   // 增加封装get请求的查询字符串
+   public static String encapQueryString(Map<String, String> params) {
+	   return encapQueryString0(params, PARAM_KV_SEP, PARAM_PARAM_SEP);
+   }
+	// cookie相关分隔符
+	public static String COOKIE_KV_SEP = "=";
+	public static String COOKIE_COOKIE_SEP = ";";
+	// 通过cookies获取cookie的字符串表示
+	public static String getCookieStr(Map<String, String> cookies) {
+		return encapQueryString0(cookies, COOKIE_KV_SEP, COOKIE_COOKIE_SEP);
+	}
+	// 通过cookie格式的字符串 获取各个cookie [这里 直接使用split, 避免出现错误]
+	public static Map<String, String> getCookiesByCookieStr(String cookiesStr) {
+		String[] cookies = cookiesStr.split(COOKIE_COOKIE_SEP);
+		Map<String, String> res = new HashMap<>(cookies.length );
+		for(int i=0; i<cookies.length; i++) {
+			String[] kvPair = cookies[i].split(COOKIE_KV_SEP);
+			Tools.assert0(kvPair.length > 1, "error cookieString : '" + cookiesStr + "', around : '" + cookies[i] + "'");
+			res.put(kvPair[0], kvPair[1] );
+		}
+		
+		return res;
+	}
+	private static String encapQueryString0(Map<String, String> params, String KVSep, String paramsSep) {
+		Tools.assert0(params != null, "'params' can't be null ");
+		Tools.assert0(KVSep != null, "'KVSep' can't be null ");
+		Tools.assert0(paramsSep != null, "'paramsSep' can't be null ");
+		
+		StringBuilder sb = new StringBuilder();
+		for(Entry<String, String> entry : params.entrySet() ) {
+			sb.append(entry.getKey() );	sb.append(KVSep);
+			sb.append(entry.getValue());	sb.append(paramsSep);
+		}
+		if(sb.length() > paramsSep.length() ) {
+			sb.delete(sb.length()-paramsSep.length(), sb.length() );
+		}
+		
+		return sb.toString();
+	}
+	
+    // add at 2016.05.18
+	public static boolean STD_CASE_TO_UPPERCASE = false;
+	// 获取标准的大写 或者小写
+	public static String getStdCase(String str) {
+		return getStdCase(str, STD_CASE_TO_UPPERCASE);
+	}
+	public static String getStdCase(String str, boolean isUpperCase) {
+		Tools.assert0(str != null, "'str' can't be null ");
+		if(isUpperCase) {
+			return str.toUpperCase();
+		} else {
+			return str.toLowerCase();
+		}
+	}
+	// 判断str01 和str02是否相同[忽略大小写]
+	public static boolean equalsIgnoreCase(String str01, String str02) {
+		return getStdCase(str01).equals(getStdCase(str02) );
+	}
+	// 如果给定的字符串的首字母是大写的话, 将其转换为小写
+	public static String lowerCaseFirstChar(String str) {
+		Tools.assert0(((str != null) || (str.length() == 0) ), "'str' is null ");
+		if(str.length() == 1) {
+			return str.toLowerCase();
+		}
+		if(Character.isUpperCase(str.charAt(0)) ) {
+			return Character.toLowerCase(str.charAt(0)) + str.substring(1);
+		}
+		
+		return str;
+	}
+	public static String upperCaseFirstChar(String str) {
+		Tools.assert0(((str != null) || (str.length() == 0) ), "'str' is null ");
+		if(str.length() == 1) {
+			return str.toUpperCase();
+		}
+		if(Character.isLowerCase(str.charAt(0)) ) {
+			return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+		}
+		
+		return str;
+	}
+	// 获取给定的异常的信息
+	public static String errorMsg(Exception e) {
+		Tools.assert0(e != null, "'e' can't be null ");
+		return e.getClass().getName() + " -> " + e.getMessage();
+	}
+	
    // ------------ 待续 --------------------
 
 	

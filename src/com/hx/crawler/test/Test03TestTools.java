@@ -38,6 +38,8 @@ public class Test03TestTools {
 
 		Tools.assert0(new Exception("abc") );
 		
+		Log.log(Tools.encapQueryString(new JSONObject().element("key1", "val1").element("key2", "val2")) );
+		
 		Tools.awaitShutdown();
 		
 	}

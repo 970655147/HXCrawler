@@ -187,13 +187,13 @@ public class Log {
 	// 标准输出
 	// 打印字符串, 对象, 按照给定的pattern填充数据
 	public static void log(String str, boolean appendCRLF, int modeIdx) {
+		Tools.assert0(str != null, "'str' is null ");
 		try {
 			StringBuilder sb = new StringBuilder(str.length() + 4);
 			sb.append(Constants.formatLogInfo(logPatternChain, new JSONObject().element(LogPatternType.MSG.typeKey(), str).element(LogPatternType.MODE.typeKey(), Constants.LOG_MODES[Tools.getIdx(modeIdx, Constants.LOG_MODES.length, Constants.ERR_IDX)])) );
 			if(appendCRLF) {
 				sb.append(Constants.CRLF );
 			}
-			
 			String line = sb.toString();
 			
 			if((modeIdx < 0) || (modeIdx >= outStreams.length) ) {
@@ -208,7 +208,7 @@ public class Log {
 				Tools.appendBuffer(logBufNames[modeIdx], line);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Tools.assert0(Tools.errorMsg(e) );
 		}
 	}
 	public static void log(boolean appendCRLF) {
@@ -224,10 +224,10 @@ public class Log {
 		log(obj, Constants.OUTPUT_APPEND_CRLF);
 	}
 	public static void log(Object obj, boolean appendCRLF) {
-		log(obj.toString(), appendCRLF );
+		log(String.valueOf(obj), appendCRLF );
 	}
 	public static void log(Object obj) {
-		log(obj.toString(), Constants.OUTPUT_APPEND_CRLF );
+		log(obj, Constants.OUTPUT_APPEND_CRLF );
 	}
 	public static void logf(String pattern, Object[] args, boolean appendCRLF) {
 		log(String.format(pattern, args), appendCRLF);
@@ -254,6 +254,9 @@ public class Log {
 		log(it, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	public static <T> void log(Iterator<T> it, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(it != null, "'Iterator' is null ");
+		Tools.assert0(sep != null, "'Seprator' is null ");
+		
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
 			while(it.hasNext()) {
@@ -274,67 +277,76 @@ public class Log {
 	}
 	
 	// 打印List
-	public static <T> void log(List<T> ls, String sep, boolean appendCRLF) {
-		log(ls.iterator(), sep, appendCRLF);
+	public static <T> void log(List<T> list, String sep, boolean appendCRLF) {
+		Tools.assert0(list != null, "'list' is null ");
+		log(list.iterator(), sep, appendCRLF);
 	}
-	public static <T> void log(List<T> ls, boolean appendCRLF) {
-		log(ls.iterator(), appendCRLF);
+	public static <T> void log(List<T> list, boolean appendCRLF) {
+		Tools.assert0(list != null, "'list' is null ");
+		log(list.iterator(), appendCRLF);
 	}
-	public static <T> void log(List<T> ls) {
-		log(ls.iterator(), Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <T> void log(List<T> list) {
+		Tools.assert0(list != null, "'list' is null ");
+		log(list.iterator(), Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <T> void log(List<T> ls, String sep) {
-		log(ls.iterator(), sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <T> void log(List<T> list, String sep) {
+		Tools.assert0(list != null, "'list' is null ");
+		log(list.iterator(), sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	// 打印Set
-	public static <T> void log(Set<T> ls, String sep, boolean appendCRLF) {
-		log(ls.iterator(), sep, appendCRLF);
+	public static <T> void log(Set<T> set, String sep, boolean appendCRLF) {
+		Tools.assert0(set != null, "'set' is null ");
+		log(set.iterator(), sep, appendCRLF);
 	}
-	public static <T> void log(Set<T> ls, boolean appendCRLF) {
-		log(ls.iterator(), appendCRLF);
+	public static <T> void log(Set<T> set, boolean appendCRLF) {
+		Tools.assert0(set != null, "'set' is null ");
+		log(set.iterator(), appendCRLF);
 	}
-	public static <T> void log(Set<T> ls) {
-		log(ls.iterator(), Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <T> void log(Set<T> set) {
+		Tools.assert0(set != null, "'set' is null ");
+		log(set.iterator(), Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <T> void log(Set<T> ls, String sep) {
-		log(ls.iterator(), sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <T> void log(Set<T> set, String sep) {
+		Tools.assert0(set != null, "'set' is null ");
+		log(set.iterator(), sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	// 打印Map
-	public static <K, V> void log(Map<K, V> ls, String sep, int modeIdx, boolean appendCRLF) {
-		log(ls, DEFAULT_MAP_KV_SEP, sep, modeIdx, appendCRLF);
+	public static <K, V> void log(Map<K, V> map, String sep, int modeIdx, boolean appendCRLF) {
+		log(map, DEFAULT_MAP_KV_SEP, sep, modeIdx, appendCRLF);
 	}
-	public static <K, V> void log(Map<K, V> ls, String kvSep, String sep, boolean appendCRLF) {
-		log(ls, kvSep, sep, Constants.OUT_IDX, appendCRLF);
+	public static <K, V> void log(Map<K, V> map, String kvSep, String sep, boolean appendCRLF) {
+		log(map, kvSep, sep, Constants.OUT_IDX, appendCRLF);
 	}
-	public static <K, V> void log(Map<K, V> ls, String kvSep, String sep) {
-		log(ls, kvSep, sep, true);
+	public static <K, V> void log(Map<K, V> map, String kvSep, String sep) {
+		log(map, kvSep, sep, true);
 	}
-	public static <K, V> void log(Map<K, V> ls, String sep, boolean appendCRLF) {
-		log(ls, DEFAULT_MAP_KV_SEP, sep, Constants.OUT_IDX, appendCRLF);
+	public static <K, V> void log(Map<K, V> map, String sep, boolean appendCRLF) {
+		log(map, DEFAULT_MAP_KV_SEP, sep, Constants.OUT_IDX, appendCRLF);
 	}
-	public static <K, V> void log(Map<K, V> ls, boolean appendCRLF) {
+	public static <K, V> void log(Map<K, V> map, boolean appendCRLF) {
 		if(appendCRLF) {
-			log(ls, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+			log(map, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
 		} else {
-			log(ls, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+			log(map, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
 		}
 	}
-	public static <K, V> void log(Map<K, V> ls) {
-		log(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <K, V> void log(Map<K, V> map) {
+		log(map, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <K, V> void log(Map<K, V> ls, String sep) {
-		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <K, V> void log(Map<K, V> map, String sep) {
+		log(map, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <K, V> void log(Map<K, V> ls, String kvSep, String sep, int modeIdx, boolean appendCRLF) {
+	public static <K, V> void log(Map<K, V> map, String kvSep, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(map != null, "'map' is null ");
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
-			for(Entry<K, V> entry : ls.entrySet() ) {
+			for(Entry<K, V> entry : map.entrySet() ) {
 				Tools.appendCRLF(sb, entry.getKey() + kvSep + entry.getValue() + sep );
 			}
 		} else {
-			for(Entry<K, V> entry : ls.entrySet() ) {
+			for(Entry<K, V> entry : map.entrySet() ) {
 				Tools.append(sb, entry.getKey() + " -> " + entry.getValue() + sep );
 			}
 		}
@@ -364,14 +376,15 @@ public class Log {
 	public static void log(int[] ls, String sep) {
 		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void log(int[] ls, String sep, int modeIdx, boolean appendCRLF) {
+	public static void log(int[] arr, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
-			for(int obj : ls) {
+			for(int obj : arr) {
 				Tools.appendCRLF(sb, (obj + sep) );
 			}
 		} else {
-			for(int obj : ls) {
+			for(int obj : arr) {
 				Tools.append(sb, obj + sep);
 			}
 		}
@@ -399,14 +412,15 @@ public class Log {
 	public static void log(long[] ls, String sep) {
 		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void log(long[] ls, String sep, int modeIdx, boolean appendCRLF) {
+	public static void log(long[] arr, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
-			for(long obj : ls) {
+			for(long obj : arr) {
 				Tools.appendCRLF(sb, (obj + sep) );
 			}
 		} else {
-			for(long obj : ls) {
+			for(long obj : arr) {
 				Tools.append(sb, obj + sep);
 			}
 		}
@@ -434,14 +448,15 @@ public class Log {
 	public static void log(double[] ls, String sep) {
 		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void log(double[] ls, String sep, int modeIdx, boolean appendCRLF) {
+	public static void log(double[] arr, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
-			for(double obj : ls) {
+			for(double obj : arr) {
 				Tools.appendCRLF(sb, (obj + sep) );
 			}
 		} else {
-			for(double obj : ls) {
+			for(double obj : arr) {
 				Tools.append(sb, obj + sep);
 			}
 		}
@@ -469,14 +484,15 @@ public class Log {
 	public static void log(char[] ls, String sep) {
 		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void log(char[] ls, String sep, int modeIdx, boolean appendCRLF) {
+	public static void log(char[] arr, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
-			for(char obj : ls) {
+			for(char obj : arr) {
 				Tools.appendCRLF(sb, (obj + sep) );
 			}
 		} else {
-			for(char obj : ls) {
+			for(char obj : arr) {
 				Tools.append(sb, obj + sep);
 			}
 		}
@@ -504,14 +520,15 @@ public class Log {
 	public static void log(byte[] ls, String sep) {
 		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void log(byte[] ls, String sep, int modeIdx, boolean appendCRLF) {
+	public static void log(byte[] arr, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
-			for(byte obj : ls) {
+			for(byte obj : arr) {
 				Tools.appendCRLF(sb, (obj + sep) );
 			}
 		} else {
-			for(byte obj : ls) {
+			for(byte obj : arr) {
 				Tools.append(sb, obj + sep);
 			}
 		}
@@ -539,14 +556,15 @@ public class Log {
 	public static void log(boolean[] ls, String sep) {
 		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void log(boolean[] ls, String sep, int modeIdx, boolean appendCRLF) {
+	public static void log(boolean[] arr, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
-			for(boolean obj : ls) {
+			for(boolean obj : arr) {
 				Tools.appendCRLF(sb, (obj + sep) );
 			}
 		} else {
-			for(boolean obj : ls) {
+			for(boolean obj : arr) {
 				Tools.append(sb, obj + sep);
 			}
 		}
@@ -574,14 +592,15 @@ public class Log {
 	public static <T> void log(T[] ls, String sep) {
 		log(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <T> void log(T[] ls, String sep, int modeIdx, boolean appendCRLF) {
+	public static <T> void log(T[] arr, String sep, int modeIdx, boolean appendCRLF) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		StringBuilder sb = new StringBuilder();
 		if(appendCRLF) {
-			for(Object obj : ls) {
+			for(Object obj : arr) {
 				Tools.appendCRLF(sb, (obj.toString() + sep) );
 			}
 		} else {
-			for(Object obj : ls) {
+			for(Object obj : arr) {
 				Tools.append(sb, obj.toString() + sep);
 			}
 		}
@@ -605,6 +624,7 @@ public class Log {
 		log(arr, DEFAULT_SEP_WHILE_TWO_DIMEN);
 	}
 	public static void log(int[][] arr, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		for(int i=0; i<arr.length; i++) {
 			int[] row = arr[i];
 			log(row, sep, modeIdx, false);
@@ -618,6 +638,7 @@ public class Log {
 		log(arr, DEFAULT_SEP_WHILE_TWO_DIMEN);
 	}
 	public static void log(long[][] arr, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		for(int i=0; i<arr.length; i++) {
 			long[] row = arr[i];
 			log(row, sep, modeIdx, false);
@@ -631,6 +652,7 @@ public class Log {
 		log(arr, DEFAULT_SEP_WHILE_TWO_DIMEN);
 	}
 	public static void log(double[][] arr, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		for(int i=0; i<arr.length; i++) {
 			double[] row = arr[i];
 			log(row, sep, modeIdx, false);
@@ -644,6 +666,7 @@ public class Log {
 		log(arr, DEFAULT_SEP_WHILE_TWO_DIMEN);
 	}
 	public static void log(char[][] arr, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		for(int i=0; i<arr.length; i++) {
 			char[] row = arr[i];
 			log(row, sep, modeIdx, false);
@@ -657,6 +680,7 @@ public class Log {
 		log(arr, DEFAULT_SEP_WHILE_TWO_DIMEN);
 	}
 	public static void log(byte[][] arr, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		for(int i=0; i<arr.length; i++) {
 			byte[] row = arr[i];
 			log(row, sep, modeIdx, false);
@@ -670,6 +694,7 @@ public class Log {
 		log(arr, DEFAULT_SEP_WHILE_TWO_DIMEN);
 	}
 	public static void log(boolean[][] arr, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		for(int i=0; i<arr.length; i++) {
 			boolean[] row = arr[i];
 			log(row, sep, modeIdx, false);
@@ -684,6 +709,7 @@ public class Log {
 		log(arr, DEFAULT_SEP_WHILE_TWO_DIMEN);
 	}
 	public static <T> void log(T[][] arr, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
 		for(int i=0; i<arr.length; i++) {
 			Object[] row = arr[i];
 			log(row, sep, modeIdx, false);
@@ -699,6 +725,9 @@ public class Log {
 		log(arr, it, DEFAULT_SEP_WHILE_NO_CRLF);
 	}
 	public static void log(int[] arr, Iterator<Integer> it, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
+		Tools.assert0(it != null, "'Iterator' is null ");
+		
 		StringBuilder sb = new StringBuilder();
 		while(it.hasNext()) {
 			Tools.append(sb, String.valueOf(arr[it.next()]) + sep);
@@ -718,6 +747,9 @@ public class Log {
 		log(arr, it, DEFAULT_SEP_WHILE_NO_CRLF);
 	}
 	public static void log(long[] arr, Iterator<Integer> it, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
+		Tools.assert0(it != null, "'Iterator' is null ");
+		
 		StringBuilder sb = new StringBuilder();
 		while(it.hasNext()) {
 			Tools.append(sb, String.valueOf(arr[it.next()]) + sep);
@@ -737,6 +769,9 @@ public class Log {
 		log(arr, it, DEFAULT_SEP_WHILE_NO_CRLF);
 	}
 	public static void log(double[] arr, Iterator<Integer> it, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
+		Tools.assert0(it != null, "'Iterator' is null ");
+		
 		StringBuilder sb = new StringBuilder();
 		while(it.hasNext()) {
 			Tools.append(sb, String.valueOf(arr[it.next()]) + sep);
@@ -756,6 +791,9 @@ public class Log {
 		log(arr, it, DEFAULT_SEP_WHILE_NO_CRLF);
 	}
 	public static void log(char[] arr, Iterator<Integer> it, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
+		Tools.assert0(it != null, "'Iterator' is null ");
+		
 		StringBuilder sb = new StringBuilder();
 		while(it.hasNext()) {
 			Tools.append(sb, String.valueOf(arr[it.next()]) + sep);
@@ -775,6 +813,9 @@ public class Log {
 		log(arr, it, DEFAULT_SEP_WHILE_NO_CRLF);
 	}
 	public static void log(byte[] arr, Iterator<Integer> it, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
+		Tools.assert0(it != null, "'Iterator' is null ");
+		
 		StringBuilder sb = new StringBuilder();
 		while(it.hasNext()) {
 			Tools.append(sb, String.valueOf(arr[it.next()]) + sep);
@@ -794,6 +835,9 @@ public class Log {
 		log(arr, it, DEFAULT_SEP_WHILE_NO_CRLF);
 	}
 	public static void log(boolean[] arr, Iterator<Integer> it, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
+		Tools.assert0(it != null, "'Iterator' is null ");
+		
 		StringBuilder sb = new StringBuilder();
 		while(it.hasNext()) {
 			Tools.append(sb, String.valueOf(arr[it.next()]) + sep);
@@ -813,6 +857,9 @@ public class Log {
 		log(arr, it, DEFAULT_SEP_WHILE_NO_CRLF);
 	}
 	public static <T> void log(T[] arr, Iterator<Integer> it, String sep, int modeIdx) {
+		Tools.assert0(arr != null, "'arr' is null ");
+		Tools.assert0(it != null, "'Iterator' is null ");
+		
 		StringBuilder sb = new StringBuilder();
 		while(it.hasNext()) {
 			Tools.append(sb, String.valueOf(arr[it.next()]) + sep);
@@ -892,13 +939,13 @@ public class Log {
 		logFor(theme, "theme", HORIZON_STARTS, HORIZON_STARTS, Constants.OUT_IDX);
 	}
 	public static void logForPage(Object page) {
-		logFor(page.toString(), "page", HORIZON_LINES, HORIZON_LINES, Constants.OUT_IDX);
+		logFor(String.valueOf(page), "page", HORIZON_LINES, HORIZON_LINES, Constants.OUT_IDX);
 	}
 	public static void logForThemes(Object theme) {
-		logFor(theme.toString(), "theme", HORIZON_STARTS, HORIZON_STARTS, Constants.OUT_IDX);
+		logFor(String.valueOf(theme), "theme", HORIZON_STARTS, HORIZON_STARTS, Constants.OUT_IDX);
 	}
 	public static void logFor(String subject, String subjectKey, String before, String after, int modeIdx) {
-		String logStr = before + " [ " + subjectKey + " : " + subject + " ] " + after;
+		String logStr = String.valueOf(before) + " [ " + String.valueOf(subjectKey) + " : " + String.valueOf(subject) + " ] " + String.valueOf(after);
 		dispathLogInfo(modeIdx, logStr);
 	}
 	
@@ -918,7 +965,7 @@ public class Log {
 		err(obj, ERRPUT_APPEND_CRLF);
 	}
 	public static void err(Object obj, boolean appendCRLF) {
-		err(obj.toString(), appendCRLF );
+		err(String.valueOf(obj), appendCRLF );
 	}
 	public static void err(Object obj) {
 		err(obj, ERRPUT_APPEND_CRLF );
@@ -947,172 +994,180 @@ public class Log {
 		err(it, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
-	public static <T> void err(List<T> ls, String sep, boolean appendCRLF) {
-		err(ls.iterator(), sep, appendCRLF);
+	public static <T> void err(List<T> list, String sep, boolean appendCRLF) {
+		Tools.assert0(list != null, "'list' is null ");
+		err(list.iterator(), sep, appendCRLF);
 	}
-	public static <T> void err(List<T> ls, boolean appendCRLF) {
-		err(ls.iterator(), appendCRLF);
+	public static <T> void err(List<T> list, boolean appendCRLF) {
+		Tools.assert0(list != null, "'list' is null ");
+		err(list.iterator(), appendCRLF);
 	}
-	public static <T> void err(List<T> ls) {
-		err(ls.iterator(), ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <T> void err(List<T> list) {
+		Tools.assert0(list != null, "'list' is null ");
+		err(list.iterator(), ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <T> void err(List<T> ls, String sep) {
-		err(ls.iterator(), sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
-	}
-	
-	public static <T> void err(Set<T> ls, String sep, boolean appendCRLF) {
-		err(ls.iterator(), sep, appendCRLF);
-	}
-	public static <T> void err(Set<T> ls, boolean appendCRLF) {
-		err(ls.iterator(), appendCRLF);
-	}
-	public static <T> void err(Set<T> ls) {
-		err(ls.iterator(), ERRPUT_APPEND_CRLF_FOR_CONTAINER);
-	}
-	public static <T> void err(Set<T> ls, String sep) {
-		err(ls.iterator(), sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <T> void err(List<T> list, String sep) {
+		Tools.assert0(list != null, "'list' is null ");
+		err(list.iterator(), sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
-	public static <K, V> void err(Map<K, V> ls, String kvSep, String sep, boolean appendCRLF) {
-		log(ls, kvSep, sep, Constants.ERR_IDX, appendCRLF);
+	public static <T> void err(Set<T> set, String sep, boolean appendCRLF) {
+		Tools.assert0(set != null, "'set' is null ");
+		err(set.iterator(), sep, appendCRLF);
 	}
-	public static <K, V> void err(Map<K, V> ls, String kvSep, String sep) {
-		err(ls, kvSep, sep, true);
+	public static <T> void err(Set<T> set, boolean appendCRLF) {
+		Tools.assert0(set != null, "'set' is null ");
+		err(set.iterator(), appendCRLF);
 	}
-	public static <K, V> void err(Map<K, V> ls, String sep, boolean appendCRLF) {
-		log(ls, DEFAULT_MAP_KV_SEP, sep, Constants.ERR_IDX, appendCRLF);
+	public static <T> void err(Set<T> set) {
+		Tools.assert0(set != null, "'set' is null ");
+		err(set.iterator(), ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <K, V> void err(Map<K, V> ls, boolean appendCRLF) {
+	public static <T> void err(Set<T> set, String sep) {
+		Tools.assert0(set != null, "'set' is null ");
+		err(set.iterator(), sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	
+	public static <K, V> void err(Map<K, V> map, String kvSep, String sep, boolean appendCRLF) {
+		log(map, kvSep, sep, Constants.ERR_IDX, appendCRLF);
+	}
+	public static <K, V> void err(Map<K, V> map, String kvSep, String sep) {
+		err(map, kvSep, sep, true);
+	}
+	public static <K, V> void err(Map<K, V> map, String sep, boolean appendCRLF) {
+		log(map, DEFAULT_MAP_KV_SEP, sep, Constants.ERR_IDX, appendCRLF);
+	}
+	public static <K, V> void err(Map<K, V> map, boolean appendCRLF) {
 		if(appendCRLF) {
-			err(ls, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+			err(map, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
 		} else {
-			err(ls, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+			err(map, DEFAULT_MAP_KV_SEP, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
 		}
 	}
-	public static <K, V> void err(Map<K, V> ls) {
-		err(ls, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <K, V> void err(Map<K, V> map) {
+		err(map, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <K, V> void err(Map<K, V> ls, String sep) {
-		err(ls, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
-	}
-	
-	public static void err(int[] ls, String sep, boolean appendCRLF) {
-		log(ls, sep, Constants.ERR_IDX, appendCRLF);
-	}
-	public static void err(int[] ls, boolean appendCRLF) {
-		if(appendCRLF) {
-			err(ls, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
-		} else {
-			err(ls, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
-		}
-	}
-	public static void err(int[] ls) {
-		err(ls, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
-	}
-	public static void err(int[] ls, String sep) {
-		err(ls, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static <K, V> void err(Map<K, V> map, String sep) {
+		err(map, sep, Constants.OUTPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
-	public static void err(long[] ls, String sep, boolean appendCRLF) {
-		log(ls, sep, Constants.ERR_IDX, appendCRLF);
+	public static void err(int[] arr, String sep, boolean appendCRLF) {
+		log(arr, sep, Constants.ERR_IDX, appendCRLF);
 	}
-	public static void err(long[] ls, boolean appendCRLF) {
+	public static void err(int[] arr, boolean appendCRLF) {
 		if(appendCRLF) {
-			err(ls, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
 		} else {
-			err(ls, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
 		}
 	}
-	public static void err(long[] ls) {
-		err(ls, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(int[] arr) {
+		err(arr, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void err(long[] ls, String sep) {
-		err(ls, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(int[] arr, String sep) {
+		err(arr, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
-	public static void err(double[] ls, String sep, boolean appendCRLF) {
-		log(ls, sep, Constants.ERR_IDX, appendCRLF);
+	public static void err(long[] arr, String sep, boolean appendCRLF) {
+		log(arr, sep, Constants.ERR_IDX, appendCRLF);
 	}
-	public static void err(double[] ls, boolean appendCRLF) {
+	public static void err(long[] arr, boolean appendCRLF) {
 		if(appendCRLF) {
-			err(ls, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
 		} else {
-			err(ls, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
 		}
 	}
-	public static void err(double[] ls) {
-		err(ls, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(long[] arr) {
+		err(arr, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void err(double[] ls, String sep) {
-		err(ls, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(long[] arr, String sep) {
+		err(arr, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
-	public static void err(byte[] ls, String sep, boolean appendCRLF) {
-		log(ls, sep, Constants.ERR_IDX, appendCRLF);
+	public static void err(double[] arr, String sep, boolean appendCRLF) {
+		log(arr, sep, Constants.ERR_IDX, appendCRLF);
 	}
-	public static void err(byte[] ls, boolean appendCRLF) {
+	public static void err(double[] arr, boolean appendCRLF) {
 		if(appendCRLF) {
-			err(ls, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
 		} else {
-			err(ls, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
 		}
 	}
-	public static void err(byte[] ls) {
-		err(ls, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(double[] arr) {
+		err(arr, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void err(byte[] ls, String sep) {
-		err(ls, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(double[] arr, String sep) {
+		err(arr, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
-	public static void err(char[] ls, String sep, boolean appendCRLF) {
-		log(ls, sep, Constants.ERR_IDX, appendCRLF);
+	public static void err(byte[] arr, String sep, boolean appendCRLF) {
+		log(arr, sep, Constants.ERR_IDX, appendCRLF);
 	}
-	public static void err(char[] ls, boolean appendCRLF) {
+	public static void err(byte[] arr, boolean appendCRLF) {
 		if(appendCRLF) {
-			err(ls, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
 		} else {
-			err(ls, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
 		}
 	}
-	public static void err(char[] ls) {
-		err(ls, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(byte[] arr) {
+		err(arr, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void err(char[] ls, String sep) {
-		err(ls, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(byte[] arr, String sep) {
+		err(arr, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
-	public static void err(boolean[] ls, String sep, boolean appendCRLF) {
-		log(ls, sep, Constants.ERR_IDX, appendCRLF);
+	public static void err(char[] arr, String sep, boolean appendCRLF) {
+		log(arr, sep, Constants.ERR_IDX, appendCRLF);
 	}
-	public static void err(boolean[] ls, boolean appendCRLF) {
+	public static void err(char[] arr, boolean appendCRLF) {
 		if(appendCRLF) {
-			err(ls, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
 		} else {
-			err(ls, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
 		}
 	}
-	public static void err(boolean[] ls) {
-		err(ls, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(char[] arr) {
+		err(arr, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static void err(boolean[] ls, String sep) {
-		err(ls, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(char[] arr, String sep) {
+		err(arr, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
-	public static <T> void err(T[] ls, String sep, boolean appendCRLF) {
-		log(ls, sep, Constants.ERR_IDX, appendCRLF);
+	public static void err(boolean[] arr, String sep, boolean appendCRLF) {
+		log(arr, sep, Constants.ERR_IDX, appendCRLF);
 	}
-	public static <T> void err(T[] ls, boolean appendCRLF) {
+	public static void err(boolean[] arr, boolean appendCRLF) {
 		if(appendCRLF) {
-			err(ls, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
 		} else {
-			err(ls, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+			err(arr, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
 		}
 	}
-	public static <T> void err(T[] ls) {
-		err(ls, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(boolean[] arr) {
+		err(arr, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
-	public static <T> void err(T[] ls, String sep) {
-		err(ls, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	public static void err(boolean[] arr, String sep) {
+		err(arr, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	
+	public static <T> void err(T[] arr, String sep, boolean appendCRLF) {
+		log(arr, sep, Constants.ERR_IDX, appendCRLF);
+	}
+	public static <T> void err(T[] arr, boolean appendCRLF) {
+		if(appendCRLF) {
+			err(arr, DEFAULT_SEP_WHILE_CRLF, appendCRLF);
+		} else {
+			err(arr, DEFAULT_SEP_WHILE_NO_CRLF, appendCRLF);
+		}
+	}
+	public static <T> void err(T[] arr) {
+		err(arr, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
+	}
+	public static <T> void err(T[] arr, String sep) {
+		err(arr, sep, ERRPUT_APPEND_CRLF_FOR_CONTAINER);
 	}
 	
 	public static void err(int[][] arr, String sep) {
@@ -1249,10 +1304,10 @@ public class Log {
 		logFor(theme, "theme", HORIZON_STARTS, HORIZON_STARTS, Constants.ERR_IDX);
 	}
 	public static void errForPage(Object page) {
-		logFor(page.toString(), "page", HORIZON_LINES, HORIZON_LINES, Constants.ERR_IDX);
+		logFor(String.valueOf(page), "page", HORIZON_LINES, HORIZON_LINES, Constants.ERR_IDX);
 	}
 	public static void errForThemes(Object theme) {
-		logFor(theme.toString(), "theme", HORIZON_STARTS, HORIZON_STARTS, Constants.ERR_IDX);
+		logFor(String.valueOf(theme), "theme", HORIZON_STARTS, HORIZON_STARTS, Constants.ERR_IDX);
 	}
 	
 	
@@ -1270,7 +1325,7 @@ public class Log {
 			e.printStackTrace();
 		}
 	}
- 	
+	
 	// ------------ 待续 --------------------
 	
 	

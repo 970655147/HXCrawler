@@ -43,7 +43,7 @@ public class Test01TestXpathParser {
 		
 		
 		// ------------------3---------------------
-		String test01Product = System.getProperty("user.dir") + "/src/com/hx/crawlerTools_xpathParser/Test01Product.html";
+		String test01Product = System.getProperty("user.dir") + "/src/com/hx/crawler/xpathParser/Test01Product.html";
 		// text
 //		String xpath = "[{\"name\":\"product\",\"xpath\":\"/html/body/products/product\",\"values\":[{\"name\":\"name\",\"xpath\":\"./name\",\"attribute\":\"text\"},{\"name\":\"price\",\"xpath\":\"./price\",\"attribute\":\"text\"}]}]";
 //		String xpath = "[{\"name\":\"product\",\"xpath\":\"/html/body/products/product\",\"values\":[{\"name\":\"index\",\"attribute\":\":index\"},{\"name\":\"name\",\"xpath\":\"./name\",\"attribute\":\"text\"},{\"name\":\"price\",\"xpath\":\"./price\",\"attribute\":\"text\"}]}]";
