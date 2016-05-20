@@ -30,20 +30,7 @@ public class StringIntResultHandlerArgsAttrHandler extends AttrHandler {
 		this.arg02 = arg02;
 	}
 	public StringIntResultHandlerArgsAttrHandler(StringIntArgsAttrHandler handler, String arg01, int arg02) {
-		this(handler, new ConstantsAttrHandler(String.valueOf(arg01)),
-				new ConstantsAttrHandler(String.valueOf(arg02)) );
-	}
-	public StringIntResultHandlerArgsAttrHandler(StringIntArgsAttrHandler handler, AttrHandler arg01, int arg02) {
-		this(handler, arg01, new ConstantsAttrHandler(String.valueOf(arg02)) );
-	}
-	public StringIntResultHandlerArgsAttrHandler(StringIntArgsAttrHandler handler, String arg01, AttrHandler arg02) {
-		this(handler, new ConstantsAttrHandler(String.valueOf(arg01)), arg02);
-	}
-	public StringIntResultHandlerArgsAttrHandler(StringIntArgsAttrHandler handler, AttrHandler arg01) {
-		this(handler, arg01, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-	}
-	public StringIntResultHandlerArgsAttrHandler(StringIntArgsAttrHandler handler, String arg01) {
-		this(handler, new ConstantsAttrHandler(String.valueOf(arg01)) );
+		this(handler, new ConstantsAttrHandler(String.valueOf(arg01)), new ConstantsAttrHandler(String.valueOf(arg02)) );
 	}
 
 	@Override

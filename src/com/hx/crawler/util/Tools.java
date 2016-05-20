@@ -112,6 +112,8 @@ public class Tools {
 	public static final String RESPONE = "response";
 	public static final String REASON = "reason";
 	public static final String MSG = "message";
+	public static final String EXT = "ext";
+	public static final String BUCKET = "bucket";
 	// add at 2016.03.21
 	public static final String BRAND = "brand";
 	public static final String UPC = "universalProductCode";
@@ -1705,7 +1707,7 @@ public class Tools {
 	
 	// 获取所有的缓冲区的key的集合
 	public static Set<String> buffNames() {
-		return bufferToBuffInfo.keySet();
+		return new HashSet<>(bufferToBuffInfo.keySet() );
 	}
 	// 创建一个缓冲区
 	public static void createAnBuffer(String bufName, String outputPath, String charset, BuffSizeEstimator buffSizeEstimator, int threshold) {
@@ -1742,6 +1744,11 @@ public class Tools {
 	}
 	public static void closeAnBuffer(String bufName) throws IOException {
 		flushBuffer(bufName, true);
+	}
+	public static void closeAllBuffer() throws IOException {
+		for(String bufName : buffNames() ) {
+			closeAnBuffer(bufName);
+		}
 	}
 	// 判断给定的bufName的buffer是否存在
 	public static boolean bufExists(String buffName) {

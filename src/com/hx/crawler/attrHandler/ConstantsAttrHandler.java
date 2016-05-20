@@ -24,6 +24,12 @@ public class ConstantsAttrHandler extends AttrHandler {
 			this.res = this.res.substring(1, this.res.length()-1 );
 		}
 	}
+	public ConstantsAttrHandler(int i) {
+		this(String.valueOf(i) );
+	}
+	public ConstantsAttrHandler(boolean bool) {
+		this(String.valueOf(bool) );
+	}
 
 	@Override
 	public String handle0(String result) {

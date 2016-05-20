@@ -167,6 +167,7 @@ public class Constants {
 	public final static String TO_LOWERCASE = "toLowerCase";
 	public final static String CONSTANTS = "constants";
 	public final static String DO_NOTHING = "doNothing";
+	public final static String GET_STR_IN_RANGE = "getStrIn";
 	
 	public final static String INDEX_OF = "indexOf";
 	public final static String LAST_INDEX_OF = "lastIndexOf";
@@ -554,7 +555,7 @@ public class Constants {
 			String next = sep.next();
 			switch (next) {
 				case Constants.VAR_START:
-					Tools.assert0(sep.hasNext(), "unExpected end of 'logPattern'! ");
+					assert0(sep.hasNext(), "unExpected end of 'logPattern'! ");
 					String varName = sep.next().trim();
 					switch (varName) {
 						case Constants.LOG_PATTERN_DATE:
@@ -592,10 +593,10 @@ public class Constants {
 								initVal = Integer.parseInt(initValOrAndInc.trim() );
 							}
 							logPatternChain.addLogPattern(new IncIndexLogPattern(initVal, inc) );
-							Tools.assert0(RBRACKET.equals(sep.next()), "expect a ')', but got an : '" + sep.seekLastNext() + "' !" );
+							assert0(RBRACKET.equals(sep.next()), "expect a ')', but got an : '" + sep.seekLastNext() + "' !" );
 							break;
 						case LOG_PATTERN_HANDLER :
-							Tools.assert0(LBRACKET.equals(sep.next()), "expect a '(', but go an : '" + sep.seekLastNext() + "' !");
+							assert0(LBRACKET.equals(sep.next()), "expect a '(', but go an : '" + sep.seekLastNext() + "' !");
 							int stackCnt = 1;
 							StringBuilder sb = new StringBuilder(sep.length() - sep.lastNextPos() );
 							while(sep.hasNext() ) {
@@ -611,7 +612,7 @@ public class Constants {
 								}
 								sb.append(partHandlerStr);
 							}
-							Tools.assert0(RBRACKET.equals(sep.seekLastNext()), "expect 'handler()' endsWith ')', but got an : '" + sep.seekLastNext() + "' !");
+							assert0(RBRACKET.equals(sep.seekLastNext()), "expect 'handler()' endsWith ')', but got an : '" + sep.seekLastNext() + "' !");
 							String handlerStr = sb.toString();
 							OperationAttrHandler operationHandler = new StandardHandlerParser().handlerParse(handlerStr, Constants.HANDLER);
 							logPatternChain.addLogPattern(new HandlerLogPattern(operationHandler, Constants.DEFAULT_VAR_VALUE) );
@@ -642,7 +643,7 @@ public class Constants {
 							logPatternChain.addLogPattern(new ConstantsLogPattern(constantsValue) );
 							break;
 					}
-					Tools.assert0(Constants.VAR_END.equals(sep.next() ), "expect an '" + Constants.VAR_END + "', but got an '" + sep.seekLastNext() + "' ! ");
+					assert0(Constants.VAR_END.equals(sep.next() ), "expect an '" + Constants.VAR_END + "', but got an '" + sep.seekLastNext() + "' ! ");
 					break;
 				default:
 					logPatternChain.addLogPattern(new ConstantsLogPattern(next) );
@@ -651,6 +652,16 @@ public class Constants {
 		}
 		
 		return logPatternChain;
+	}
+	// incase of 'initDependency'[Tools.taskBeforeLogPatternChain == null]		add at 2016.05.19
+	private static void assert0(boolean boo, String msg) {
+		if(msg == null) {
+			System.err.println("'msg' can't be null ");
+			return ;
+		}
+		if(! boo) {
+			throw new RuntimeException("assert0Exception : " + msg);
+		}
 	}
 	// 格式化日期相关
 	public static String formatLogInfo(LogPatternChain logPatternChain, JSONObject argsMap) {

@@ -6,46 +6,41 @@
 
 package com.hx.crawler.attrHandler;
 
-import com.hx.crawler.attrHandler.adapter.interf.TwoIntArgsAttrHandler;
+import com.hx.crawler.attrHandler.adapter.interf.StringOneOrTwoIntAttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Tools;
 
 // ½ØÈ¡×Ö·û´®µÄhandler
 // map(subString(1, 3) )
-public class SubStringAttrHandler extends TwoIntArgsAttrHandler {
-	// ½ØÈ¡µÄ×Ö·û´®µÄ·¶Î§
-	private int start;
-	private int end;
-	
+public class SubStringAttrHandler extends StringOneOrTwoIntAttrHandler {
 	// ³õÊ¼»¯
-	public SubStringAttrHandler(int start, int end) {
-		setArgs(start, end);
+	public SubStringAttrHandler(String target, int from, int to) {
+		super(target, from, to);
 	}
-	public SubStringAttrHandler(int start) {
-		setArgs(start, Constants.TARGET_UNDEFINED);
+	public SubStringAttrHandler(String target, int from) {
+		super(target, from, Constants.TARGET_UNDEFINED);
+	}
+	public SubStringAttrHandler(int from, int to) {
+		super(Constants.HANDLER_UNDEFINED, from, to);
+	}
+	public SubStringAttrHandler(int from) {
+		super(Constants.HANDLER_UNDEFINED, from, Constants.TARGET_UNDEFINED);
 	}
 	public SubStringAttrHandler() {
-		setArgs(Constants.TARGET_UNDEFINED, Constants.TARGET_UNDEFINED);
+		this(Constants.HANDLER_UNDEFINED, Constants.TARGET_UNDEFINED, Constants.TARGET_UNDEFINED);
 	}
-
-	@Override
-	public String handle0(String result) {
-		Tools.assert0(start > Constants.TARGET_UNDEFINED, "error while calc the 'subString(Int, Int)', 'start' be initialized illegal ! ");
-		if(Constants.TARGET_UNDEFINED == end) {
-			return result.substring(start);
-		}
-		
-		return result.substring(start, end);
-	}
-	@Override
-	public void setArgs(int arg1, int arg2) {
-		start = arg1;
-		end = arg2;
-	}
-
+	
 	@Override
 	public String name() {
 		return Constants.SUB_STRING;
+	}
+	
+	@Override
+	protected String gotResult(String target, int from, int to, String result) {
+		if(to == Constants.TARGET_UNDEFINED) {
+			to = target.length();
+		}
+		return target.substring(from, to);
 	}
 	
 }

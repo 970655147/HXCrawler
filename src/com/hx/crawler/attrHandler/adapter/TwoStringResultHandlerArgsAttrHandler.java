@@ -27,18 +27,6 @@ public class TwoStringResultHandlerArgsAttrHandler extends AttrHandler {
 		this.arg01 = arg01;
 		this.arg02 = arg02;
 	}
-	public TwoStringResultHandlerArgsAttrHandler(TwoStringArgsAttrHandler handler, AttrHandler arg01) {
-		this(handler, arg01, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-	}
-	public TwoStringResultHandlerArgsAttrHandler(TwoStringArgsAttrHandler handler, String arg01) {
-		this(handler, new ConstantsAttrHandler(arg01) );
-	}
-	public TwoStringResultHandlerArgsAttrHandler(TwoStringArgsAttrHandler handler,  AttrHandler arg01, String arg02) {
-		this(handler, arg01, new ConstantsAttrHandler(arg02) );
-	}
-	public TwoStringResultHandlerArgsAttrHandler(TwoStringArgsAttrHandler handler,  String arg01, AttrHandler arg02) {
-		this(handler, new ConstantsAttrHandler(arg01), arg02 );
-	}
 	public TwoStringResultHandlerArgsAttrHandler(TwoStringArgsAttrHandler handler,  String arg01, String arg02) {
 		this(handler, new ConstantsAttrHandler(arg01), new ConstantsAttrHandler(arg02) );
 	}

@@ -6,36 +6,27 @@
 
 package com.hx.crawler.attrHandler;
 
-import com.hx.crawler.attrHandler.adapter.interf.StringIntArgsAttrHandler;
+import com.hx.crawler.attrHandler.adapter.interf.OneOrTwoStringIntArgsAttrHandler;
 import com.hx.crawler.util.Constants;
-import com.hx.crawler.util.Tools;
 
 // lastIndexOf关联的AttrHandler
 // map(lastIndexOf(hello[, 2]) )
-public class LastIndexAttrHandler extends StringIntArgsAttrHandler {
-	// 给定的目标字符串, 开始向前搜索的位置
-	private String idxStr;
-	private int to;
-	
+public class LastIndexAttrHandler extends OneOrTwoStringIntArgsAttrHandler {
 	// 初始化
-	public LastIndexAttrHandler(String idxStr, int to) {
-		setArgs(idxStr, to);
+	public LastIndexAttrHandler(String target, String idxStr, int from) {
+		super(target, idxStr, from);
+	}
+	public LastIndexAttrHandler(String target, String idxStr) {
+		this(target, idxStr, Constants.TARGET_UNDEFINED);
+	}
+	public LastIndexAttrHandler(String idxStr, int from) {
+		super(Constants.HANDLER_UNDEFINED, idxStr, from);
 	}
 	public LastIndexAttrHandler(String idxStr) {
-		this(idxStr, Constants.TARGET_UNDEFINED);
+		this(Constants.HANDLER_UNDEFINED, idxStr, Constants.TARGET_UNDEFINED);
 	}
 	public LastIndexAttrHandler() {
-		this(null, Constants.TARGET_UNDEFINED);
-	}
-	
-	@Override
-	public String handle0(String result) {
-		Tools.assert0(idxStr != null, "error while calc the 'lastIndexOf(String[, Int])', 'idxString' be initialized illegal ! ");
-		if(Constants.TARGET_UNDEFINED == to) {
-			return String.valueOf(result.lastIndexOf(idxStr) );
-		}
-		
-		return String.valueOf(result.lastIndexOf(idxStr, to) );
+		this(Constants.HANDLER_UNDEFINED, "", Constants.TARGET_UNDEFINED);
 	}
 	
 	@Override
@@ -44,9 +35,11 @@ public class LastIndexAttrHandler extends StringIntArgsAttrHandler {
 	}
 	
 	@Override
-	public void setArgs(String arg1, int arg2) {
-		this.idxStr = arg1;
-		this.to = arg2;
+	protected String gotResult(String target, String idxStr, int from, String result) {
+		if(from == Constants.TARGET_UNDEFINED) {
+			from = target.length();
+		}
+		return String.valueOf(target.lastIndexOf(idxStr, from) );
 	}
 	
 }

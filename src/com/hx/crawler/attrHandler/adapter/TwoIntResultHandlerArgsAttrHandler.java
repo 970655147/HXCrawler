@@ -35,18 +35,6 @@ public class TwoIntResultHandlerArgsAttrHandler extends AttrHandler {
 		this(handler, new ConstantsAttrHandler(String.valueOf(start)),
 				new ConstantsAttrHandler(String.valueOf(end)) );
 	}
-	public TwoIntResultHandlerArgsAttrHandler(TwoIntArgsAttrHandler handler, AttrHandler start, int end) {
-		this(handler, start, new ConstantsAttrHandler(String.valueOf(end)) );
-	}
-	public TwoIntResultHandlerArgsAttrHandler(TwoIntArgsAttrHandler handler, int start, AttrHandler end) {
-		this(handler, new ConstantsAttrHandler(String.valueOf(start)), end);
-	}
-	public TwoIntResultHandlerArgsAttrHandler(TwoIntArgsAttrHandler handler, AttrHandler start) {
-		this(handler, start, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-	}
-	public TwoIntResultHandlerArgsAttrHandler(TwoIntArgsAttrHandler handler, int start) {
-		this(handler, new ConstantsAttrHandler(String.valueOf(start)) );
-	}
 	
 	@Override
 	public String handle0(String result) {

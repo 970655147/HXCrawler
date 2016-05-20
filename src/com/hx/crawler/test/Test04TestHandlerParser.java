@@ -22,7 +22,7 @@ public class Test04TestHandlerParser {
 //		String str = "map(((trim())) )";
 //		String str = "map(((trim().subString())) )";
 //		String str = "map(trim().trim() )";
-//		String str = "map(trim().subString(1, 3).trimSpaces().length().equals(abc) )";
+//		String str = "map(trim().subString(1, 3).trimAsOne().length().equals(abc) )";
 //		String str = "map(subString(indexOf(this, abc), indexOf(bb) ) )";
 //		String str = "map(subString(indexOf('this', 'abc'), indexOf(bb) ) )";
 //		String str = "map('a' + 'b' + c + 'd' + e.length )";
@@ -58,7 +58,12 @@ public class Test04TestHandlerParser {
 //		String str = "map(add(toInt('2'), 6, 9) ) ";
 //		String str = "map(length>15?(subString(0,12)+'...'):$this ) ";
 //		String str = "map(toBool('bac') )";
-		String str = "map(toString(toInt('7')) )";
+//		String str = "map(toString(toInt('7')) )";
+//		String str = "map(getStrIn('abs', 'sk', true, false))";
+//		String str = "map(getStrIn('absdddsk', 'abs', 'sk', true, false))";
+//		String str = "map(indexOf('b', 8) )";
+//		String str = "map(replace('abcabsabs', 'abs', 'XXX'))";
+		String str = "map(subString('abdff1', 3))";
 		
 //		String res = "       te-----             ---|st    ";
 //		String res = "te--|st";
