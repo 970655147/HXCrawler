@@ -41,7 +41,7 @@ public class ThreeStringTwoBooleanResultHandler extends AttrHandler {
 		);
 	}
 	public ThreeStringTwoBooleanResultHandler(ThreeStringTwoBooleanArgsAttrHandler handler, AttrHandler target, AttrHandler start, AttrHandler end) {
-		this(handler, target, start, end, new ConstantsAttrHandler(Constants.FALSE), new ConstantsAttrHandler(Constants.TRUE) );
+		this(handler, target, start, end, new ConstantsAttrHandler(Constants.FALSE), new ConstantsAttrHandler(Constants.FALSE) );
 	}
 	public ThreeStringTwoBooleanResultHandler(ThreeStringTwoBooleanArgsAttrHandler handler, String target, String start, String end) {
 		this(handler, target, start, end, false, false );

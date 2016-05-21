@@ -11,6 +11,7 @@ import com.hx.crawler.attrHandler.interf.AttrHandler;
 import com.hx.crawler.attrHandler.interf.HandlerParser;
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Log;
+import com.hx.crawler.util.Tools;
 
 public class Test04TestHandlerParser {
 	
@@ -62,7 +63,8 @@ public class Test04TestHandlerParser {
 //		String str = "map(getStrIn('abs', 'sk', true, false))";
 //		String str = "map(getStrIn('abs', 'sk', true, false))";
 //		String str = "map(getStrIn('abs' + '', 'sk' + 'fj', true, false))";
-//		String str = "map(getStrIn('absdddsk', 'abs', 'sk', true, false))";
+		String str = "map(getStrIn('absdddsk', 'abs', 'sk'))";
+//		Log.log(Tools.getStrInRange("absdddsk", "abs", "sk") );
 //		String str = "map(indexOf('b', 8) )";
 //		String str = "map(replace('abcabsabs', 'abs', 'XXX'))";
 //		String str = "map(subString('abdff1', 3))";
@@ -70,8 +72,9 @@ public class Test04TestHandlerParser {
 //		String str = "map(trim(1, 2) )";
 //		String str = "map(trim(34435, 2, 1) )";
 //		String str = "map(trimAsOne(1, 2) )";
-		String str = "map(trimAsOne('  3443  5  ', 1, 2) )";
+//		String str = "map(trimAsOne('  3443  5  ', 1, 2) )";
 //		String str = "map(trimAll('  3443  5  ', 1, 2) )";
+		
 		
 //		String res = "       te-----             ---|st    ";
 //		String res = "te--|st";

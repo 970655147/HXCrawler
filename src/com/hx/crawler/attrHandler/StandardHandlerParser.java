@@ -988,22 +988,20 @@ public class StandardHandlerParser extends HandlerParser {
 			Operand param03 = attrHandler.operand(2);
 			Operand param04 = attrHandler.operand(3);
 			Operand param05 = attrHandler.operand(4);
-			// (str, str)
-			if(null == param03) {
-				return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
+			// (str, str, str, boolean, boolean)
+			if(param05 != null) {
+				return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), getAttrHandler(sep, param04), getAttrHandler(sep, param05) );				
 			} else {
-				// (str, str, boolean, boolean)
-				// (param03 != null) && 
-				if(OperandTypes.Boolean == param03.type() ) {
-					return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), getAttrHandler(sep, param04) );
-				// (str, str, str, boolean, boolean) or (str, str, str)
+				// (str, str)
+				if(param03 == null) {
+					return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
 				} else {
-					// (str, str, str, boolean, boolean)
-					if((param04 != null) && (OperandTypes.Boolean == param04.type()) ) {
-						return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), getAttrHandler(sep, param04), getAttrHandler(sep, param05) );
 					// (str, str, str)
-					} else {
+					if(OperandTypes.String == param03.type() ) {
 						return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
+					// (str, str, boolean, boolean)
+					} else {
+						return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), getAttrHandler(sep, param04) );
 					}
 				}
 			}
@@ -1031,15 +1029,18 @@ public class StandardHandlerParser extends HandlerParser {
 		if((null == param01) || (emptyOperand(param01)) ) {
 			return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
 		} else {
+			// (str, int, int)
 			if(param03 != null) {
 				return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
 			} else {
+				// (str) or (str, int)
 				if(OperandTypes.String == param01.type() ) {
 					if(param02 != null) {
 						return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
 					} else {
 						return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
 					}
+				// (int) or (int, int)
 				} else {
 					if(param02 != null) {
 						return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
