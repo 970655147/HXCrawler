@@ -30,12 +30,6 @@ public class StringTwoIntResultHandlerArgsAttrHandler extends AttrHandler {
 	public StringTwoIntResultHandlerArgsAttrHandler(StringTwoIntAttrHandler handler, String target, int from, int to) {
 		this(handler, new ConstantsAttrHandler(target), new ConstantsAttrHandler(from), new ConstantsAttrHandler(to) );
 	}
-	public StringTwoIntResultHandlerArgsAttrHandler(StringTwoIntAttrHandler handler, AttrHandler from, AttrHandler to) {
-		this(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), from, to );
-	}
-	public StringTwoIntResultHandlerArgsAttrHandler(StringTwoIntAttrHandler handler, int from, int to) {
-		this(handler, Constants.HANDLER_UNDEFINED, from, to );
-	}
 
 	@Override
 	public String handle0(String result) {

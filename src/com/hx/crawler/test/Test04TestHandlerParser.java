@@ -60,6 +60,8 @@ public class Test04TestHandlerParser {
 //		String str = "map(toBool('bac') )";
 //		String str = "map(toString(toInt('7')) )";
 //		String str = "map(getStrIn('abs', 'sk', true, false))";
+//		String str = "map(getStrIn('abs', 'sk', true, false))";
+//		String str = "map(getStrIn('abs' + '', 'sk' + 'fj', true, false))";
 //		String str = "map(getStrIn('absdddsk', 'abs', 'sk', true, false))";
 //		String str = "map(indexOf('b', 8) )";
 //		String str = "map(replace('abcabsabs', 'abs', 'XXX'))";

@@ -40,33 +40,11 @@ public class ThreeStringTwoBooleanResultHandler extends AttrHandler {
 				new ConstantsAttrHandler(String.valueOf(includeEnd))
 		);
 	}
-	public ThreeStringTwoBooleanResultHandler(ThreeStringTwoBooleanArgsAttrHandler handler, AttrHandler start, AttrHandler end, AttrHandler includeStart, AttrHandler includeEnd) {
-		this.handler = handler;
-		this.target = new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED);
-		this.start = start;
-		this.end = end;
-		this.includeStart = includeStart;
-		this.includeEnd = includeEnd;
-	}
-	public ThreeStringTwoBooleanResultHandler(ThreeStringTwoBooleanArgsAttrHandler handler, String start, String end, boolean includeStart, boolean includeEnd) {
-		this(handler,
-				new ConstantsAttrHandler(start),
-				new ConstantsAttrHandler(end),
-				new ConstantsAttrHandler(String.valueOf(includeStart)),
-				new ConstantsAttrHandler(String.valueOf(includeEnd))
-				);
-	}
 	public ThreeStringTwoBooleanResultHandler(ThreeStringTwoBooleanArgsAttrHandler handler, AttrHandler target, AttrHandler start, AttrHandler end) {
-		this(handler, target, start, end, new ConstantsAttrHandler("false"), new ConstantsAttrHandler("false") );
+		this(handler, target, start, end, new ConstantsAttrHandler(Constants.FALSE), new ConstantsAttrHandler(Constants.TRUE) );
 	}
 	public ThreeStringTwoBooleanResultHandler(ThreeStringTwoBooleanArgsAttrHandler handler, String target, String start, String end) {
 		this(handler, target, start, end, false, false );
-	}
-	public ThreeStringTwoBooleanResultHandler(ThreeStringTwoBooleanArgsAttrHandler handler, AttrHandler start, AttrHandler end) {
-		this(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), start, end, new ConstantsAttrHandler("false"), new ConstantsAttrHandler("false") );
-	}
-	public ThreeStringTwoBooleanResultHandler(ThreeStringTwoBooleanArgsAttrHandler handler, String start, String end) {
-		this(handler, Constants.HANDLER_UNDEFINED, start, end, false, false );
 	}
 	
 	@Override

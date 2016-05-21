@@ -33,12 +33,6 @@ public class ThreeStringResultHandler extends AttrHandler {
 				new ConstantsAttrHandler(replacement)
 		);
 	}
-	public ThreeStringResultHandler(ThreeStringArgsAttrHandler handler, AttrHandler pattern, AttrHandler replacement) {
-		this(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), pattern, replacement );
-	}
-	public ThreeStringResultHandler(ThreeStringArgsAttrHandler handler, String pattern, String replacement) {
-		this(handler, Constants.HANDLER_UNDEFINED, pattern, replacement);
-	}
 	
 	@Override
 	public String handle0(String result) {

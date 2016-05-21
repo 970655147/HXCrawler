@@ -422,6 +422,11 @@ public class StandardHandlerParser extends HandlerParser {
 	}
 	// 根据attrHandlerContent, 获取一个AttrHandler
 	private AttrHandler getAttrHandler(WordsSeprator sep, Operand attrHandler) {
+		// replace code from : 32 -> 1			-- add at 2016.05.21
+		// indicate pattern likes : 'abc', 12, true [so just 'new ConstantsAttrHandler']
+		if(stringAble(attrHandler.type()) ) {
+			return new ConstantsAttrHandler(attrHandler.name() );
+		}
 		if(! attrHandler.hasNext() ) {
 			return getAttrHandler0(sep, attrHandler);
 		}
@@ -699,11 +704,7 @@ public class StandardHandlerParser extends HandlerParser {
 			if((ope == null) || (ope.type() == OperandTypes.Null) ) {
 				return new OneStringResultHandlerArgsAttrHandler(handler, Constants.HANDLER_UNDEFINED);
 			} else {
-				if(stringAble(ope.type()) ) {
-					return new OneStringResultHandlerArgsAttrHandler(handler, ope.name() );
-				} else {
-					return new OneStringResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, ope) );
-				}
+				return new OneStringResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, ope) );
 			}
 		}
 	private AttrHandler getOneBooleanArgsHandler(WordsSeprator sep, Operand attrHandler) {
@@ -719,14 +720,7 @@ public class StandardHandlerParser extends HandlerParser {
 		return null;
 	}
 		private AttrHandler getOneBooleanArgsHandler0(WordsSeprator sep, Operand ope, OneBooleanArgsAttrHandler handler) {
-			if(OperandTypes.Boolean == ope.type() ) {
-				return new OneBooleanResultHandlerArgsAttrHandler(handler, Boolean.parseBoolean(ope.name()) );
-			} else if(OperandTypes.Method == ope.type() ) {
-				return new OneBooleanResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, ope) );
-			} else {
-				// OperandTypes.Null
-				return null;
-			}
+			return new OneBooleanResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, ope) );
 		}
 	private AttrHandler getOneOrTwoStringArgsHandler(WordsSeprator sep, Operand attrHandler) {
 		Operand param01 = attrHandler.operand(0);
@@ -759,25 +753,9 @@ public class StandardHandlerParser extends HandlerParser {
 	}
 		private AttrHandler getOneOrTwoStringArgsHandler0(WordsSeprator sep, Operand param01, Operand param02, TwoStringArgsAttrHandler handler) {
 			if(param02 == null) {
-				if(stringAble(param01.type()) ) {
-					return new TwoStringResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-				} else {
-					return new TwoStringResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-				}
+				return new TwoStringResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
 			} else {
-				if(stringAble(param01.type()) ) {
-					if(stringAble(param02.type()) ) {
-						return new TwoStringResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()) );
-					} else {
-						return new TwoStringResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02) );
-					}
-				} else {
-					if(stringAble(param02.type()) ) {
-						return new TwoStringResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()) );
-					} else {
-						return new TwoStringResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
-					}
-				}
+				return new TwoStringResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
 			}
 		}
 	private AttrHandler getTwoOrThreeStringArgsHandler(WordsSeprator sep, Operand attrHandler) {
@@ -796,49 +774,9 @@ public class StandardHandlerParser extends HandlerParser {
 	}
 		private AttrHandler getTwoOrThreeStringArgsHandler0(WordsSeprator sep, Operand param01, Operand param02, Operand param03, TwoOrThreeStringArgsAttrHandler handler) {
 			if(param03 == null) {
-				if(stringAble(param01.type()) ) {
-					if(stringAble(param02.type())) {
-						return new ThreeStringResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()) );						
-					} else {
-						return new ThreeStringResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02) );						
-					}
-				} else {
-					if(stringAble(param02.type())) {
-						return new ThreeStringResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()) );						
-					} else {
-						return new ThreeStringResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()) );						
-					}
-				}
+				return new ThreeStringResultHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()) );
 			} else {
-				if(stringAble(param01.type()) ) {
-					if(stringAble(param02.type()) ) {
-						if(stringAble(param03.type()) ) {
-							return new ThreeStringResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()) );
-						} else {
-							return new ThreeStringResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03) );							
-						}
-					} else {
-						if(stringAble(param03.type()) ) {
-							return new ThreeStringResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()) );
-						} else {
-							return new ThreeStringResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );							
-						}
-					}
-				} else {
-					if(stringAble(param02.type()) ) {
-						if(stringAble(param03.type()) ) {
-							return new ThreeStringResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()) );
-						} else {
-							return new ThreeStringResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03) );							
-						}
-					} else {
-						if(stringAble(param03.type()) ) {
-							return new ThreeStringResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()) );
-						} else {
-							return new ThreeStringResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );							
-						}
-					}
-				}
+				return new ThreeStringResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
 			}
 		}
 	private AttrHandler getOneOrTwoStringIntArgsHandler(WordsSeprator sep, Operand attrHandler) {
@@ -860,74 +798,18 @@ public class StandardHandlerParser extends HandlerParser {
 		private AttrHandler getStringOrStringIntArgsHandler0(WordsSeprator sep, Operand param01, Operand param02, Operand param03, OneOrTwoStringIntArgsAttrHandler handler) {
 			// (str)
 			if(param02 == null) {
-				if(stringAble(param01.type()) ) {
-					return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-				} else {
-					return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-				}
+				return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
 			} else {
 				// (str, int)
 				if(OperandTypes.Int == param02.type() ) {
-					if(stringAble(param01.type()) ) {
-						if(stringAble(param02.type()) ) {
-							return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()) );
-						} else {
-							return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02) );							
-						}
-					} else {
-						if(stringAble(param02.type()) ) {
-							return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()) );
-						} else {
-							return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02) );							
-						}
-					}
+					return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
 				} else {
 					// (str, str, int)
 					if(param03 != null) {
-						if(stringAble(param01.type()) ) {
-							if(stringAble(param02.type()) ) {
-								if(stringAble(param03.type()) ) {
-									return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()) );
-								} else {
-									return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03) );
-								}
-							} else {
-								if(stringAble(param03.type()) ) {
-									return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()) );
-								} else {
-									return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
-								}
-							}
-						} else {
-							if(stringAble(param02.type()) ) {
-								if(stringAble(param03.type()) ) {
-									return new TwoStringIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()) );
-								} else {
-									return new TwoStringIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03) );
-								}
-							} else {
-								if(stringAble(param03.type()) ) {
-									return new TwoStringIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()) );
-								} else {
-									return new TwoStringIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
-								}
-							}
-						}
+						return new TwoStringIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
 					// (str, str)
 					} else {
-						if(stringAble(param01.type()) ) {
-							if(stringAble(param02.type()) ) {
-								return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-							} else {
-								return new TwoStringIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );							
-							}
-						} else {
-							if(stringAble(param02.type()) ) {
-								return new TwoStringIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-							} else {
-								return new TwoStringIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );							
-							}
-						}
+						return new TwoStringIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
 					}
 				}
 			}
@@ -940,7 +822,7 @@ public class StandardHandlerParser extends HandlerParser {
 			case Constants.SUB_STRING:
 				return getStringOneOrTwoIntArgsHandler0(sep, param01, param02, param03, new SubStringAttrHandler() );
 			default :
-				Tools.assert0("got an unknow '(Int [, Int])' method : " + attrHandler.name() );
+				Tools.assert0("got an unknow '([String ,]Int [, Int])' method : " + attrHandler.name() );
 				break ;
 		}
 		
@@ -950,60 +832,16 @@ public class StandardHandlerParser extends HandlerParser {
 			// (int, int) or (int)
 			if(OperandTypes.Int == param01.type() ) {
 				if(param02 == null ) {
-					return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
+					return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
 				} else {
-					if(OperandTypes.Int == param02.type() ) {
-						return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()) );
-					} else {
-						return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02) );
-					}
+					return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
 				}
 			// (str, int) or (str, int, int)
 			} else {
 				if(param03 == null) {
-					if(stringAble(param01.type()) ) {
-						if(OperandTypes.Int == param02.type() ) {
-							return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-						} else {
-							return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-						}
-					} else {
-						if(OperandTypes.Int == param02.type() ) {
-							return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-						} else {
-							return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
-						}
-					}
+					return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED) );
 				} else {
-					if(stringAble(param01.type()) ) {
-						if(OperandTypes.Int == param02.type() ) {
-							if(OperandTypes.Int == param03.type() ) {
-								return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()) );
-							} else {
-								return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03) );
-							}
-						} else {
-							if(OperandTypes.Int == param03.type() ) {
-								return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()) );
-							} else {
-								return new StringTwoIntResultHandlerArgsAttrHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
-							}
-						}
-					} else {
-						if(OperandTypes.Int == param02.type() ) {
-							if(OperandTypes.Int == param03.type() ) {
-								return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()) );
-							} else {
-								return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03) );
-							}
-						} else {
-							if(OperandTypes.Int == param03.type() ) {
-								return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()) );
-							} else {
-								return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
-							}
-						}
-					}
+					return new StringTwoIntResultHandlerArgsAttrHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
 				}
 			}
 		}
@@ -1014,35 +852,7 @@ public class StandardHandlerParser extends HandlerParser {
 					Operand ope = attrHandler.operand(0);
 					Operand ope01 = attrHandler.operand(1);
 					Operand ope02 = attrHandler.operand(2);
-					if(stringAble(ope.type()) ) {
-						if(stringAble(ope01.type()) ) {
-							if(stringAble(ope02.type()) ) {
-								return new CondExpAttrHandler(ope.name(), ope01.name(), ope02.name() );
-							} else {
-								return new CondExpAttrHandler(new ConstantsAttrHandler(ope.name()), ope01.name(), getAttrHandler(sep, ope02) );
-							}
-						} else {
-							if(stringAble(ope02.type()) ) {
-								return new CondExpAttrHandler(new ConstantsAttrHandler(ope.name()), getAttrHandler(sep, ope01), ope02.name() );
-							} else {
-								return new CondExpAttrHandler(new ConstantsAttrHandler(ope.name()), getAttrHandler(sep, ope01), getAttrHandler(sep, ope02) );
-							}
-						}
-					} else {
-						if(stringAble(ope01.type()) ) {
-							if(stringAble(ope02.type()) ) {
-								return new CondExpAttrHandler(getAttrHandler(sep, ope), ope01.name(), ope02.name() );
-							} else {
-								return new CondExpAttrHandler(getAttrHandler(sep, ope), ope01.name(), getAttrHandler(sep, ope02) );
-							}
-						} else {
-							if(stringAble(ope02.type()) ) {
-								return new CondExpAttrHandler(getAttrHandler(sep, ope), getAttrHandler(sep, ope01), ope02.name() );
-							} else {
-								return new CondExpAttrHandler(getAttrHandler(sep, ope), getAttrHandler(sep, ope01), getAttrHandler(sep, ope02) );
-							}
-						}
-					}
+					return new CondExpAttrHandler(getAttrHandler(sep, ope), getAttrHandler(sep, ope01), getAttrHandler(sep, ope02) );
 				}
 			default :
 				Tools.assert0("got an unknow '(String, String, ...)' method : " + attrHandler.name() );
@@ -1146,244 +956,20 @@ public class StandardHandlerParser extends HandlerParser {
 			Operand param05 = attrHandler.operand(4);
 			// (str, str)
 			if(null == param03) {
-				if(stringAble(param01.type()) ) {
-					if(stringAble(param02.type()) ) {
-						return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()) );
-					} else {
-						return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02) );
-					}
-				} else {
-					if(stringAble(param02.type()) ) {
-						return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()) );
-					} else {
-						return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
-					}
-				}
+				return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02) );
 			} else {
 				// (str, str, boolean, boolean)
 				// (param03 != null) && 
 				if(OperandTypes.Boolean == param03.type() ) {
-					 if(stringAble(param01.type()) ) {
-						 if(stringAble(param02.type()) ) {
-							if(stringAble(param03.type()) ) {
-								if(stringAble(param04.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), getAttrHandler(sep, param04) );
-								}
-							} else {
-								if(stringAble(param04.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), getAttrHandler(sep, param04) );
-								}
-							}
-						 } else {
-							if(stringAble(param03.type()) ) {
-								if(stringAble(param04.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), getAttrHandler(sep, param04) );
-								}
-							} else {
-								if(stringAble(param04.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03), getAttrHandler(sep, param04) );
-								}
-							}
-						 }
-					 } else {
-						 if(stringAble(param02.type()) ) {
-							if(stringAble(param03.type()) ) {
-								if(stringAble(param04.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), getAttrHandler(sep, param04) );
-								}
-							} else {
-								if(stringAble(param04.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), getAttrHandler(sep, param04) );
-								}
-							}
-						 } else {
-							if(stringAble(param03.type()) ) {
-								if(stringAble(param04.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), getAttrHandler(sep, param04) );
-								}
-							} else {
-								if(stringAble(param04.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), getAttrHandler(sep, param04) );
-								}
-							}
-						 }
-					 }
+					return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(Constants.HANDLER_UNDEFINED), getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), getAttrHandler(sep, param04) );
 				// (str, str, str, boolean, boolean) or (str, str, str)
 				} else {
 					// (str, str, str, boolean, boolean)
 					if((param04 != null) && (OperandTypes.Boolean == param04.type()) ) {
-						 if(stringAble(param01.type()) ) {
-							 if(stringAble(param02.type()) ) {
-								if(stringAble(param03.type()) ) {
-									if(stringAble(param04.type()) ) {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									} else {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									}
-								} else {
-									if(stringAble(param04.type()) ) {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									} else {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									}
-								}
-							 } else {
-								if(stringAble(param03.type()) ) {
-									if(stringAble(param04.type()) ) {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									} else {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									}
-								} else {
-									if(stringAble(param04.type()) ) {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									} else {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									}
-								}
-							 }
-						 } else {
-							 if(stringAble(param02.type()) ) {
-								if(stringAble(param03.type()) ) {
-									if(stringAble(param04.type()) ) {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									} else {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									}
-								} else {
-									if(stringAble(param04.type()) ) {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									} else {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									}
-								}
-							 } else {
-								if(stringAble(param03.type()) ) {
-									if(stringAble(param04.type()) ) {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									} else {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									}
-								} else {
-									if(stringAble(param04.type()) ) {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									} else {
-										if(stringAble(param05.type()) ) {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), new ConstantsAttrHandler(param05.name()) );
-										} else {
-											return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), new ConstantsAttrHandler(param04.name()), getAttrHandler(sep, param05) );
-										}
-									}
-								}
-							 }
-						 }
+						return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03), getAttrHandler(sep, param04), getAttrHandler(sep, param05) );
 					// (str, str, str)
 					} else {
-						 if(stringAble(param01.type()) ) {
-							 if(stringAble(param02.type()) ) {
-								if(stringAble(param03.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03) );
-								}
-							 } else {
-								if(stringAble(param03.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
-								}
-							 }
-						 } else {
-							 if(stringAble(param02.type()) ) {
-								if(stringAble(param03.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), new ConstantsAttrHandler(param03.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), new ConstantsAttrHandler(param02.name()), getAttrHandler(sep, param03) );
-								}
-							 } else {
-								if(stringAble(param03.type()) ) {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), new ConstantsAttrHandler(param03.name()) );
-								} else {
-									return new ThreeStringTwoBooleanResultHandler(handler, new ConstantsAttrHandler(param01.name()), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
-								}
-							 }					 
-						 }
+						return new ThreeStringTwoBooleanResultHandler(handler, getAttrHandler(sep, param01), getAttrHandler(sep, param02), getAttrHandler(sep, param03) );
 					}
 				}
 			}
