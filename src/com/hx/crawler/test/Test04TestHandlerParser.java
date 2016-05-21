@@ -65,11 +65,17 @@ public class Test04TestHandlerParser {
 //		String str = "map(getStrIn('absdddsk', 'abs', 'sk', true, false))";
 //		String str = "map(indexOf('b', 8) )";
 //		String str = "map(replace('abcabsabs', 'abs', 'XXX'))";
-		String str = "map(subString('abdff1', 3))";
+//		String str = "map(subString('abdff1', 3))";
+//		String str = "map(trim )";
+//		String str = "map(trim(1, 2) )";
+//		String str = "map(trim(34435, 2, 1) )";
+//		String str = "map(trimAsOne(1, 2) )";
+		String str = "map(trimAsOne('  3443  5  ', 1, 2) )";
+//		String str = "map(trimAll('  3443  5  ', 1, 2) )";
 		
 //		String res = "       te-----             ---|st    ";
 //		String res = "te--|st";
-		String res = "te-   abslkdjflskfjgf -|st";
+		String res = "te-   abslkdjflskfjgf -|st ";
 		HandlerParser parser = new StandardHandlerParser();
 		AttrHandler handler = parser.handlerParse(str, Constants.HANDLER);
 		Log.log(handler.handle(res) );

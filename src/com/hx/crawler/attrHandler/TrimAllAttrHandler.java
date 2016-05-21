@@ -6,24 +6,33 @@
 
 package com.hx.crawler.attrHandler;
 
-import com.hx.crawler.attrHandler.adapter.interf.NoneOrOneStringArgsAttrHandler;
+import com.hx.crawler.attrHandler.adapter.interf.StringOneOrTwoIntAttrHandler;
 import com.hx.crawler.util.Constants;
 import com.hx.crawler.util.Tools;
 
 // 去掉字符串的所有空格的handler
 // map(trimAll)
-public class TrimAllAttrHandler extends NoneOrOneStringArgsAttrHandler {
+public class TrimAllAttrHandler extends StringOneOrTwoIntAttrHandler {
 	// 初始化
-	public TrimAllAttrHandler(String arg) {
-		super(arg);
+	public TrimAllAttrHandler(String str, int trimHead, int trimTail) {
+		super(str, trimHead, trimTail);
 	}
 	public TrimAllAttrHandler() {
-		this(Constants.HANDLER_UNDEFINED);
+		this(Constants.HANDLER_UNDEFINED, Constants.TARGET_UNDEFINED, Constants.TARGET_UNDEFINED);
 	}
 
 	@Override
-	protected String gotResult(String str, String result) {
-		return Tools.trimAllSpaces(str);
+	protected String gotResult(String target, int from, int to, String result) {
+		String trimed = Tools.trimAllSpaces(target);
+		if(from == Constants.TARGET_UNDEFINED) {
+			from = 0;
+		}
+		if(to == Constants.TARGET_UNDEFINED) {
+			to = trimed.length();
+		} else {
+			to = trimed.length() - to;
+		}
+		return trimed.substring(from, to);
 	}
 
 	@Override
